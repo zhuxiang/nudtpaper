@@ -110,11 +110,19 @@ Nemhauser等人证明了朴素的贪心算法得出解以$1-1/\mathsf{e}$的因�
 
 为了解决朴素贪心算法的这一弊端，Borgs等人\upcite{borgs2014maximizing}提出了一种新的方法，突破了朴素贪心算法的限制。Tang等人\upcite{tang2014influence}将这种方法称之为\textbf{反向传播采样}（\textit{Reverse Influence Sampling}），并且阐述了其工作原理。为了解释反向传播采样算法的工作原理，我们首先引入如下的概念。
 
-\begin{defn}[反向可达集合]\label{def:rrSet}
+\begin{mydef}[反向可达集合]\label{def:rrSet}
 给定一个图$\mathcal{G}=\left(\mathcal{V}, \mathcal{E}\right)$，我们对图中的$\mathcal{G}$中的每一条边$e \in \mathcal{E}$进行抛硬币实验，依概率$1-p\left(e\right)$移除掉边$e$。定义$g$为得到的图，对于任意的节点$v \in \mathcal{V}$，节点$v$在图$g$中的反向可达集合${RR}\left(v\right)$定义为图$g$中可达节点$v$的节点集合。这就是说，如果节点$u \in {RR}\left(v\right)$，则至少在图$g$中存在一条路经从节点$u$到达节点$v$。
-\end{defn}
+\end{mydef}
 
-根据定义\ref{def:rrSet}可知，如果节点$u$在节点$v$的反向可达集合${RR}\left(v\right)$中，那么节点$u$在图$\mathcal{G}$中能够依一定概率通过一条路径到达节点$v$。这也就表示，如果采用节点$u$作为种子节点集合$S=\{u\}$在图$\mathcal{G}$中进行信息传播，那么节点$u$是有一定概率激活节点$v$的。
+根据定义\ref{def:rrSet}可知，如果节点$u$在节点$v$的反向可达集合${RR}\left(v\right)$中，那么节点$u$在图$\mathcal{G}$中能够依一定概率通过一条路径到达节点$v$。这也就表示，如果采用节点$u$作为种子节点集合$S=\{u\}$在图$\mathcal{G}$中进行信息传播，那么节点$u$是有一定概率激活节点$v$的。此外，Borgs等人给出了反向可达集合的性质如下，
+
+\begin{mylem}\label{lem:rrSet}
+如果一个节点$v$的反向可达集合${RR}\left(v\right)$有$\rho$的概率与节点集合$S$存在交集，那么如果以$S$为种子节点集合在图$\mathcal{G}$中进行信息传播，则节点$v$将依概率$\rho$被激活。
+\end{mylem}
+
+\begin{proof}
+假定$g$为基于$\mathcal{G}$依概率$1-p\left(e\right)$移除每一条边$e \in \mathcal{E}$生成的实例图。定义$\rho_2$为节点集合$S$在图$g$中可达节点$v$的概率，$\rho_1$为图$g$中存在一条从节点集合$S$到达节点$v$的概率。那么，根据定义\ref{def:rrSet}可知，$\rho_1 = \rho_2$。
+\end{proof}
 
 \subsection{传播效率最大化问题}
 \label{3subsec:efficiency}
