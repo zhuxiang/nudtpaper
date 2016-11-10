@@ -46,6 +46,8 @@
 \documentclass[doctor,twoside,otf]{nudtpaper}
 \usepackage{mynudt}
 
+\newtheorem{defn}{定义}[chapter]
+
 \classification{TP957}
 \serialno{0123456}
 \confidentiality{公开}
@@ -89,8 +91,11 @@
 %书写正文，可以根据需要增添章节; 正文还包括致谢，参考文献与成果
 \mainmatter
 \input{data/chap01}
+
 \input{data/chap02}
+
 \input{data/chap03}
+
 \input{data/ack}
 
 \cleardoublepage
