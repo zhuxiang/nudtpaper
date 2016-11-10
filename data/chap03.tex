@@ -95,7 +95,14 @@ $T'\left(S\right)$ & 种子节点集合$S$在超图$\mathcal{H}$中的传播效�
     u=\arg\max\limits_{w \in V \setminus S}\left({\mathbb{E}_\mathcal{G}\left[I\left(S\cup w\right)\right]-\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]}\right)
 \end{equation}
 
-Nemhauser等人证明了朴素的贪心算法得出解以$1-1/e$的因子近似于最优解，即任意一个由贪心算法的出来的解$S$都满足$I\left(S\right) \geq (1-1/e) I\left(S^{\ast}\right)$，其中$S^{\ast}$代表最优解。虽然贪心算法的核心思想比较简单，但是由于计算影响力期望值的过程是\#P-hard\upcite{Chen2010Scalable}的问题，因此实现该算法并不是简单的。
+Nemhauser等人证明了朴素的贪心算法得出解以$1-1/\mathsf{e}$的因子近似于最优解，即任意一个由贪心算法的出来的解$S$都满足$I\left(S\right) \geq (1-1/\mathsf{e}) I\left(S^{\ast}\right)$，其中$S^{\ast}$代表最优解，$\mathsf{e}$为自然常数。虽然贪心算法的核心思想比较简单，但是由于计算影响力期望值的过程是\#P-hard\upcite{Chen2010Scalable}的问题，因此实现该算法并不是简单的。为了解决该问题，Kempe等人\upcite{kempe2003maximizing}提出了使用\textbf{蒙特卡罗方法}（\textit{Monte Carlo method}）来对$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$在一定精度内进行估计。蒙特卡罗方法的步骤如下。假设我们对图$\mathcal{G}=\left(\mathcal{V},\mathcal{E}\right)$中的所有的边$e\in\mathcal{E}$都进行抛硬币实验，图$\mathcal{G}$中边的连接的概率为$p\left(e\right)$，我们以$1-p\left(e\right)$的概率去除掉边$e$。定义$g$为得到的结果图，$R_g\left(S\right)$为在图$g$中从种子节点集合$S$出发可达的节点集合。我们需要注意的是，图$g$中的边不再是概率性连接的边，而是确定性的边。对于任意节点$v\in g$，如果在图$g$中存在一条路径从节点集合$S$出发到达节点$v$，那么称节点$v$是从节点集合$S$可达的。Kempe等人\upcite{kempe2003maximizing}证明了$R_g\left(S\right)$的期望值与$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$是相等的，即可表示为如下，
+
+\begin{equation}\label{eq:influenceSpread}
+    \mathbb{E}_\mathcal{G}\left[I\left(S\right)\right] = \mathbb{E}_{g\sim\mathcal{G}}\left[I_g\left(S\right)\right]
+\end{equation}
+其中$I_g\left(S\right) = \left\vert{R_g\left(S\right)}\right\vert$，即在图$g$中的影响力等于从种子节点集合出发可达的节点数目。因此，我们可以通过估计$R_g\left(S\right)$的期望值来估计$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$，即通过估计图$g$中可达的节点数目的期望来估计原图$\mathcal{G}$中的影响力期望值。在实际操作中，我们首先根据原来的社交网络生成多个实例$g\sim\mathcal{G}$，然后对每一个实例进行计算其影响力$I_g\left(S\right)$，最终计算其平均值作为$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$的一个估计。假设我们在估计$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$的过程中生成了$r$个实例图$g$，并且$r$足够大，那么在独立级联模型下，贪心算法能够得到一个$\left(1-1/\mathsf{e}-\varepsilon\right)$的近似最优解，其中$\varepsilon$是一个与图$\mathcal{G}$和$r$相关的常数\upcite{borgs2014maximizing,kempe2005influential}。一般来说，Kempe等人建议设置$r=10,000$，许多其他的工作都采用了相似的设置参数。
+
+尽管朴素的贪心算法是有效的，但是在复杂网络的应用中，算法的效率是极其低的。算法的时间复杂度为$O\left(knmr\right)$。确切来说，算法进行了$k$次迭代来选择种子节点集合，每一次迭代需要对$O\left(n\right)$个节点进行影响力的期望值的估计。每一次估计需要对生成的$r$个实例进行计算，而每一次计算需要消耗$O\left(m\right)$的时间。因此，整个计算过程的时间复杂度为$O\left(knmr\right)$。
 
 \subsection{传播效率最大化问题}
 \label{3subsec:efficiency}
