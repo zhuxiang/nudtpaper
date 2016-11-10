@@ -16,7 +16,7 @@
 
 \section{相关定义}
 \label{3sec:definition}
-在本节中，第\ref{3subsec:model}节首先对\textbf{独立级联模型}（\textit{Independent Cascade Model}）以及在独立级联模型下的影响力最大化问题进行回顾，然后介绍了几种解决影响力最大化问题的方法，并且对这些算法进行分析，包括期望传播函数的单调性和子模性等。其次，第\ref{3subsec:efficiency}节提出了\textbf{传播效率最大化}（\textit{Influence Efficiency Maximization}）问题，该问题是基于传统的影响力最大化问题，将传播时延考虑在内，研究如何使得整个网络的传播效率最大化。同时，第\ref{3subsec:efficiency}节对传播效率最大化问题进行了形式化的描述，分析了传播效率最大化和影响力最大化问题的区别。
+在本节中，第\ref{3subsec:model}节首先对\textbf{独立级联模型}（\textit{Independent Cascade Model}）以及在独立级联模型下的影响力最大化问题进行回顾，然后介绍了几种解决影响力最大化问题的方法，并且对这些算法进行分析，包括影响力函数期望的单调性和子模性等。其次，第\ref{3subsec:efficiency}节提出了\textbf{传播效率最大化}（\textit{Influence Efficiency Maximization}）问题，该问题是基于传统的影响力最大化问题，将传播时延考虑在内，研究如何使得整个网络的传播效率最大化。同时，第\ref{3subsec:efficiency}节对传播效率最大化问题进行了形式化的描述，分析了传播效率最大化和影响力最大化问题的区别。
 
 为了便于参照，表\ref{3tab:notation}中列出了频繁使用的符号。
 
@@ -31,11 +31,11 @@ $\mathcal{G}=\left(\mathcal{V},\mathcal{E}\right)$ & $\mathcal{G}$是社交网�
 \hline
 $\mathcal{H}=\left(\mathcal{V},\mathcal{Z}\right)$ & $\mathcal{H}$是基于图$\mathcal{G}$生成的超图（参见\ref{alg:res}），$\mathcal{V}$是节点集合，$\mathcal{Z}$是超边集合\\
 \hline
-n & $\mathcal{G}$或者$\mathcal{H}$的节点的数目 \\
+$n$ & $\mathcal{G}$或者$\mathcal{H}$的节点的数目 \\
 \hline
-m & $\mathcal{G}$的边的数目 \\
+$m$ & $\mathcal{G}$的边的数目 \\
 \hline
-k & 种子节点集合的大小 \\
+$k$ & 种子节点集合的大小 \\
 \hline
 $p^\mathcal{G}_{u,v}$ & 节点$u$激活节点$v$的概率 \\
 \hline
@@ -74,6 +74,28 @@ $T'\left(S\right)$ & 种子节点集合$S$在超图$\mathcal{H}$中的传播效�
 \end{figure}
 
 以图\ref{fig:tinyGraph}中的社交网络$\mathcal{G}$为例，考虑种子节点集合$S=\left\{v_1\right\}$的信息传播过程。图\ref{fig:tinyGraph}中边上的数值代表着节点之间的传播概率$p^\mathcal{G}_{u,v}$。整个信息传播的过程可以描述如下。在$t=0$时刻，由于节点$v_1$是种子节点集合中唯一的节点，因此节点$v_1$被激活。在$t=1$时刻，因为节点$v_1$在$t=0$时刻被激活，而且图$\mathcal{G}$中存在一条从$v_1$到$v_2$概率为1的边，节点$v_1$将依概率1去激活节点$v_2$。因此，节点$v_2$将在$t=1$时刻被激活，$S_1=\left\{v_2\right\}$。此后，在$t=2$时刻，节点$v_2$将尝试去激活节点$v_3$、$v_4$、$v_5$以及$v_6$。假设这一次信息传播过程如图\ref{fig:tinyRandomGraph}所示，节点$v_3$和$v_5$被激活，则$S_2=\left\{v_3, v_5\right\}$。然后，在$t=3$时刻，由于被激活的节点没有后继节点可被激活，整个信息传播过程在此时刻停止。定义$I\left(S\right)$为在种子节点集合是$S$的条件下，整个信息传播过程中激活的节点数目，代表信息传播过程中的影响力。在上述的图$\mathcal{G}$的一次信息传播过程中，影响力$I\left(S\right)=4$。
+
+给定一个种子节点集合$S$，定义$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$表示种子节点集合在图$\mathcal{G}$中影响力的期望，它等于以种子节点集合为传播源，在图$\mathcal{G}$中信息传播结束时激活节点数目的期望值。在独立级联模型下，影响力最大化问题的目标是寻找一个大小至多为$k$的种子节点集合，使得影响力函数的期望值$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$最大化。给定一个输入$k$，影响力最大化问题可以形式化为如下，
+
+\begin{equation}\label{eq:imProblem}
+    \begin{split}
+        &S^{\ast} = \arg\max{\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]}\\
+        &s.t.~~S \subseteq \mathcal{V},\left\vert{S}\right\vert = k
+    \end{split}
+\end{equation}
+
+以图\ref{fig:tinyGraph}的社交网络$\mathcal{G}$为例，给定输入$k=1$来考虑影响力最大化问题。为了解决例子中的影响力最大化问题，根据公式\ref{eq:imProblem}所示，我们需要计算所有$k=1$的种子节点集合的影响力期望值，即每个节点的影响力期望值。对于节点$v_1$组成的种子节点集合，其影响力期望值$\mathbb{E}_\mathcal{G}\left[I\left(\{v_1\}\right)\right]=1+1+4\times0.8=5.2$。对于种子节点集合$\{v_2\}$，影响力期望值$\mathbb{E}_\mathcal{G}\left[I\left(\{v_2\}\right)\right]=1+4\times0.8=4.2$。对于其他的种子节点集合，$\mathbb{E}_\mathcal{G}\left[I\left(\{v_3\}\right)\right]=
+\mathbb{E}_\mathcal{G}\left[I\left(\{v_4\}\right)\right]=
+\mathbb{E}_\mathcal{G}\left[I\left(\{v_5\}\right)\right]=
+\mathbb{E}_\mathcal{G}\left[I\left(\{v_6\}\right)\right]=1$。由此，我们可以得出，在给定图$\mathcal{G}$以及$k=1$的条件下，影响力最大化问题的最优解为$S^\ast=\left\{v_1\right\}$。
+
+在上述的例子中，因为图$\mathcal{G}$的结构简单，并且种子节点集合的大小$k=1$，所以能够直接计算得出种子节点集合的影响力期望值，从而选择得出最优解。而在实际情况下，图$\mathcal{G}$的结构往往会复杂得多，而且$k>1$，很难直接计算种子节点集合的影响力期望值。Kempe等人\upcite{kempe2003maximizing}首先证明了在独立级联模型下，影响力最大化问题是一个NP-hard问题。因此，直接计算出有影响力的节点是十分困难的。为了解决此问题，Kempe等人又证明了在独立级联模型下，影响力函数的期望$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$是单调的以及子模的。这两个性质为求解影响力最大化问题的近似算法提供了理论保证。形式上，一个单调的函数对于任意的节点$u$和任意集合$S$，都满足$f\left(S\cup\left\{u\right\}\right) \geq f\left(S\right)$。而一个子模的函数对于任意的节点$u$以及任意的两个集合$S \subseteq W$，都满足$f\left(S\cup\left\{u\right\}\right) - f\left(S\right) \geq f\left(W\cup\left\{u\right\}\right) - f\left(W\right)$。针对具有单调性以及子模性的函数，Nemhauser等人\upcite{nemhauser1978analysis}提出了一种朴素的贪心算法来解决此类问题。算法的核心思想是首先从一个空的种子节点集合$S=\emptyset$开始，重复地选择当前边际收益（即$f\left(S\cup\left\{u\right\}\right) - f\left(S\right)$）最大的节点$u$加入到种子节点集合$S$中，直到满足种子节点集合的大小为$k$时结束迭代。选择节点$u$的准则可以形式化如下，
+
+\begin{equation}\label{eq:greedyIM}
+    u=\arg\max\limits_{w \in V \setminus S}\left({\mathbb{E}_\mathcal{G}\left[I\left(S\cup w\right)\right]-\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]}\right)
+\end{equation}
+
+Nemhauser等人证明了朴素的贪心算法得出解以$1-1/e$的因子近似于最优解，即任意一个由贪心算法的出来的解$S$都满足$I\left(S\right) \geq (1-1/e) I\left(S^{\ast}\right)$，其中$S^{\ast}$代表最优解。虽然贪心算法的核心思想比较简单，但是由于计算影响力期望值的过程是\#P-hard\upcite{Chen2010Scalable}的问题，因此实现该算法并不是简单的。
 
 \subsection{传播效率最大化问题}
 \label{3subsec:efficiency}
