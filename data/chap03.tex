@@ -41,7 +41,7 @@ $p^\mathcal{G}_{u,v}$ & 节点$u$激活节点$v$的概率 \\
 \hline
 $I\left(S\right)$ & 种子节点集合$S$的影响力 \\
 \hline
-$RR\left(v\right)$ & 节点$v$的反向连通节点集合 (see Definition \ref{def:rrSet}) \\
+$RR\left(v\right)$ & 节点$v$的反向可达集合 (参见定义\ref{def:rrSet}) \\
 \hline
 $e_{u,v}$ & 节点$u$到节点$v$的传播效率（参见\ref{eq:efficiency}） \\
 \hline
@@ -123,6 +123,14 @@ Nemhauser等人证明了朴素的贪心算法得出解以$1-1/\mathsf{e}$的因�
 \begin{proof}
 假定$g$为基于$\mathcal{G}$依概率$1-p\left(e\right)$移除每一条边$e \in \mathcal{E}$生成的实例图。定义$\rho_2$为节点集合$S$在图$g$中可达节点$v$的概率，$\rho_1$为图$g$中存在一条从节点集合$S$到达节点$v$的概率。那么，根据定义\ref{def:rrSet}可知，$\rho_1 = \rho_2$。
 \end{proof}
+
+基于以上的理论，反向传播采样方法的算法流程按照如下的两步进行。第一步，首先在图$\mathcal{G}$中等概率地任意选择一个节点$v \in \mathcal{V}$，按照定义\ref{def:rrSet}来生成反向可达集合${RR}\left(v\right)$。然后，重复上述的过程来生成多个实例。第二步，选择$k$个节点来覆盖最多的反向可达集合。当且仅当一个节点$u\in RR\left(v\right)$时，我们称节点$u$覆盖集合$RR\left(v\right)$。最后，方法采用朴素贪心算法来得出一个下限为$1-1/\mathsf{e}$的近似最优解$S$作为结果返回。
+
+反向传播采样方法的核心思想可以描述如下。如果一个节点$u$出现在许多的反向可达集合$RR\left(v\right)$中，那么节点$u$就有更高的概率去激活更多的节点。而且，节点$v$是等概率地从节点集合$\mathcal{V}$中抽取，因此节点$u$将有概率激活图$\mathcal{G}$中更多的节点，即影响力$I\left(\{u\}\right)$的值会更大。这也就是说，如果一个种子节点集合$S$覆盖了最多的反向可达集合$RR\left(v\right)$，那么$S$在图$\mathcal{G}$中将有最大的影响力期望值。
+
+以图\ref{fig:tinyGraph}中的社交网络$\mathcal{G}$为例，考虑在独立级联模型以及$k=1$的条件下，反向传播采样方法的工作流程。第一步，首先反向传播采样方法将等概率地随机从图$\mathcal{G}$中选取节点$v$，然后依照概率$1-p\left(e\right)$移除每一条边$e$得到图$g$，然后计算反向可达集合$RR\left(v\right)$。假设我们选择了节点$v_3$并且得到的结果图$g$如图\ref{fig:tinyRandomGraph}所示，则我们可以计算得到${RR}_1=\left\{v_1, v_2, v_3\right\}$，其中下标表示生成的反向可达集合的序号。这是因为在图$g$中，$v_1$，$v_2$以及$v_3$是可达节点$v_3$的节点。然后，重复上述过程生成多个反向可达集合。假设这个过程中生成的其他反向可达集合为${RR}_2=\left\{v_1\right\}$，${RR}_3=\left\{v_1, v_2\right\}$， ${RR}_4=\left\{v_4\right\}$，${RR}_5=\left\{v_1, v_2, v_5\right\}$以及 ${RR}_6=\left\{v_6\right\}$。在这个情况下，我们可以得出节点$v_1$覆盖了最多的反向可达集合，因为节点$v_1$包含在集合${RR}_1$，${RR}_2$，${RR}_3$，${RR}_5$中。因此，反向传播采样方法返回$S=\left\{v_1\right\}$作为最终结果。
+
+与朴素贪心算法对比，反向传播采样算法之所以效率更高是因为避免了在计算$O\left(kn\right)$次迭代的影响力期望值的无效计算。算法的核心关键点是以反向可达集合$RR$取代了对信息传播的迭代模拟。为了平衡反向传播采样方法的有效性和高效性，算法需要控制生成反向可达集合的数目。Borgs等人证明了，为了在独立级联模型下得到一个$\left(1-1/\mathsf{e}-\varepsilon\right)$的近似最优解，$RR$的数目至少为$\Theta\left(k\left(m+n\right)\log{n}/\varepsilon^3\right)$\upcite{borgs2014maximizing}。
 
 \subsection{传播效率最大化问题}
 \label{3subsec:efficiency}
