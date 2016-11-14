@@ -134,7 +134,40 @@ Nemhauser等人证明了朴素的贪心算法得出解以$1-1/\mathsf{e}$的因�
 
 \subsection{传播效率最大化问题}
 \label{3subsec:efficiency}
+传统的影响力最大化问题的目标是解决在给定种子节点集合大小$k$的条件下，计算得到使得影响力期望值最大的种子节点集合$S$。这个问题没有考虑信息的传播时延，给定不同的种子节点集合会使得网络中的节点在不同的时刻$t$被激活。在实际应用中，人们不仅关心传播影响范围的大小，也关注信息的传播效率。例如，在市场营销中，如何迅速地将一个新产品的信息传播给潜在用户是十分重要的。由此产生了一个新的问题，在一定条件下，我们如何能够计算出一个种子节点集合，使得网络的传播效率最大化。我们对传播效率定义如下。
 
+\begin{mydef}[传播效率]\label{def:ie}
+假如存在一条路径从节点$u$到达节点$v$且路径中的每一个节点在信息传播结束时都是激活的，那么我们称这是一条从$u$到$v$的通路。网络中节点$u$到节点$v$之间可能存在多条通路。给定一个种子节点$u$，当信息传播过程结束时，对于图中的每一个节点$v \in \mathcal{V}$，如果节点$u$到节点$v$之间不存在通路，则节点$u$到节点$v$的传播效率$e_{u,v}=0$，否则节点$u$到节点$v$的传播效率形式化如下，
+\begin{equation}\label{eq:efficiency}
+    e_{u,v} = \frac{1}{t_{u,v}+1}
+\end{equation}
+其中$t_{u,v}$是从节点$u$到节点$v$的传播时延，即网络中节点$u$到节点$v$的最短通路的路径长度。对于节点$u$自身，传播时延$t_{u,u}=0$。给定种子节点集合$S$，传播效率函数$T\left(S\right)$形式化如下，
+\begin{equation}\label{eq:influenceEfficiency}
+    T\left(S\right)=\sum\limits_{v\in\mathcal{V}}{\frac{1}{t_{S,v}+1}}
+\end{equation}
+其中$t_{S,v}$是从集合$S$到节点$v$的传播时延，即网络中从集合$S$到节点$v$的最短通路的路径长度。
+\end{mydef}
+
+以图\ref{fig:tinyGraph}为例，考虑种子节点集合$S=\left\{v_1\right\}$在图$\mathcal{G}$中的信息传播过程。假设信息传播过程的结果如图\ref{fig:tinyRandomGraph}所示。在$t=0$时刻，节点$v_1$作为种子节点被激活。下一时刻，$t=1$时节点$v_2$被节点$v_1$激活。然后，$t=2$时刻，节点$v_3$和节点$v_5$被激活。最后，在$t=3$时刻，没有新的节点可以被激活，信息传播过程结束。因此，传播效率$T\left(S\right)=1+\frac{1}{2}+2\times\frac{1}{3}=13/6$。
+
+定义$\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]$为种子节点集合$S$在图$\mathcal{G}$中的传播效率的期望值。那么传播效率最大化问题是在给定种子节点集合大小$k$的情况下，计算得出使得传播效率期望值$\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]$最大化的种子节点集合$S$。给定一个输入$k$，传播效率最大化问题可以形式化如下，
+
+\begin{equation}\label{iem:Problem}
+    \begin{split}
+        &S^{\ast} = \arg\max{\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]}\\
+        &s.t.~~S \subseteq \mathcal{V},\left\vert{S}\right\vert = k
+    \end{split}
+\end{equation}
+
+以图\ref{fig:tinyGraph}为例，给定$k=1$以及图$\mathcal{G}$，考虑在独立级联模型下的传播效率最大化问题。我们能计算得出图$\mathcal{G}$中每一个节点的传播效率期望值。对于种子节点集合$S=\{v_1\}$的情况，$\mathbb{E}_\mathcal{G}\left[T\left(\{v_1\}\right)\right] = 1\times1 + 1\times\frac{1}{2} + 4\times0.8\times\frac{1}{3}\approx2.57$。对于$S=\{v_2\}$的情况，$\mathbb{E}_\mathcal{G}\left[T\left(\{v_2\}\right)\right] = 1\times1 + 4\times0.8\times\frac{1}{2} = 2.6$。对于其他的节点作为种子节点集合时，$\mathbb{E}_\mathcal{G}\left[T\left(\{v_3\}\right)\right] = \mathbb{E}_\mathcal{G}\left[T\left(\{v_4\}\right)\right] = \mathbb{E}_\mathcal{G}\left[T\left(\{v_5\}\right)\right] = \mathbb{E}_\mathcal{G}\left[T\left(\{v_6\}\right)\right] = 1$。因此，在图$\mathcal{G}$中，当$k=1$的情况下，传播效率最大化问题的最优解为$S^\ast = \left\{v_2\right\}$。与影响力最大化问题相比，我们可以得知，影响力期望值最大的种子节点集合不一定是传播效率期望值最大的集合。例如图\ref{fig:tinyGraph}表示的社交网络中，在$k=1$的情况下，种子节点集合$\left\{v_1\right\}$提供了最大的影响力期望值，种子节点集合$\left\{v_2\right\}$提供了最大的传播效率期望值。
+
+为了解决传播效率最大化问题，我们依旧可以运用蒙特卡罗方法来估计$\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]$的值。假设图$g$是依概率$1-p\left(e\right)$移除图$\mathcal{G}$中的每一条边$e\in\mathcal{E}$后得到的实例图。在独立级联模型下，我们能够对传播效率的期望值估计如下，
+\begin{equation}\label{eq:expectedIE}
+    \mathbb{E}_\mathcal{G}\left[T\left(S\right)\right] = \mathbb{E}_{g\sim\mathcal{G}}\left[T_g\left(S\right)\right]
+\end{equation}
+其中$T_g\left(S\right)$为种子节点集合$g$在图$g$中的传播效率。
+
+在第\ref{3sec:definition}节中，我们回顾了影响力最大化问题以及影响力函数的一些性质。影响力函数的单调性和子模性为问题的近似最优解算法提供了理论保证。基于该问题，本节将传播时延考虑在内，然后提出了传播效率最大化问题的定义。
 \section{方法描述}
 \label{3sec:method}
 
