@@ -43,11 +43,11 @@ $I\left(S\right)$ & 种子节点集合$S$的影响力 \\
 \hline
 $RR\left(v\right)$ & 节点$v$的反向可达集合 (参见定义\ref{def:rrSet}) \\
 \hline
-$e_{u,v}$ & 节点$u$到节点$v$的传播效率（参见\ref{eq:efficiency}） \\
+$e_{u,v}$ & 节点$u$到节点$v$的传播效率（参见方程（\ref{eq:efficiency}）） \\
 \hline
-$T\left(S\right)$ & 种子节点集合$S$在图$\mathcal{G}$中的传播效率（参见\ref{eq:influenceEfficiency}）\\
+$T\left(S\right)$ & 种子节点集合$S$在图$\mathcal{G}$中的传播效率（参见方程（\ref{eq:influenceEfficiency}））\\
 \hline
-$T'\left(S\right)$ & 种子节点集合$S$在超图$\mathcal{H}$中的传播效率（参见\ref{alg:res}）\\
+$T'\left(S\right)$ & 种子节点集合$S$在超图$\mathcal{H}$中的传播效率（参见算法\ref{alg:res}）\\
 \hline
 \end{tabular}
 \label{3tab:notation}
@@ -76,7 +76,6 @@ $T'\left(S\right)$ & 种子节点集合$S$在超图$\mathcal{H}$中的传播效�
 以图\ref{fig:tinyGraph}中的社交网络$\mathcal{G}$为例，考虑种子节点集合$S=\left\{v_1\right\}$的信息传播过程。图\ref{fig:tinyGraph}中边上的数值代表着节点之间的传播概率$p^\mathcal{G}_{u,v}$。整个信息传播的过程可以描述如下。在$t=0$时刻，由于节点$v_1$是种子节点集合中唯一的节点，因此节点$v_1$被激活。在$t=1$时刻，因为节点$v_1$在$t=0$时刻被激活，而且图$\mathcal{G}$中存在一条从$v_1$到$v_2$概率为1的边，节点$v_1$将依概率1去激活节点$v_2$。因此，节点$v_2$将在$t=1$时刻被激活，$S_1=\left\{v_2\right\}$。此后，在$t=2$时刻，节点$v_2$将尝试去激活节点$v_3$、$v_4$、$v_5$以及$v_6$。假设这一次信息传播过程如图\ref{fig:tinyRandomGraph}所示，节点$v_3$和$v_5$被激活，则$S_2=\left\{v_3, v_5\right\}$。然后，在$t=3$时刻，由于被激活的节点没有后继节点可被激活，整个信息传播过程在此时刻停止。定义$I\left(S\right)$为在种子节点集合是$S$的条件下，整个信息传播过程中激活的节点数目，代表信息传播过程中的影响力。在上述的图$\mathcal{G}$的一次信息传播过程中，影响力$I\left(S\right)=4$。
 
 给定一个种子节点集合$S$，定义$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$表示种子节点集合在图$\mathcal{G}$中影响力的期望，它等于以种子节点集合为传播源，在图$\mathcal{G}$中信息传播结束时激活节点数目的期望值。在独立级联模型下，影响力最大化问题的目标是寻找一个大小至多为$k$的种子节点集合，使得影响力函数的期望值$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$最大化。给定一个输入$k$，影响力最大化问题可以形式化为如下，
-
 \begin{equation}\label{eq:imProblem}
     \begin{split}
         &S^{\ast} = \arg\max{\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]}\\
@@ -90,13 +89,11 @@ $T'\left(S\right)$ & 种子节点集合$S$在超图$\mathcal{H}$中的传播效�
 \mathbb{E}_\mathcal{G}\left[I\left(\{v_6\}\right)\right]=1$。由此，我们可以得出，在给定图$\mathcal{G}$以及$k=1$的条件下，影响力最大化问题的最优解为$S^\ast=\left\{v_1\right\}$。
 
 在上述的例子中，因为图$\mathcal{G}$的结构简单，并且种子节点集合的大小$k=1$，所以能够直接计算得出种子节点集合的影响力期望值，从而选择得出最优解。而在实际情况下，图$\mathcal{G}$的结构往往会复杂得多，而且$k>1$，很难直接计算种子节点集合的影响力期望值。Kempe等人\upcite{kempe2003maximizing}首先证明了在独立级联模型下，影响力最大化问题是一个NP-hard问题。因此，直接计算出有影响力的节点是十分困难的。为了解决此问题，Kempe等人又证明了在独立级联模型下，影响力函数的期望$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$是单调的以及子模的。这两个性质为求解影响力最大化问题的近似算法提供了理论保证。形式上，一个单调的函数对于任意的节点$u$和任意集合$S$，都满足$f\left(S\cup\left\{u\right\}\right) \geq f\left(S\right)$。而一个子模的函数对于任意的节点$u$以及任意的两个集合$S \subseteq W$，都满足$f\left(S\cup\left\{u\right\}\right) - f\left(S\right) \geq f\left(W\cup\left\{u\right\}\right) - f\left(W\right)$。针对具有单调性以及子模性的函数，Nemhauser等人\upcite{nemhauser1978analysis}提出了一种朴素的贪心算法来解决此类问题。算法的核心思想是首先从一个空的种子节点集合$S=\emptyset$开始，重复地选择当前边际收益（即$f\left(S\cup\left\{u\right\}\right) - f\left(S\right)$）最大的节点$u$加入到种子节点集合$S$中，直到满足种子节点集合的大小为$k$时结束迭代。选择节点$u$的准则可以形式化如下，
-
 \begin{equation}\label{eq:greedyIM}
     u=\arg\max\limits_{w \in V \setminus S}\left({\mathbb{E}_\mathcal{G}\left[I\left(S\cup w\right)\right]-\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]}\right)
 \end{equation}
 
 Nemhauser等人证明了朴素的贪心算法得出解以$1-1/\mathsf{e}$的因子近似于最优解，即任意一个由贪心算法的出来的解$S$都满足$I\left(S\right) \geq (1-1/\mathsf{e}) I\left(S^{\ast}\right)$，其中$S^{\ast}$代表最优解，$\mathsf{e}$为自然常数。虽然贪心算法的核心思想比较简单，但是由于计算影响力期望值的过程是\#P-hard\upcite{Chen2010Scalable}的问题，因此实现该算法并不是简单的。为了解决该问题，Kempe等人\upcite{kempe2003maximizing}提出了使用\textbf{蒙特卡罗方法}（\textit{Monte Carlo method}）来对$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$在一定精度内进行估计。蒙特卡罗方法的步骤如下。假设我们对图$\mathcal{G}=\left(\mathcal{V},\mathcal{E}\right)$中的所有的边$e\in\mathcal{E}$都进行抛硬币实验，图$\mathcal{G}$中边的连接的概率为$p\left(e\right)$，我们以$1-p\left(e\right)$的概率移除掉边$e$。定义$g$为得到的结果图，$R_g\left(S\right)$为在图$g$中从种子节点集合$S$出发可达的节点集合。我们需要注意的是，图$g$中的边不再是概率性连接的边，而是确定性的边。对于任意节点$v\in g$，如果在图$g$中存在一条路径从节点集合$S$出发到达节点$v$，那么称节点$v$是从节点集合$S$可达的。Kempe等人\upcite{kempe2003maximizing}证明了$R_g\left(S\right)$的期望值与$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$是相等的，即可表示为如下，
-
 \begin{equation}\label{eq:influenceSpread}
     \mathbb{E}_\mathcal{G}\left[I\left(S\right)\right] = \mathbb{E}_{g\sim\mathcal{G}}\left[I_g\left(S\right)\right]
 \end{equation}
@@ -151,7 +148,6 @@ Nemhauser等人证明了朴素的贪心算法得出解以$1-1/\mathsf{e}$的因�
 以图\ref{fig:tinyGraph}为例，考虑种子节点集合$S=\left\{v_1\right\}$在图$\mathcal{G}$中的信息传播过程。假设信息传播过程的结果如图\ref{fig:tinyRandomGraph}所示。在$t=0$时刻，节点$v_1$作为种子节点被激活。下一时刻，$t=1$时节点$v_2$被节点$v_1$激活。然后，$t=2$时刻，节点$v_3$和节点$v_5$被激活。最后，在$t=3$时刻，没有新的节点可以被激活，信息传播过程结束。因此，传播效率$T\left(S\right)=1+\frac{1}{2}+2\times\frac{1}{3}=13/6$。
 
 定义$\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]$为种子节点集合$S$在图$\mathcal{G}$中的传播效率的期望值。那么传播效率最大化问题是在给定种子节点集合大小$k$的情况下，计算得出使得传播效率期望值$\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]$最大化的种子节点集合$S$。给定一个输入$k$，传播效率最大化问题可以形式化如下，
-
 \begin{equation}\label{iem:Problem}
     \begin{split}
         &S^{\ast} = \arg\max{\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]}\\
@@ -170,6 +166,140 @@ Nemhauser等人证明了朴素的贪心算法得出解以$1-1/\mathsf{e}$的因�
 在第\ref{3sec:definition}节中，我们回顾了影响力最大化问题以及影响力函数的一些性质。影响力函数的单调性和子模性为问题的近似最优解算法提供了理论保证。基于该问题，本节将传播时延考虑在内，然后提出了传播效率最大化问题的定义。
 \section{方法描述}
 \label{3sec:method}
+本节首先对传播效率最大化问题的复杂度，其次证明了近似最优解算法的保证，最后提出了\textbf{反向效率采样}（\textit{Reverse Efficiency Sampling}）算法来解决传播效率最大化问题。
+
+众所周知，影响力最大化问题在独立级联模型下是一个NP-hard的问题。本节首先对传播效率最大化问题的复杂度进行分析。
+
+\begin{mytheo}\label{theo:npHard}
+传播效率最大化问题在独立级联模型下是一个NP-hard的问题。
+\end{mytheo}
+
+\begin{proof}\label{pro:npHard}
+考虑一个NP-complete的问题实例，集合覆盖（\textit{Set Cover}）问题。问题的定义如下，给定一个集合$U=\left\{u_1, u_2, \cdots, u_n\right\}$的若干个子集$S_1, S_2, \cdots, S_m$，我们需要求解是否存在$k$个子集的并集与集合$U$相等。下面我们证明集合覆盖问题可以看作是传播效率最大化问题的一个特例。
+
+给定任意一个集合覆盖问题的实例，可以定义一个与之相对应的二部图$\mathcal{G}$，节点数目等于$n+m$。图中的节点$i$对应于子集$S_i$，节点$j$对应于集合中的每一个元素$u_j \in U$。对于每一个节点$u_j \in S_i$，图中都有一条从节点$i$到节点$j$的边$\left(i,j\right)$，且边的传播概率为$p_{i,j}=1$。集合覆盖问题等同于判断在构造的二部图$\mathcal{G}$中，是否存在一个$k$个节点的集合$A$使得传播效率期望值$\mathbb{E}_\mathcal{G}\left[T\left(A\right)\right] \geq k+\frac{n}{2}$。因为二部图$\mathcal{G}$中边的传播概率非0即1，对应的信息传播是一个确定性的过程。初始化的$k$个种子节点等同于在集合覆盖问题中选择$k$个子集，而激活其余的$n$个节点相当于覆盖集合$U$。因此，如果存在$k$个节点的集合$A$满足$\mathbb{E}_\mathcal{G}\left[T\left(A\right)\right] \geq k+\frac{n}{2}$，则集合覆盖问题能够被解决。
+\end{proof}
+
+此外，另一个重要的问题是计算一个种子节点集合的传播效率期望值是非常耗时的，时间复杂度为$O\left(mr\right)$。给定一个种子节点集合$S$，没有一个高效的方法直接计算传播效率期望值$\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]$。本节将这个问题规约到$s$-$t$连通性问题，证明了在独立级联模型下计算传播效率期望值是一个\#P-hard的问题。
+
+\begin{mytheo} \label{theo:sharpHard}
+在独立级联模型下，给定一个种子节点集合$S$，计算其传播效率期望值$\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]$是一个\#P-hard的问题。
+\end{mytheo}
+
+\begin{proof}
+我们通过将这个问题规约到$s$-$t$连通性问题来证明定理。给定一个有向图$\mathcal{G}=\left( \mathcal{V}, \mathcal{E} \right)$以及两个节点$s$和$t$，$s$-$t$连通性问题是来计算图$\mathcal{G}$中能够连通节点$s$和节点$t$的子图数。定义$p^\mathcal{G}_{s,t}$为图$\mathcal{G}$中节点$s$与节点$t$连通的概率。当使得图$\mathcal{G}$的每一条边有$1/2$的概率连通，$1/2$的概率不连通时，我们可以直观地观察到，$s$-$t$连通性问题等同于求解$p^\mathcal{G}_{s,t}$。下一步，我们将传播效率最大化问题归约到$s$-$t$连通性问题。首先，令种子节点集合$S=\{s\}$，且图$\mathcal{G}$中的每一条边$\left(u,v\right) \in \mathcal{E}$的传播概率$p^\mathcal{G}_{u,v}=1/2$。此时，图$\mathcal{G}$中，以$S$为种子节点集合的传播效率期望值定义为$\mathbb{E}_\mathcal{G}\left[T_0\left(S\right)\right]$。下一步，我们在图$\mathcal{G}$增加一个节点$t_1$以及一条从节点$t$到节点$t_1$的边。我们称得到的新的图为$\mathcal{G}_1$，以及新增的边的传播概率为$p^{\mathcal{G}_1}_{t,t_1}=1$。在图$\mathcal{G}_1$中，以$S$为种子节点集合的传播效率期望值定义为$\mathbb{E}_\mathcal{G}\left[T_1\left(S\right)\right]$。而且我们可计算得知，$\mathbb{E}_\mathcal{G}\left[T_1\left(S\right)\right]=\mathbb{E}_\mathcal{G} \left[T_0\left(S\right)\right] + p^{\mathcal{G}_1}_{t,t_1}\cdot \sum_{i=1}^n{p^\mathcal{G}_{s,t,d=i}\cdot \frac{1}{d+1}}=\mathbb{E}_\mathcal{G} \left[T_0\left(S\right) \right] + \sum_{i=1}^n{p^\mathcal{G}_{s,t,d=i}\cdot \frac{1}{d+1}}$，其中$p^\mathcal{G}_{s,t,d=i}$表示在图$\mathcal{G}$中，从节点$s$到节点$t$且距离为$d$的概率（从$s$达到$t$经过通过$d$次传播），$n=\left\vert\mathcal{V}\right\vert$。下一步，我们继续在图$\mathcal{G}_1$中，添加节点$t_2$以及一条从$t_1$到$t_2$的边，得到新的图$\mathcal{G}_2$，且令$p^{\mathcal{G}_2}_{t_1,t_2}=1$。在图$\mathcal{G}_2$中，以$S$为种子节点集合的传播效率期望值定义为$\mathbb{E}_\mathcal{G}\left[T_2\left(S\right)\right]$。可以计算得知，$\mathbb{E}_\mathcal{G}\left[T_2\left(S\right)\right]=\mathbb{E}_\mathcal{G} \left[T_1\left(S\right)\right] + p^{\mathcal{G}_1}_{t_1,t_2}\cdot p^{\mathcal{G}_1}_{t,t_1}\cdot \sum_{i=1}^n{p^\mathcal{G}_{s,t,d=i}\cdot \frac{1}{d+2}}=\mathbb{E}_\mathcal{G} \left[T_1\left(S\right)\right] + \sum_{i=1}^n{p^\mathcal{G}_{s,t,d=i}\cdot \frac{1}{d+2}}$。我们可以重复上述步骤，得到$n$个以$S$为种子节点集合的传播效率期望值$T_1\left(S\right),\cdots,T_n\left(S\right)$。且递推公式为$\mathbb{E}_\mathcal{G}\left[T_j\left(S\right)\right]=\mathbb{E}_\mathcal{G} \left[T_{j-1}\left(S\right)\right] + \sum_{i=1}^n{p^\mathcal{G}_{s,t,d=i}\cdot \frac{1}{d+j}}$。这些传播效率期望值方程可以表示如下，
+\begin{equation}\label{eq:sharpHard}
+    \begin{bmatrix}
+    \frac{1}{1+1} & \frac{1}{1+2} & \cdots & \frac{1}{1+n} \\
+    \vdots & \vdots & \cdots & \vdots \\
+    \frac{1}{i+1} & \frac{1}{i+2} & \cdots & \frac{1}{i+n} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    \frac{1}{n+1} & \frac{1}{n+2} & \cdots & \frac{1}{n+n}
+    \end{bmatrix}
+    \begin{bmatrix}
+    p^\mathcal{G}_{s,t,d=1}\\
+    \vdots\\
+    p^\mathcal{G}_{s,t,d=i}\\
+    \vdots\\
+    p^\mathcal{G}_{s,t,d=n}
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+    \mathbb{E}_\mathcal{G}\left[T_1\left(S\right)\right] - \mathbb{E}_\mathcal{G}\left[T_0\left(S\right)\right]\\
+    \vdots\\
+    \mathbb{E}_\mathcal{G}\left[T_i\left(S\right)\right] - \mathbb{E}_\mathcal{G}\left[T_{i-1}\left(S\right)\right]\\
+    \vdots\\
+    \mathbb{E}_\mathcal{G}\left[T_n\left(S\right)\right] - \mathbb{E}_\mathcal{G}\left[T_{n-1}\left(S\right)\right]\\
+    \end{bmatrix}
+\end{equation}
+根据上述过程，可令$A$表示方程组（\ref{eq:sharpHard}）中的矩阵，$\mathbf{x} = \left(p^\mathcal{G}_{s,t,d=1},p^\mathcal{G}_{s,t,d=2},\cdots,p^\mathcal{G}_{s,t,d=n}\right)^T$，$\mathbf{b}=\left(\mathbb{E}_\mathcal{G} \left[T_1\left(S\right)\right] - \mathbb{E}_\mathcal{G}\left[T_0\left(S\right)\right],\cdots,\mathbb{E}_\mathcal{G}\left[T_n\left(S\right)\right] - \mathbb{E}_\mathcal{G}\left[T_{n-1}\left(S\right)\right]\right)^T$。方程组（\ref{eq:sharpHard}）可表示为$A\mathbf{x}=\mathbf{b}$。根据引理\ref{lem:nonsingular}可知矩阵$A$是一个非奇异的矩阵，因此线性方程组（\ref{eq:sharpHard}）可以通过高斯-赛德尔方法在多项式时间内解决，而且构造这一个线性方程组是在线性时间内可完成的。我们可以直观地计算出图$\mathcal{G}$中节点$s$到$t$的连通概率$p^\mathcal{G}_{s,t}=\sum_{i=1}^n{p^\mathcal{G}_{s,t,d=i}}$，这也就是说节点$s$到节点$t$的概率在线性时间内可以计算。因此，$s$-$t$连通性问题是可解决的。而我们已知$s$-$t$连通性问题是一个\#P-complete的问题。因此，计算传播效率期望值是一个\#P-hard的问题。
+\end{proof}
+
+下面我们证明上述的矩阵$A$是非奇异的。引理以及其证明如下。
+
+\begin{lemma}\label{lem:nonsingular}
+矩阵$A \in \mathbb{R}^{n \times n}$且$a_{ij} = \frac{1}{i+j}$，则矩阵$A$是非奇异的。
+\end{lemma}
+\begin{proof}
+令$\Delta_{n}$表示矩阵$A$的行列式，
+\begin{equation}\label{eq:detetminant1}
+    \Delta_{n}=\left\vert A \right\vert=
+    \begin{vmatrix}
+    \frac{1}{1+1} & \frac{1}{1+2} & \cdots & \frac{1}{1+n} \\
+    \vdots & \vdots & \cdots & \vdots \\
+    \frac{1}{i+1} & \frac{1}{i+2} & \cdots & \frac{1}{i+n} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    \frac{1}{n+1} & \frac{1}{n+2} & \cdots & \frac{1}{n+n}
+    \end{vmatrix}
+\end{equation}
+下一步，令行列式$\left\vert A \right\vert$中的第$i$行（$2\leq i \leq n$）减去第1行，可得到$a_{ij} = \frac{1}{i+j}-\frac{1}{1+j}=\frac{1-i}{\left(i+j\right)\left(1+j\right)}$。则行列式$\Delta_n$可表示为如下所示。
+\begin{equation}\label{eq:detetminant2}
+\begin{split}
+    \Delta_n & =
+    \begin{vmatrix}
+    \frac{1}{1+1} & \frac{1}{1+2} & \cdots & \frac{1}{1+n} \\
+    \vdots & \vdots & \cdots & \vdots \\
+    \frac{1-i}{\left(i+1\right)\left(1+1\right)} & \frac{1-i}{\left(i+2\right)\left(1+2\right)} & \cdots & \frac{1-i}{\left(i+n\right)\left(1+n\right)} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    \frac{1-n}{\left(n+1\right)\left(1+1\right)} & \frac{1-n}{\left(n+2\right)\left(1+2\right)} & \cdots & \frac{1-n}{\left(n+n\right)\left(1+n\right)} \\
+    \end{vmatrix}\\
+    & =
+    \frac{\prod\limits_{2\leq i \leq n}{1-i}}{\prod\limits_{1\leq j \leq n}{1+j}}
+    \begin{vmatrix}
+    1 & 1 & \cdots & 1 \\
+    \frac{1}{2+1} & \frac{1}{2+2} & \cdots & \frac{1}{2+n} \\
+    \vdots & \vdots & \cdots & \vdots \\
+    \frac{1}{i+1} & \frac{1}{i+2} & \cdots & \frac{1}{i+n} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    \frac{1}{n+1} & \frac{1}{n+2} & \cdots & \frac{1}{n+n}
+    \end{vmatrix}\\
+    & = \frac{\prod\limits_{2\leq i \leq n}{1-i}}{\prod\limits_{1\leq j \leq n}{1+j}}
+    \left\vert B \right\vert
+\end{split}
+\end{equation}
+下一步，令行列式$\left\vert B \right\vert$中的第$j$列（$2 \leq j \leq n$）减去第1列，可得$b_{ij} = \frac{1}{i+j} - \frac{1}{i+1}=\frac{1-j}{\left(i+j\right)\left(i+1\right)}$。则行列式$\Delta_n$可表示为如下所示。
+\begin{equation}\label{eq:detetminant3}
+\begin{split}
+    \Delta_n & = \frac{\prod\limits_{2\leq i \leq n}{1-i}}{\prod\limits_{1\leq j \leq n}{1+j}}
+    \begin{vmatrix}
+    1 & 0 & \cdots & 0 \\
+    \frac{1}{2+1} & \frac{1-2}{\left(2+2\right)\left(2+1\right)} & \cdots & \frac{1-n}{\left(2+n\right)\left(2+1\right)} \\
+    \vdots & \vdots & \cdots & \vdots \\
+    \frac{1}{i+1} & \frac{1-2}{\left(i+2\right)\left(i+1\right)} & \cdots & \frac{1-n}{\left(i+n\right)\left(i+1\right)} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    \frac{1}{n+1} & \frac{1-2}{\left(n+2\right)\left(n+1\right)} & \cdots & \frac{1-n}{\left(n+n\right)\left(n+1\right)}
+    \end{vmatrix}\\
+    & = \frac{\prod\limits_{2\leq i \leq n}{1-i}\prod\limits_{2\leq j \leq n}{1-j}}{\prod\limits_{1\leq j \leq n}{1+j}\prod\limits_{2\leq i \leq n}{1+i}}
+    \begin{vmatrix}
+    1 & 0 & \cdots & 0 \\
+    \frac{1}{2+1} & \frac{1}{2+2} & \cdots & \frac{1}{2+n}\\
+    \vdots & \vdots & \cdots & \vdots \\
+    \frac{1}{i+1} & \frac{1}{i+2} & \cdots & \frac{1}{i+n}\\
+    \vdots & \vdots & \ddots & \vdots \\
+    \frac{1}{n+1} & \frac{1}{n+2} & \cdots & \frac{1}{n+n}
+    \end{vmatrix}\\
+    & = \frac{\prod\limits_{2\leq i \leq n}{1-i}\prod\limits_{2\leq j \leq n}{1-j}}{\prod\limits_{1\leq j \leq n}{1+j}\prod\limits_{2\leq i \leq n}{1+i}}
+    \begin{vmatrix}
+    \frac{1}{2+2} & \frac{1}{2+3} & \cdots & \frac{1}{2+n}\\
+    \vdots & \vdots & \cdots & \vdots \\
+    \frac{1}{i+2} & \frac{1}{i+3} & \cdots & \frac{1}{i+n}\\
+    \vdots & \vdots & \ddots & \vdots \\
+    \frac{1}{n+2} & \frac{1}{n+3} & \cdots & \frac{1}{n+n}
+    \end{vmatrix}\\ 
+    &= \lambda_{n} \Delta_{n-1}
+\end{split}
+\end{equation}
+其中$\lambda_{n}$是非零的。因此，我们可以重复上述步骤，则行列式$\Delta_n$可计算得到如下。
+\begin{equation}\label{eq:detetminant4}
+\begin{split}
+    \Delta_n &= \prod\limits_{k=1}^{n-1}{\lambda_k}\Delta_1=\prod\limits_{k=1}^{n-1}{\frac{\prod\limits_{k+1 \leq i \leq n}{k-i}\prod\limits_{k+1 \leq j \leq n}{k-j}}{\prod\limits_{k \leq j \leq n}{k+j}\prod\limits_{k+1 \leq i \leq n}{k+i}}}\Delta_1\\
+    & = \frac{1}{2n}\frac{\prod\limits_{2\leq k+1\leq i \leq n}{k-i}\prod\limits_{2\leq k+1\leq j \leq n}{k-j}}{\prod\limits_{1\leq k\leq j \leq n}{k+j}\prod\limits_{2\leq k+1\leq i \leq n}{k+i}}
+\end{split}
+\end{equation}
+由上述可知$\Delta_n$中的每一项都不为零，所以可知$\Delta_n \neq 0$，因此$A$是非奇异的。
+\end{proof}
+
+由此可知，直接来求解传播效率最大化问题是非常困难的。针对这种情况，Nemhauser等人\upcite{nemhauser1978analysis}证明了一个非负的，单调的且子模性的函数$f(\cdot)$，朴素的贪心算法能够提供一个$(1-1/\textsf{e})$的近似最优解。
 
 \section{实验分析}
 \label{3sec:experiment}
