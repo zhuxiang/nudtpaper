@@ -318,6 +318,53 @@ $\mathbb{E}_\mathcal{G}\left[T\left(\cdot\right)\right]$的单调性是显而易
 \begin{proof}\label{pro:submodular}
 首先，我们证明对于概率空间中任意的确定的样本点$X$，传播效率函数$T_X\left(\cdot\right)$是具有子模性的。为了证明上述的结论，令$S$和$W$为两个节点集合，且满足$S \subseteq W \subseteq \mathcal{V}$，令$u \in \mathcal{V}$为图$\mathcal{G}$中的任意一个节点。令$\delta\left(u|S\right)$为添加节点$u$至集合$S$后传播效率的边际收益，$\delta\left(u|S\right) = T_X\left(S\cup\left\{u\right\}\right)-T_X\left(S\right)$。然后，我们对$\delta\left(u|S\right)$和$\delta\left(u|W\right)$进行比较。为了方便比较，令$R_X\left(u\right)$表示节点$u$在样本点$X$下的可达节点集合。因为$S \subseteq W$，所以可得$R_X\left(S\right) \subseteq R_X\left(W\right)$。当节点$u$加入到集合$S$和$W$中时，会出现如图\ref{fig:submodular}三种情况。首先，第一种情况如图中的斜线区域，即对于节点$v \in R_X\left(u\right) \setminus R_X\left(W\right)$。在此种情况下，在加入节点$u$之前，图中不存在从集合$S$或者集合$W$到达节点$v$的通路。因此，可知第一种情况中$\delta\left(u|S\right) = \delta\left(u|W\right)$。第二种情况是图中的反斜线区域，即对于节点$v \in \left( R_X\left(u\right) \cap R_X\left(W\right) \right) \setminus R_X\left(S\right)$。在此种情况下，在加入节点$u$之前，图中存在从集合$W$到节点$v$的通路，但是不存在从集合$S$到节点$v$的通路。在此情况下，可知$\delta\left(u|S\right) \geq \delta\left(u|W\right)$。第三种情况是图中的网状区域，即对于节点$v \in R_X\left(u\right) \cap R_X\left(S\right)$。在此种情况下，在节点$u$前，从集合$S$或者集合$W$都有到节点$v$的通路。因为$S \subseteq W$，$e_{W,v} \geq e_{S,v}>0$，所以在第三种情况下$\delta\left(u|S\right) \geq \delta\left(u|W\right)$也是成立的。综合上述可知，结论$\delta\left(u|S\right) \geq \delta\left(u|W\right)$在任意情况下都是成立的，即$T_X\left(S\cup\left\{u\right\}\right)-T_X\left(S\right) \geq T_X\left(W\cup\left\{u\right\}\right)-T_X\left(W\right)$对于集合$S \subseteq W$是成立的，因此$T_X\left(\cdot\right)$是具有子模性的。而又有$\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right] = \sum\nolimits_X{\Pr\left[X\right] \cdot T_X\left(S\right)}$，即传播效率期望值是概率空间中所有可能样本$X$的加权平均值。一个非负的线性组合不会改变函数的子模性，故传播效率函数的期望$\mathbb{E}_\mathcal{G}\left[T\left(\cdot\right)\right]$也是具有子模性。
 \end{proof}
+
+\begin{algorithm}[!ht]
+\caption{$greedy(k,T)$}
+\label{alg:greedy}
+\begin{algorithmic}[1]
+	\REQUIRE $k,\mathcal{G},T$
+    \ENSURE $S$
+    \STATE initialize $S=\emptyset$
+    \FOR{$i$ =1 to $k$}
+        \STATE select $u=\arg\max_{w \in V \setminus S}\left({\mathbb{E}_\mathcal{G}\left[T\left(S\cup w\right)\right]-\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]}\right)$
+        \STATE $S=S\cup u$
+    \ENDFOR
+    \STATE \textbf{return} $S$
+\end{algorithmic}
+\end{algorithm}
+
+根据定理\ref{theo:submodular}我们可知传播效率函数的期望值$\mathbb{E}_\mathcal{G}\left[T\left(\cdot\right)\right]$是单调且子模性的，因此朴素贪心算法（\textit{greedy}）能够得到一个$1-1/\mathsf{e}$的近似最优解。朴素贪心算法的过程如算法\ref{alg:greedy}所示。算法的流程如下，需要求解的种子节点集合$S$首先置为空集。其次，遍历所有节点，选择传播效率期望值边际收益最大的节点$u$加入到集合$S$中。然后，重复第二步直到集合$S$的大小等于$k$。
+
+此外，由于传播效率期望值具有子模性，因此惰性计算技术\upcite{minoux1978accelerated}可以用来提升朴素贪心算法的性能。惰性计算能够极大地减少模拟评估的次数而不改变贪心算法的的输出。正如惰性计算的名字，该方法的核心思想是尽可能地避免不必要的模拟评估。给定一个单调且子模性的函数$f$，令$f\left(u|S\right)$为集合$S$加入节点$u$后的边际收益，即$f\left(u|S\right) = f\left( S \cup \left\{u\right\} \right) - f\left( S \right)$。假设第$i$轮迭代贪心算法得出的种子节点集合为$S$，且我们对节点$u \in \mathcal{V} \setminus S$的边际收益$f\left(u|S\right)$进行了计算。在更早的迭代中，种子节点集合为$S' \subset S$，且我们计算了节点$w \in \mathcal{V} \setminus S'$的边际收益$f\left(w|S'\right)$。那么当$f\left(w|S'\right) \leq f\left(u|S\right)$时，根据子模性可知$f\left(w|S\right) \leq f\left(w|S'\right) \leq f\left(u|S\right)$。这就是说，在第$i$轮迭代中，节点$w$不可能成为最大化传播效率的节点，因此计算$f\left(w|S\right)$是没有意义的。上述的思想可以通过一个优先队列来实现，如算法\ref{alg:lazygreedy}所示，称之为\textbf{惰性贪心}（\textit{lazy greedy}）算法。
+
+\begin{algorithm}[!ht]
+    \caption{$LazyGreedy(k,T)$}
+    \label{alg:lazygreedy}
+    \begin{algorithmic}[1]
+    \STATE initialize $S=\emptyset$, priority queue $Q=\emptyset$, iteration $i=1$
+    \FOR{$j=1$ to $n$}
+        \STATE $u.mg=T\left(u|\emptyset\right)$, $u.i=1$
+        \STATE put $u$ into $Q$ with $u.mg$ as the key
+    \ENDFOR
+    \WHILE{$i \leq k$}
+        \STATE pop the top element $u$ of $Q$
+        \IF{$u.i = i$}
+            \STATE $S = S \cup \left\{u\right\}$, $i=i+1$
+        \ELSE
+            \STATE $u.mg=T\left(u|S\right)$,  $u.i=i$ 
+        \ENDIF
+    \ENDWHILE
+    \STATE \textbf{return} $S$
+    \end{algorithmic}
+\end{algorithm}
+
+算法的具体实现过程如下。对于每一个节点$u$，我们为之设计一种结构体，包含两个域值$u.mg$以及$u.i$。其中$u.mg$表示最新一次迭代将节点$u$加入集合$S$时的传播效率期望值边际收益，$u.i$表示$u.mg$更新时的迭代轮数。初始化时，我们对所有节点$u$计算$T\left(u|\emptyset\right)$作为$u.mg$加入优先队列$Q$中，以$u.mg$作为队列的键，此时所有的$u.i=1$。此后的每一轮迭代，我们选择队列$Q$的队首（具有最大的边际收益）的节点$u$进行检查。如果$u.i=i$，即节点$u$确实是第$i$迭代时加入到种子节点集合$S$中的边际收益最大的节点，则将节点$u$加入到种子节点集合$S$中。如果$u.i \neq i$，则更新$u.mg$为$T\left(u|S\right)$，更新$u.i$为当前的迭代轮数，然后将节点$u$插入回优先队列$Q$中。
+
+惰性贪心算法极大地减少了无效模拟评估的次数。Leskovec等人\upcite{leskovec2007cost}通过实验证明该算法对影响力最大化问题的速度提升了近700倍。对于传播效率最大化问题，由于传播效率函数的单调性和子模性，惰性贪心算法也能减少无效模拟评估次数，从而进行加速。
+
+由定理\ref{theo:sharpHard}可知，直接计算传播效率期望值是很困难的。许多相关的工作\upcite{leskovec2007cost,goyal2011celf++,chen2009efficient}在贪心算法的框架下对此类问题进行了改进。然而，这些改进算法仍然不够高效。另一方面，启发式的算法能够解决效率问题，但是不能提供理论上的性能保证。本节借鉴了Borgs等人\upcite{borgs2014maximizing}的反向传播采样思想来解决传播效率最大化问题。
+
 \section{实验分析}
 \label{3sec:experiment}
 
