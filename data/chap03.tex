@@ -365,6 +365,60 @@ $\mathbb{E}_\mathcal{G}\left[T\left(\cdot\right)\right]$的单调性是显而易
 
 由定理\ref{theo:sharpHard}可知，直接计算传播效率期望值是很困难的。许多相关的工作\upcite{leskovec2007cost,goyal2011celf++,chen2009efficient}在贪心算法的框架下对此类问题进行了改进。然而，这些改进算法仍然不够高效。另一方面，启发式的算法能够解决效率问题，但是不能提供理论上的性能保证。本节借鉴了Borgs等人\upcite{borgs2014maximizing}的反向传播采样思想来解决传播效率最大化问题。
 
+\begin{algorithm}[!ht]
+    \caption{$RES$($k$,$r$,$T'\left(\cdot\right)$)}
+    \label{alg:res}
+    \begin{algorithmic}[1]
+    \STATE {initialize $\mathcal{H}=\left(\mathcal{V}, \emptyset \right)$}
+    \FOR{$i=1$ to $r$}
+        \STATE{stochastically select a node $v \in \mathcal{V}$ uniformly}
+        \STATE{generate $z_i = RR\left(v\right)$}
+        \STATE{calculate $e_{u,v} = \frac{1}{t_{u,v}+1}$ for $u \in RR\left(v\right)$}
+        \STATE{add $z_i$ to the edge set $\mathcal{Z}$ of $\mathcal{H}$}
+    \ENDFOR
+    \STATE{initialize $S=\emptyset$}
+    \FOR{$j=1$ to $k$}
+        \STATE{$w = \arg\max_{v \in \mathcal{V}}\left(T'\left(S \cup v\right) - T'\left(S\right)\right)$}
+        \STATE{add $w$ to $S$}
+        \STATE{remove $w$ from $\mathcal{V}$}
+    \ENDFOR
+    \STATE {\textbf{return:} $S$}
+    \end{algorithmic}
+\end{algorithm}
+
+如算法\ref{alg:res}所示，我们称之为\textbf{反向效率采样}（\textit{Reverse Efficiency Sampling}），算法的流程可描述如下。反向效率采样算法按照两步进行。第一步是根据图$\mathcal{G}$建立超图$\mathcal{H}=\left(\mathcal{V}, \mathcal{Z} \right)$，其中$\mathcal{V}$是与图$\mathcal{G}$相同的节点集合，$\mathcal{Z}$是超边集合。每一条超边$z_i \in \mathcal{Z}$代表一个反向可达集合$RR\left(v\right)$，其中节点$v \in \mathcal{V}$，是随机等概率选取的。超边$z_i$可以形式化为一个集合$\{u_1, u_2, \cdots, u_j\}$，代表着存在一条从节点$u \in z_i$到节点$v$的通路。我们不断地随机等概率选取节点$v$，然后基于图$\mathcal{G}$生成图$g$，计算反向可达集合$RR\left(v\right)$，即超边$z_i$，然后添加到超边集合$\mathcal{Z}$中。该过程通过模拟图$\mathcal{G}$的反向图中的信息传播过程来实现。在反向图中首先激活节点$v$，然后按照宽度优先搜索来概率性地激活出度边指向的邻居节点。当信息传播过程停止时，被激活的节点集合构成了超图$\mathcal{H}$中的一条边。同时，我们还需要记录超边上每一个节点$u \in z_i$的传播效率$e_{u,v} = \frac{1}{t_{u,v}+1}$。我们重复生成超边的过程来构建超边集合$\mathcal{Z}$直到集合的大小到达预定的值$r$。
+
+在第二步中，我们基于超图$\mathcal{H}$来计算种子节点集合$S$。在这一步中，算法重复地选择当前传播效率边际收益最大的节点$w \in \mathcal{V}$加入到结合$S$中，其中边际效益为$T'\left(S \cup w\right) - T'\left(S\right)$，且$T'\left(S\right) = \sum_{i=1}^r{\frac{1}{t_{S,v_i}+1}}$，$v_i$为第i轮迭代中随机等概率选取的节点，对应的超边为$z_i$。最终，算法得到一个大小为$k$的节点集合$S$。
+
+下一步，我们对算法\ref{alg:res}进行详细地分析。首先，我们可以观察到种子节点集合$S$的传播效率期望值等于$n$倍从集合$S$到节点$u$的传播效率$e_{S,u}$，其中节点$u$从图$g$中随机等概率选取的，图$g$是基于图$\mathcal{G}$生成的实例图。上述现象可表述为如下，
+\begin{mytheo}\label{theo:observe}
+$\mathbb{E}_{g\sim\mathcal{G}}\left[T_g\left(S\right)\right]=n\Pr\nolimits_{v,g\sim\mathcal{G}}\left[S\cap RR\left(v\right)\neq\emptyset\right]\cdot\frac{1}{d_{S,v}+1}$
+\end{mytheo}
+\begin{proof}
+    \begin{equation*}
+        \begin{split}
+            \mathbb{E}_{g\sim\mathcal{G}}\left[T_g\left(S\right)\right] & = \sum\limits_{v \in \mathcal{V}}{\Pr\nolimits_{g \sim \mathcal{G}}{\left[ \exists u \in S, v \in R_g \left(u\right) \right] \cdot \frac{1}{d_{S,v}+1}}}\\
+            & = \sum\limits_{v \in \mathcal{V}}{\Pr\nolimits_{g \sim \mathcal{G}}{\left[ \exists u \in S, u \in {RR}_g \left(v\right) \right] \cdot \frac{1}{d_{S,v}+1}}}\\
+            & = n \Pr\nolimits_{v,g \sim \mathcal{G}}{\left[ \exists u \in S, u \in {RR}_g \left(v\right) \right] \cdot \frac{1}{d_{S,v}+1}}\\
+            & = n \Pr\nolimits_{v,g \sim \mathcal{G}}{\left[ S \cap {RR}_g \left(v\right) \neq \emptyset \right] \cdot \frac{1}{d_{S,v}+1}}
+        \end{split}
+    \end{equation*}
+\end{proof}
+
+定理\ref{theo:observe}表示我们可以通过观察事件$S\cap {RR}_g\left(v\right)\neq\emptyset$的概率来计算$\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]$。超图$\mathcal{H}$中节点$u \in \mathcal{V}$的度即为信息传播模拟过程中成功激活的节点次数。因此，由定理\ref{theo:observe}可知，我们能够基于超图$\mathcal{H}$来计算传播效率期望值。给定种子节点集合$S$与超图$\mathcal{H}$下的传播效率函数如下所示，
+\begin{equation}\label{eq:infEffHyper}
+    T'\left(S\right)=\sum\limits_{z_i\in\mathcal{Z}}{\frac{1}{t_{S,v_i}+1}}
+\end{equation}
+其中$S$为种子节点集合，$z_i$为随机等概率选取的节点$v_i$对应的超边。下一步，我们分析在超图$\mathcal{H}$中的传播效率函数期望值$\mathbb{E}_\mathcal{H}\left[T'\left(\cdot\right)\right]$。我们给出定理如下，
+\begin{mytheo}\label{theo:hyperSubmodular}
+对于在独立级联模型下的一个网络$\mathcal{G}$的任意一个实例，对应生成的超图$\mathcal{H}$中传播效率函数的期望$\mathbb{E}_\mathcal{H}\left[T'\left(\cdot\right)\right]$是具有子模性的。
+\end{mytheo}
+\begin{proof}
+易证$\mathbb{E}_\mathcal{H}\left[T'\left(\cdot\right)\right]$是单调性的，因为将任意节点$u$加入到任意种子节点集合$S$中都不会减少传播效率期望值。为了证明子模性，我们可以先证明$T'\left(\cdot\right)$的子模性。假设种子节点集合$S$与$W$满足$S \subseteq W \subseteq \mathcal{V}$，节点$u \in \mathcal{V}$是超图$\mathcal{H}$中的节点。如果集合$S \cap z \neq \emptyset$，则我们称集合$S$覆盖超边$z$。与定理\ref{theo:submodular}相同，当将节点$u$加入集合$S$与$W$时，将有三种情况。第一种情况是集合$S$与$W$都不覆盖超边$z$，则$T'\left(S \cup u\right) - T'\left(S\right) = T'\left(W \cup u\right) - T'\left(W\right)$，即二者的边际效益相等。第二种情况是集合$S$不覆盖超边$z$，集合$W$覆盖超边$z$。此种情况下$e_{S,v} = 0$，而$e_{W,v} > 0$，故$T'\left(S \cup u\right) - T'\left(S\right) \geq T'\left(W \cup u\right) - T'\left(W\right)$。第三种情况是集合$S$与$W$都覆盖超边$z$。此种情况下由于$S \subseteq W$，所以$e_{S,v} \leq e_{W,v}$，故$T'\left(S \cup u\right) - T'\left(S\right) \geq T'\left(W \cup u\right) - T'\left(W\right)$。所以对于所有情况，我们都能得出结论$T'\left(S \cup u\right) - T'\left(S\right) \geq T'\left(W \cup u\right) - T'\left(W\right)$在独立级联模型下，$S \subseteq W$的情况下是成立的，因此$T'\left(\cdot\right)$是子模性的。而期望是对$T'\left(\cdot\right)$的加权线性求和，故$\mathbb{E}_\mathcal{H}\left[T'\left(\cdot\right)\right]$也是子模性的。
+\end{proof}
+
+由于传播效率函数期望值$\mathbb{E}_\mathcal{H}\left[T'\left(\cdot\right)\right]$是单调且子模的，则算法\ref{alg:res}中的反向效率采样算法能够得到一个$\left(1-1/\mathsf{e}-\varepsilon\right)$的近似最优解来解决独立级联模型下的传播效率最大化问题。其中$\varepsilon$与采样的次数$r$以及图$\mathcal{G}$的结构有关。如何计算$\varepsilon$与$r$以及$\mathcal{G}$的关系仍然是一个开放性的问题。
+
 \section{实验分析}
 \label{3sec:experiment}
 
