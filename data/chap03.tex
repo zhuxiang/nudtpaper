@@ -417,11 +417,11 @@ $\mathbb{E}_{g\sim\mathcal{G}}\left[T_g\left(S\right)\right]=n\Pr\nolimits_{v,g\
 易证$\mathbb{E}_\mathcal{H}\left[T'\left(\cdot\right)\right]$是单调性的，因为将任意节点$u$加入到任意种子节点集合$S$中都不会减少传播效率期望值。为了证明子模性，我们可以先证明$T'\left(\cdot\right)$的子模性。假设种子节点集合$S$与$W$满足$S \subseteq W \subseteq \mathcal{V}$，节点$u \in \mathcal{V}$是超图$\mathcal{H}$中的节点。如果集合$S \cap z \neq \emptyset$，则我们称集合$S$覆盖超边$z$。与定理\ref{theo:submodular}相同，当将节点$u$加入集合$S$与$W$时，将有三种情况。第一种情况是集合$S$与$W$都不覆盖超边$z$，则$T'\left(S \cup u\right) - T'\left(S\right) = T'\left(W \cup u\right) - T'\left(W\right)$，即二者的边际效益相等。第二种情况是集合$S$不覆盖超边$z$，集合$W$覆盖超边$z$。此种情况下$e_{S,v} = 0$，而$e_{W,v} > 0$，故$T'\left(S \cup u\right) - T'\left(S\right) \geq T'\left(W \cup u\right) - T'\left(W\right)$。第三种情况是集合$S$与$W$都覆盖超边$z$。此种情况下由于$S \subseteq W$，所以$e_{S,v} \leq e_{W,v}$，故$T'\left(S \cup u\right) - T'\left(S\right) \geq T'\left(W \cup u\right) - T'\left(W\right)$。所以对于所有情况，我们都能得出结论$T'\left(S \cup u\right) - T'\left(S\right) \geq T'\left(W \cup u\right) - T'\left(W\right)$在独立级联模型下，$S \subseteq W$的情况下是成立的，因此$T'\left(\cdot\right)$是子模性的。而期望是对$T'\left(\cdot\right)$的加权线性求和，故$\mathbb{E}_\mathcal{H}\left[T'\left(\cdot\right)\right]$也是子模性的。
 \end{proof}
 
-由于传播效率函数期望值$\mathbb{E}_\mathcal{H}\left[T'\left(\cdot\right)\right]$是单调且子模的，则算法\ref{alg:res}中的反向效率采样算法能够得到一个$\left(1-1/\mathsf{e}-\varepsilon\right)$的近似最优解来解决独立级联模型下的传播效率最大化问题。其中$\varepsilon$与采样的次数$r$以及图$\mathcal{G}$的结构有关。如何计算$\varepsilon$与$r$以及$\mathcal{G}$的关系仍然是一个开放性的问题。
+由于传播效率函数期望值$\mathbb{E}_\mathcal{H}\left[T'\left(\cdot\right)\right]$是单调且子模的，则算法\ref{alg:res}中的反向效率采样算法能够得到一个$\left(1-1/\mathsf{e}-\varepsilon\right)$的近似最优解来解决独立级联模型下的传播效率最大化问题。其中$\varepsilon$与采样的次数$r$以及图$\mathcal{G}$的结构有关。如何计算$\varepsilon$与$r$以及$\mathcal{G}$的关系仍然是一个开放性的问题。下面本节对上述提及的算法的时间复杂度进行分析。其中朴素贪心算法和惰性贪心算法都是基于贪心算法框架下实现的。这一类算法进行$k$轮迭代来选择种子节点集合$S$，每一轮迭代需要对$O\left(n\right)$个节点进行传播效率期望值的估计。而每一次传播效率期望值的估计需要在$r$个生成的实例图$g$上进行$O\left(m\right)$次计算。因此，朴素贪心算法和惰性贪心算法的时间复杂度都是$O\left(knmr\right)$的。但是由于惰性贪心算法基于惰性计算避免了一些不必要的模拟评估，惰性贪心算法在实际运行中比朴素贪心算法的效率要高。相比之下，反向效率采样算法是在另一个框架下设计的。首先，反向传播采样算法生成了$r$条超边，构造了超图$\mathcal{H}$，每生成一条超边需要消耗$O\left(m\right)$的时间，因此生成整个超图$\mathcal{H}$需要消耗$O\left(rm\right)$的时间。然后，算法迭代$k$轮来生成种子节点集合$S$，每一轮迭代需要对$O\left(n\right)$个节点进行模拟估计，每一次模拟估计需要对$r$条超边进行运算，因此计算种子节点集合$S$的时间复杂度为$O\left(knr\right)$。有上述分析可知，反向效率采样的时间复杂度相比于朴素贪心算法和惰性贪心算法要低。
 
 \section{实验分析}
 \label{3sec:experiment}
-
+本节设计了若干组实验来验证上述提出的算法。首先，我们介绍实验的设置。其次，我们详细地展示了实验结果，并对其进行分析。本节中的实验基于八核（Intel Xeon 1.80GHz CPU）、64GB内存的机器运行，操作系统为64位 CentOS release 6.7。以上所有算法都是基于Java实现，在JDK 1.8.0\_40环境下编译。
 \section{本章小结}
 \label{3sec:conclusion}
 
