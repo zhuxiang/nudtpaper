@@ -453,7 +453,7 @@ $\mathbb{E}_{g\sim\mathcal{G}}\left[T_g\left(S\right)\right]=n\Pr\nolimits_{v,g\
 \textbf{参数设置}，在比较传播效率以及运行时间时，种子节点集合$S$的大小$k$设置为1, 5, 10,
 $\cdots$，直到50。对于惰性贪心算法，我们根据之前相关的工作，经验性地设置蒙特卡罗方法的重复模拟次数$r=10,000$。对于反向效率采样算法，我们设置$r=n\log{n}$来得到一个$(1-1/\mathsf{e}-\varepsilon)$的近似最优解，其中$\varepsilon$与$r$以及网络相关。在所有实验中，我们都重复算法5次，记录其平均值作为实验结果。
 
-\subsection{反向传播采样算法对比}
+\subsection{相似度对比}
 \label{subsec:compare}
 \begin{figure}[ht]
    \begin{minipage}{0.48\textwidth}
@@ -490,6 +490,87 @@ $\cdots$，直到50。对于惰性贪心算法，我们根据之前相关的工�
     J(S,S') = \frac{\vert S \cap S' \vert}{\vert S \cup S' \vert}
 \end{equation}
 其中$\vert S \cap S' \vert$表示集合$S$与集合$S'$的交集大小，$\vert S \cup S' \vert$表示集合$S$与集合$S'$的并集大小。实验结果如图\ref{fig:facebookJaccard}至图\ref{fig:dblpJaccard}所示。从实验结果可知，在$k$较小的时候，例如$k=1$时，Jaccard相似度相似度是不稳定的。在$k=1$的情况下，\textit{Facebook}, \textit{HepPh} and \textit{DBLP}网络中的$S=S'$，而\textit{Twitter}网络中的$S \neq S'$。由此可知，当$k$比较小的时候，使得网络有最大影响力期望值的节点也可能是使得网络有最大传播效率期望值的节点。当$k$比较小的时候，大部分节点处于未激活状态，能够激活尽可能多的节点也许就能获得更大的传播效率。随着$k$的增加，例如超过10以后，在均匀独立级联模型和加权独立级联模型下的$J(S,S')$值变得相对稳定。在均匀独立级联模型中$J(S,S')$约等于0.2，在加权独立级联模型中$J(S,S')$约等于0.5。因此，我们可知传播效率最大化问题的种子节点集合与影响力最大化问题的种子节点集合并不是相同的，即传播效率最大化问题与影响力最大化问题是两个不同的问题。
+
+\subsection{算法精确度对比}
+\label{subsec:accuracy}
+\begin{figure}[!ht]
+   \begin{minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{figures/facebookEff.eps}
+     \caption{在\textit{Facebook}数据集上不同$k$下的传播效率对比}
+     \label{fig:facebookEff}
+   \end{minipage}
+   \hfill
+   \begin {minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{figures/hepPhEff.eps}
+     \caption{在\textit{HepPh}数据集上不同$k$下的传播效率对比}
+     \label{fig:hepPhEff}
+   \end{minipage}
+   \\
+   \begin{minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{figures/twitterEff.eps}
+     \caption{在\textit{Twitter}数据集上不同$k$下的传播效率对比}
+     \label{fig:twitterEff}
+   \end{minipage}
+   \hfill
+   \begin {minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{figures/dblpEff.eps}
+     \caption{在\textit{DBLP}数据集上不同$k$下的传播效率对比}
+     \label{fig:dblpEff}
+   \end{minipage}
+\end{figure}
+
+在本小节中，我们计算各种算法得出种子节点集合的传播效率，对比各种算法的精确度。对于结果种子节点集合，我们运行10,000次蒙特卡罗模拟来估计信息传播过程中的传播效率。此外，对于每一个数据集，我们调整种子节点集合大小$k$从1到50来观察不同大小种子节点集合的传播效率。我们在均匀独立级联模型以及加权独立级联模型下进行实验，实验结果如图\ref{fig:facebookEff}至图\ref{fig:dblpEff}所示。如图所示，反向效率采样算法与惰性贪心算法、最大度算法在均匀独立级联模型下各数据集中的传播效率性能相似。这是由于在均匀独立级联模型下不能保证$\sum_{u \in \mathcal{V}}{p_{u,v}} = 1$的成立，且反向效率采样算法得到的近似最优解的近似率不高，所以在某些网络中（例如图\ref{fig:facebookEff}），反向效率采样算法的性能要稍差一些。但是我们可以得知，反向效率采样算法的精确度在最差的情况下（\textit{Facebook}网络）与最好结果相差少于17\%，不会相差一个数量级。在加权独立级联模型下，反向效率采样算法在各数据集中的精确度都是最高的，并且与惰性贪心算法的精确度相似，而最大度算法的精确度相比较低。例如在图\ref{fig:twitterEff}中$k=50$的情况下，最大度算法与反向效率采样算法的精确度相差56.5\%，即最大度算法得出种子节点集合的传播效率只有反向效率采样算法的一半左右。
+
+由上述在均匀独立级联模型以及加权独立级联模型下各数据集上的实验结果可知，反向效率采样算法和惰性贪心算法都有理论上的精确度保证，性能优于启发式算法，例如最大度算法。
+
+\subsection{运行时间对比}
+\label{subsec:runningTime}
+\begin{figure}[!ht]
+   \begin{minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{figures/facebookTime.eps}
+     \caption{在\textit{Facebook}数据集上不同$k$下的运行时间对比}
+     \label{fig:facebookTime}
+   \end{minipage}
+   \hfill
+   \begin {minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{figures/hepPhTime.eps}
+     \caption{在\textit{HepPh}数据集上不同$k$下的运行时间对比}
+     \label{fig:hepPhTime}
+   \end{minipage}
+   \\
+   \begin{minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{figures/twitterTime.eps}
+     \caption{在\textit{Twitter}数据集上不同$k$下的运行时间对比}
+     \label{fig:twitterTime}
+   \end{minipage}
+   \hfill
+   \begin {minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{figures/dblpTime.eps}
+     \caption{在\textit{DBLP}数据集上不同$k$下的运行时间对比}
+     \label{fig:dblpTime}
+   \end{minipage}
+\end{figure}
+
+本小节我们对各算法的运行时间进行对比实验。为了验证反向效率采样算法的效率，我们在均匀独立级联模型以及加权独立级联模型下各数据集上不同$k$的情况下，与惰性贪心算法以及最大度算法进行实验对比，结果如图\ref{fig:facebookTime}至图\ref{fig:dblpTime}。如图所示，在均匀独立级联模型以及加权独立级联模型下，反向效率采样算法相比惰性贪心算法都能提高一个数量级的效率。而最大度算法是一种启发式的算法，因此运行时间最少，且不随$k$的变化而变化，但是如第\ref{subsec:accuracy}小节所示，该算法不能提供性能的保证。因为最大度算法算法简单，本小节利用该算法来作运行时间的一个下限基准。从图中我们可以得出，反向效率采样算法和惰性贪心算法的运行时间都随着$k$的增加而增加，其中惰性贪心算法运行时间的增长速率高于反向效率采样算法。例如，在图\ref{fig:twitterTime}中在$k=1$时，惰性贪心算法的运行时间约为反向效率采样的10倍，在$k=50$时，增长为约20倍。因此，反向效率采样算法的效率优于其他的算法。
+
+\subsection{可扩展性}
+\label{subsec:scalability}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/resScalability.eps}
+    \caption{反向效率采样算法的可扩展性}
+    \label{fig:scalability}
+\end{figure}
+
+本小节进行了反向效率采样算法的可扩展性实验。实验使用\textit{DBLP}网络来生成各种大小的子图。生成过程如下所示。首先，我们随机地选取图中的一个节点，然后做宽度优先搜索来添加边到子图中，该过程直到子图的大小满足要求时停止。如果宽度优先搜索过程在子图大小没有满足前就停止了，那么在重新随机地选择一个不在目前子图中的节点，继续进行宽度优先搜索，重复上述过程直到满足要求。利用该方法，我们可以得到各种大小的子图。本小节的实验中，我们令子图的边的大小从$m=1,000$到$m=1,000,000$变化，然后运行反向效率采样算法，记录运行的时间。在均匀独立级联模型以及加权独立级联模型下的实验结果如图\ref{fig:scalability}所示。由图可知，随着图大小的增长，运行时间的增长是线性的。因此，反向效率采样算法是可扩展的。
 \section{本章小结}
 \label{3sec:conclusion}
 
