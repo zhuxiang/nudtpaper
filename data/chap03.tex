@@ -225,7 +225,20 @@ Nemhauser等人证明了朴素的贪心算法得出解以$1-1/\mathsf{e}$的因�
 根据上述过程，可令$A$表示方程组（\ref{eq:sharpHard}）中的矩阵，$\mathbf{x} = \left(p^\mathcal{G}_{s,t,d=1},p^\mathcal{G}_{s,t,d=2},\cdots,p^\mathcal{G}_{s,t,d=n}\right)^T$，$\mathbf{b}=\left(\mathbb{E}_\mathcal{G} \left[T_1\left(S\right)\right] - \mathbb{E}_\mathcal{G}\left[T_0\left(S\right)\right],\cdots,\mathbb{E}_\mathcal{G}\left[T_n\left(S\right)\right] - \mathbb{E}_\mathcal{G}\left[T_{n-1}\left(S\right)\right]\right)^T$。方程组（\ref{eq:sharpHard}）可表示为$A\mathbf{x}=\mathbf{b}$。根据引理\ref{lem:nonsingular}可知矩阵$A$是一个非奇异的矩阵，因此线性方程组（\ref{eq:sharpHard}）可以通过高斯-赛德尔方法在多项式时间内解决，而且构造这一个线性方程组是在线性时间内可完成的。我们可以直观地计算出图$\mathcal{G}$中节点$s$到$t$的连通概率$p^\mathcal{G}_{s,t}=\sum_{i=1}^n{p^\mathcal{G}_{s,t,d=i}}$，这也就是说节点$s$到节点$t$的概率在线性时间内可以计算。因此，$s$-$t$连通性问题是可解决的。而我们已知$s$-$t$连通性问题是一个\#P-complete的问题。因此，计算传播效率期望值是一个\#P-hard的问题。
 \end{proof}
 
-下面我们证明上述的矩阵$A$是非奇异的。引理以及其证明如下。
+定理\ref{theo:sharpHard}证明中的矩阵$A$如公式（\ref{eq:matrixA}）所示，
+\begin{equation}
+\label{eq:matrixA}
+	A = 
+    \begin{bmatrix}
+    \frac{1}{1+1} & \frac{1}{1+2} & \cdots & \frac{1}{1+n} \\
+    \vdots & \vdots & \cdots & \vdots \\
+    \frac{1}{i+1} & \frac{1}{i+2} & \cdots & \frac{1}{i+n} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    \frac{1}{n+1} & \frac{1}{n+2} & \cdots & \frac{1}{n+n}
+    \end{bmatrix}
+\end{equation}
+
+上述过程将计算传播效率期望值$\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]$的问题规约到了$s$-$t$连通性问题，证明了计算传播效率期望值$\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]$的问题是一个\#P-hard的问题。其中引用了矩阵$A$为非奇异矩阵的事实，下面我们证明上述的矩阵$A$是非奇异的。首先，我们可以观察到矩阵$A$是一个对称矩阵，其次我们可以得到矩阵中通项$a_{ij}$。因此，我们考虑使用行列变换对矩阵$A$的行列式进行降维，发现行列式的递推公式，计算行列式的值。如果行列式不为零，则可证明矩阵$A$是非奇异的。引理以及其详细证明过程如下。
 
 \begin{lemma}\label{lem:nonsingular}
 矩阵$A \in \mathbb{R}^{n \times n}$且$a_{ij} = \frac{1}{i+j}$，则矩阵$A$是非奇异的。
