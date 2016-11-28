@@ -228,6 +228,70 @@ $narr$ & 用户查询的详情\\
   其中$D$表示一个文档，即一条推文信息，$Q$表示用户查询。函数$f\left(q_i,D\right)$表示查询词$q_i$在文档$D$中的词频，$|D|$表示文档$D$的长度，$avgdl$表示文档集中文档的平均长度，$k_1$以及$b$为调整参数。系统一般经验性的设置$k_1=2$，$b=0.75$。
 \end{itemize}
 
+以上是系统对推文信息和用户查询之间相关性的处理，下面介绍系统对于推文的质量的评估。在特征提取模块中抽取的社交属性可被用来训练推文的\textbf{质量模型}（\textit{Quality Model}）。我们首先人工地标注推文的质量得分，标注不依据推文的类别，单纯考虑推文是否能够带来信息量。质量高的推文标注1，质量低的推文标注0。如果推文能提供更多的信息，并且撰写得更完整，则推文会获得高的得分。我们使用\textbf{逻辑回归模型}（\textit{Logistic Regression Model}）来对文本的质量模型进行建模，模型如下所示，
+\begin{equation}
+\label{eq:lr}
+  h_ {\bm{\theta}} \left(\mathbf{x}\right) = \frac{1}{1 + e^{-{{\bm{\theta}}^T}\mathbf{x}}}
+\end{equation}
+其中$\mathbf{x}=\left({x_1},{x_2},\cdot,{x_n}\right)$是抽取的社交属性，$\bm{\theta}=\left({\theta _1},{\theta _2},\cdot,{\theta _n}\right)$为待训练的参数。实现一般来说，用户更倾向于接受文本质量高的、由权威发布的信息，基于以上假设，我们选取如下的社交属性作为特征。
+\begin{itemize}
+  \item \textbf{用户粉丝数}（\textit{FollowerCnt}），表示发布推文信息的用户的粉丝数。粉丝数高的用户表示该用户在社交网络中是受欢迎的，因此该用户发布的推文信息很大概率上是高质量的信息。
+  \item \textbf{用户推文数}（\textit{StatusCnt}），表示发布推文信息的用户历史上发布的推文数。用户发布推文的数目预示着用户的活跃度，而一个活跃的用户更可能发布高质量的信息。
+  \item \textbf{推文转发数}（\textit{RetweetCnt}），表示推文的转发数。一条推文的转发数越大说明这一条推文越受人欢迎，质量越高。
+  \item \textbf{推文转发等级}（\textit{RetweetLvl}），表示对转发数使用对数函数后的转发等级。
+  \item \textbf{推文点赞数}（\textit{CollectCnt}），表示推文的点赞数。用户如果认为一条推文是吸引人的，信息丰富的，则可以点赞或者收藏。
+  \item \textbf{推文词语数}（\textit{WordCnt}），表示推文中除去停用词的文本长度，即词语数。一般来说，长的文本相对于短的文本的信息量会大一些。
+  \item \textbf{推文字符数}（\textit{CharCnt}），表示推文中除去停用词的文本的字符数。
+  \item \textbf{短链接数}（\textit{UrlCnt}），表示推文中短链接的数目。信息量丰富的文本往往会在推文末尾给出一个短链接。
+\end{itemize}
+
+\begin{figure}[!htbp]
+   \begin{minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{wordCntCDF}
+     \caption{\textit{WordCnt}的累积分布函数}
+     \label{fig:wordCntCDF}
+   \end{minipage}
+   \hfill
+   \begin {minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{charCntCDF}
+     \caption{\textit{CharCnt}的累积分布函数}
+     \label{fig:charCntCDF}
+   \end{minipage}
+   \\
+   \begin{minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{followerCntCDF}
+     \caption{\textit{FollowerCnt}的累积分布函数}
+     \label{fig:followerCntCDF}
+   \end{minipage}
+   \hfill
+   \begin {minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{followeeCntCDF}
+     \caption{\textit{FolloweeCnt}的累积分布函数}
+     \label{fig:followeeCntCDF}
+   \end{minipage}
+   \\
+   \begin{minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{FFRCDF}
+     \caption{\textit{FFR}的累积分布函数}
+     \label{fig:FFRCDF}
+   \end{minipage}
+   \hfill
+   \begin {minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{statusCntCDF}
+     \caption{\textit{StatusCnt}的累积分布函数}
+     \label{fig:StatusCnt}
+   \end{minipage}
+\end{figure}
+
+为了检验抽取出来的社交属性的有效性，我们计算了人工标注数据集中的各个社交属性中的\textbf{累计分布函数}（\textit{cumulative distribution function}）来进行观察。推文根据其文本质量被标记成1或者0，其中1表示这是一条质量高的推文，反之则表示这是一条质量不高的推文。社交属性的累计分布函数结果如图\ref{fig:wordCntCDF}至图\ref{fig:StatusCnt}所示，两个分类的累计分布函数曲线显示了特征的区分能力。从结果图可知，\textit{CharCnt}、textit{FolloweeCnt}、\textit{FFR}以及\textit{StatusCnt}是区分推文是否高质量的有效的特征。由图\ref{fig:charCntCDF}可知，超过95\%的低质量的推文的字符数都小于100，而超过50\%的高质量的推文的字符数都大于100。由图\ref{fig:followerCntCDF}和图\ref{fig:FFRCDF}可知，拥有高粉丝数和高粉丝-好友比的用户更可能发布高质量的推文。由图\ref{fig:StatusCnt}可知，活跃用户更有可能发布高质量的推文。因此，抽取的社交属性能够被用于训练评估推文质量的分类器。
+
+在计算得到推文信息和用户查询之间的语意相似度和推文的质量得分后，二者被综合起来用来评估推文的最终得分。
 \section{实验分析}
 \label{2sec:experiment}
 
