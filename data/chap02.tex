@@ -201,7 +201,32 @@ $narr$ & 用户查询的详情\\
 \label{2subsec:featureRep}
 已有的工作对语义特征的表示模型有着很多的研究，例如\textbf{词袋模型}（\textit{Bag of Words Model}）等。词袋模型忽略了文本的语法和词序，仅仅将文本当作词语的聚集。该模型假设每一个词是独立的，即文本中词的概率与上下文是无关的，它简化了表示方法，但是忽略了语法和词序，在某些情况下带来了一些缺陷。基于此的一些改进算法，例如二元词袋模型、三元词袋模型等在一定程度上解决了这些缺陷。然而，词语失配问题仍然是词袋模型无法解决的问题。
 
-为了解决词语失配问题，\textbf{词向量模型}（Word Vector Model）被提出来表示语义特征。使用\textit{word2vec}技术来对词语进行向量化，\textit{gensim}\footnote{\url{http://radimrehurek.com/gensim/index.html}}是一个比较方便的工具来处理该问题。为了训练词向量模型，维基百科的英文预料库被用于训练\footnote{\url{https://dumps.wikimedia.org/enwiki/20160113/}}。图\ref{fig:real-timeSearch}中的知识库基于维基百科英文语料库使用\textit{gensim}工具训练得到。推文$\mathbf{ts}$中的每一个词语$\mathbf{t}_i$，可被表示成一个向量$\mathbf{t}_i=\left(\alpha_1,\alpha_2,\cdots,\alpha_m\right)$，其中$m$为词向量模型设置的维度（例如200、400等），参数$\alpha_i$表示词向量第$i$维的值。因此，一条推文$\mathbf{ts}$可向量化为$\mathbf{ts}= \sum w_i \mathbf{t}_i$，其中$w_i$为词语$\mathbf{t}_i$的权重。与处理推文的方式相似，语义增强后的用户查询$q$中的每一个关键词$\mathbf{k}_i$可以表示成$\mathbf{k}_i = \left(\beta_1,\beta_2,\cdots,\beta_m\right)$，其中参数$\beta_i$为关键词$\mathbf{k}_i$第$i$维的值。而且语义增强后的用户查询$\mathbf{q} = \sum v_i \mathbf{k}_i$，$v_i$为词语$\mathbf{k}_i$的权重。按照上述流程，推文信息以及用户查询通过词向量模型转化成了向量形式。
+为了解决词语失配问题，\textbf{词向量模型}（Word Vector Model）被提出来表示语义特征。使用\textit{word2vec}技术来对词语进行向量化，\textit{gensim}\footnote{\url{http://radimrehurek.com/gensim/index.html}}是一个比较方便的工具来处理该问题。为了训练词向量模型，维基百科的英文预料库被用于训练\footnote{\url{https://dumps.wikimedia.org/enwiki/20160113/}}。图\ref{fig:real-timeSearch}中的知识库基于维基百科英文语料库使用\textit{gensim}工具训练得到。推文$\mathbf{ts}$中的每一个词语$\mathbf{t}_i$，可被表示成一个向量$\mathbf{t}_i=\left(\alpha_1,\alpha_2,\cdots,\alpha_m\right)$，其中$m$为词向量模型设置的维度（例如200、400等），参数$\alpha_j$表示词向量第$j$维的值。因此，一条推文$\mathbf{ts}$可向量化为$\mathbf{ts}= \sum w_i \mathbf{t}_i$，其中$w_i$为词语$\mathbf{t}_i$的权重。与处理推文的方式相似，语义增强后的用户查询$q$中的每一个关键词$\mathbf{k}_i$可以表示成$\mathbf{k}_i = \left(\beta_1,\beta_2,\cdots,\beta_m\right)$，其中参数$\beta_j$为关键词$\mathbf{k}_i$第$j$维的值。而且语义增强后的用户查询$\mathbf{q} = \sum v_i \mathbf{k}_i$，$v_i$为词语$\mathbf{k}_i$的权重。按照上述流程，推文信息以及用户查询通过词向量模型转化成了向量形式。
+
+\subsection{候选生成模块}
+\label{2subsec:candidate}
+依靠词向量模型，词语的失配问题得到了比较好的解决。但是该方法也是一把双刃剑，词向量模型在获取更多相关的信息的时候也会带来许多低相关的信息给用户，即词向量模型在提高召回率的时候降低了准确率。为了解决该问题，系统使用了一个规则过滤器\textbf{布尔逻辑关键词模型}（\textit{Boolean Logic Keyword Model}）来提高准确率。布尔逻辑关键词模型将用户查询表示成如下形式，
+\begin{equation}
+\label{eq:blkm}
+  p = \{1:\left(\mathbf{t}_1 || \mathbf{t}_2\right) \& \& \left(\mathbf{t}_3 || \mathbf{t}_4\right),~~0:\mathbf{t}_5 || \mathbf{t}_6\}
+\end{equation}
+其中$p$代表一个用户查询，其中包含两个域1和0。值为1的域代表着该用户查询检索到的结果中必须出现的词，值为0的域代表着该用户查询检索到的结果中不一定须要出现的词，但是命中会增加推文信息和用户查询之间的相关性。符号$||$表示逻辑上的“或”关系，代表多个词出现某一个即可；符号$\&\&$表示逻辑上的“与”关系，代表多个词须要同时出现才满足。例如公式（\ref{eq:blkm}）表示能够通过过滤器的推文中必须包含词语$t_1$或者$t_2$，并且包含$t_3$或者$t_4$。如果推文中包含$t_5$或者$t_6$，则会增加推文信息与用户查询之间的相关性。系统根据语义扩展后的用户查询中的词语的tf-idf值来生成规则过滤器。我们为规则过滤器设置两个参数阈值$\eta$和$\gamma$（$\eta < \gamma$）。假设tf-idf$_{max}$表示一个用户查询$p$中的最大tf-idf值。则阈值$\gamma$设置为0.7$\cdot$tf-idf$_{max}$，阈值$\eta$设置为0.9$\cdot$tf-idf$_{max}$，这是一个经验性的参数设置。对于tf-idf值大于$\eta$的词语将被加入到$p$中域为1的列表中，对于tf-idf值大于$\gamma$又小于$\eta$的词语将被加入到$p$中域为0的列表中，对于tf-idf值小于$\gamma$的词语将不作处理。
+
+所有从推特信息流中监测到的推文首先都会经过根据布尔逻辑关键词模型生成的规则过滤器。如果推文不与任何规则过滤器匹配，则该条推文将被直接丢弃。如果推文通过了某个规则过滤器，则推文信息与该用户查询之间的语义得分讲根据它们之间的相似度计算得出。然后推文将根据公式（\ref{eq:blkm}）以及语义得分分类到某一个用户查询中。已有的研究主要有两类计算语义得分的方法来评估推文信息与用户查询之间的相关性。
+\begin{itemize}
+  \item \textbf{基于tf-idf的相似度}，根据推文信息和用户查询生成的向量以及tf-idf权重进行相似度计算，计算公式如下所示，
+  \begin{equation}
+  \label{eq:tf-idf}
+  sim = \frac{\mathbf{ts}^T \cdot \mathbf{q}}{\|\mathbf{ts}\| \cdot \|\mathbf{q}\|} = \frac{\left(\sum \limits_{i=1}^m {w_i \mathbf{t}_i}\right)^T \cdot \sum \limits_{j=1}^m {v_j \mathbf{k}_j}}{\sqrt{\left(\sum \limits_{i=1}^m {w_i \mathbf{t}_i}\right)^T \left(\sum \limits_{i=1}^m {w_i \mathbf{t}_i}\right)}\sqrt{\left(\sum \limits_{j=1}^m {v_j \mathbf{k}_j}\right)^T \left(\sum \limits_{j=1}^m {v_j \mathbf{k}_j}\right)}}
+  \end{equation}
+  其中$\mathbf{ts}$表示推文信息的向量，$\mathbf{q}$表示用户查询的向量。$w_i$为词向量$\mathbf{t}_i$的权重，$v_j$为词向量$\mathbf{k}_j$的权重。
+  \item \textbf{基于BM25的相似度}，利用算法Okapi BM25的权重函数来评估推文信息和用户查询之间的相似度。算法Okapi BM25是一个基于词袋模型的算法，根据文档中出现的查询词的频率进行权重计算。推文信息与用户查询之间的相似度计算如下，
+  \begin{equation}
+  \label{eq:bm25}
+  sim = \sum \limits_{q_i \in Q} {idf\left(q_i\right) \cdot \frac{ f\left(q_i,D\right) \cdot \left(k_1 + 1\right)}{f\left(q_i,D\right) + k_1 \cdot \left(1-b+b\cdot\frac{|D|}{avgdl}\right)}}
+  \end{equation}
+  其中$D$表示一个文档，即一条推文信息，$Q$表示用户查询。函数$f\left(q_i,D\right)$表示查询词$q_i$在文档$D$中的词频，$|D|$表示文档$D$的长度，$avgdl$表示文档集中文档的平均长度，$k_1$以及$b$为调整参数。系统一般经验性的设置$k_1=2$，$b=0.75$。
+\end{itemize}
 
 \section{实验分析}
 \label{2sec:experiment}
