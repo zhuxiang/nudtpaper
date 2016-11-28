@@ -53,9 +53,9 @@ $I\left(S\right)$ & 种子节点集合$S$的影响力 \\
 \hline
 $RR\left(v\right)$ & 节点$v$的反向可达集合 (参见定义\ref{def:rrSet}) \\
 \hline
-$e_{u,v}$ & 节点$u$到节点$v$的传播效率（参见方程（\ref{eq:efficiency}）） \\
+$e_{u,v}$ & 节点$u$到节点$v$的传播效率（参见公式（\ref{eq:efficiency}）） \\
 \hline
-$T\left(S\right)$ & 种子节点集合$S$在图$\mathcal{G}$中的传播效率（参见方程（\ref{eq:influenceEfficiency}））\\
+$T\left(S\right)$ & 种子节点集合$S$在图$\mathcal{G}$中的传播效率（参见公式（\ref{eq:influenceEfficiency}））\\
 \hline
 $T'\left(S\right)$ & 种子节点集合$S$在超图$\mathcal{H}$中的传播效率（参见算法\ref{alg:res}）\\
 \hline
@@ -331,7 +331,7 @@ Nemhauser等人证明了朴素的贪心算法得出解以$1-1/\mathsf{e}$的因�
 
 $\mathbb{E}_\mathcal{G}\left[T\left(\cdot\right)\right]$的单调性是显而易见的，因为向任意一个种子节点集合$S$中增加一个节点$u$不会使得传播效率减小。这也就是说，对于任意的种子节点集合$S$与节点$u \in \mathcal{V}$，$\mathbb{E}_\mathcal{G}\left[T\left( S \cup \left\{u\right\} \right)\right] \geq \mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]$始终是成立的。为了证明定理\ref{theo:submodular}的结论，我们需要计算$\mathbb{E}_\mathcal{G}\left[T\left( S \cup \left\{u\right\} \right)\right] - \mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]$的值，即我们需要计算将节点$u$加入到集合$S$中的边际收益。但是直接计算边际收益是十分困难的，因为整个信息传播过程是不确定的，节点被激活的顺序也是不确定的。为了解决这个难点，我们采用另一种等同的视角\upcite{kempe2003maximizing}来看待信息传播过程，它与节点激活的顺序无关。它提供了一种另外的途径来证明$\mathbb{E}_\mathcal{G}\left[T\left(\cdot\right)\right]$的子模性。考虑如下情景，在独立级联模型下的信息传播过程中，当节点$u$在上一时刻被激活，尝试依概率$p_{u,v}$去激活它的出度边指向的邻居节点$v$。我们可以对该过程用抛一枚偏置为$p_{u,v}$的硬币的结果来模拟，我们直观上地可以知道抛硬币实验在当节点$u$被激活后进行还是在信息传播过程的一开始就进行，然后在节点$u$被激活后再揭晓结果，这个对于模拟是不影响的。因此，我们能在信息传播过程一开始，就对于图$\mathcal{G}$中的每一条边$e=\left(u,v\right)$进行偏置为$p_{u,v}$的抛硬币实验，然后在节点$u$被激活而节点$v$没有激活的时刻揭晓结果。
 
-令所有的抛硬币的模拟在信息传播过程的一开始就完成，则信息传播过程可以看作如下的过程。每条边$e=\left(u,v\right)$的抛硬币模拟，代表着节点$u$到节点$v$的尝试激活。如果激活成功，则我们称$e$是一条连通边。此外，我们可以称从节点$u$到节点$v$的路径是一条通路，如果路径中的每一条边都是连通边。基于上述的定义，我们可以很清晰地计算出在所有的抛硬币模拟都已确定的情况下，独立级联模型下种子节点集合为$S$的传播效率。信息传播过程结束时，当且仅当存在一条从$S$到节点$v$的通路时，节点$v$是激活的。我们可以根据从$S$到$v$的最短的通路，计算得到节点$v$的传播效率$e_{S,v}$。考虑如下一个概率空间，空间中的每一个节点代表着图$\mathcal{G}$中所有边$e$对应的抛硬币模拟的结果。令$X$表示空间中的一个样本点，且定义$T_X\left(S\right)$为以$S$为种子节点集合，抛硬币模拟结果为$X$的传播效率，$T_X\left(S\right)$可根据方程（\ref{eq:influenceEfficiency}）计算得出。本节对定理\ref{theo:submodular}进行证明如下。
+令所有的抛硬币的模拟在信息传播过程的一开始就完成，则信息传播过程可以看作如下的过程。每条边$e=\left(u,v\right)$的抛硬币模拟，代表着节点$u$到节点$v$的尝试激活。如果激活成功，则我们称$e$是一条连通边。此外，我们可以称从节点$u$到节点$v$的路径是一条通路，如果路径中的每一条边都是连通边。基于上述的定义，我们可以很清晰地计算出在所有的抛硬币模拟都已确定的情况下，独立级联模型下种子节点集合为$S$的传播效率。信息传播过程结束时，当且仅当存在一条从$S$到节点$v$的通路时，节点$v$是激活的。我们可以根据从$S$到$v$的最短的通路，计算得到节点$v$的传播效率$e_{S,v}$。考虑如下一个概率空间，空间中的每一个节点代表着图$\mathcal{G}$中所有边$e$对应的抛硬币模拟的结果。令$X$表示空间中的一个样本点，且定义$T_X\left(S\right)$为以$S$为种子节点集合，抛硬币模拟结果为$X$的传播效率，$T_X\left(S\right)$可根据公式（\ref{eq:influenceEfficiency}）计算得出。本节对定理\ref{theo:submodular}进行证明如下。
 
 \begin{figure}[!ht]
     \centering
