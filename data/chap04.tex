@@ -1,15 +1,15 @@
 \chapter{社交网络中传播效率最大化}
-\label{3chap:main}
+\label{chap4:main}
 \textbf{影响力最大化}（\textit{Influence Maximization}）在许多的社交网络应用中扮演着举足轻重的角色，例如市场营销、商业活动以及竞选活动等等。研究信息传播模型以及机理的一个典型目的便是市场营销。在现实社会中，人或者事物都是通过某种关系来连接，形成了一个巨大的网络。因此，信息传播可以选择一小部分节点激活做为种子节点集合，然后通过信息的传递，在整个网络中产生一个大范围的影响。从技术方面来说，影响力最大化问题是在给定网络和传播模型的条件下，研究如何选择种子节点集合使得传播的影响范围最大化。影响力最大化问题由于其的问题真实、应用性广的特点，吸引了许许多多的研究，包括信息传播模型的研究和计算影响力最大化的方法。但是，仍然有着一些需求在实际应用中得不到满足。
 
 在信息传播过程中，一个被激活的节点将会尝试在下一个时刻激活它的邻居节点。所以，除去种子节点外，每一个被激活的节点在被激活之前都会有一个时间延迟，我们称之为\textbf{传播时延}（\textit{propagation time delay}）。如果一个节点在信息传播结束时，仍然未被激活，则该节点的传播时延可以看作无穷大。在传统的影响力最大化问题中，传播时延没有被考虑在内，而研究整个网络的传播时延是非常有意义的，它可以度量选择的种子节点集合的传播效率。出于这种需求，本章提出了一个新的问题，传播效率最大化问题。该问题将传播时延考虑在内，在给定网络和传播模型的条件下，研究如何选择种子节点集合使得传播效率最大化。传播效率最大化问题与影响力最大化问题虽然相似，但是两个问题的侧重点不尽相同。传统的影响力最大化问题研究的是如何使得传播的范围最广，不考虑节点的传播时延。而本章提出的传播效率最大化问题将传播时延考虑在内，研究如何使得传播效率最大化。
 
 本章主要的工作可以总结如下。首先，基于传统的影响力最大化问题，我们将传播时延考虑在内了来探究传播效率，提出了传播效率最大化问题，研究给定网络和传播模型的条件下，研究如何选择种子节点集合使得传播效率最大化。其次，本章证明了传播效率最大化问题是一个NP-hard问题，而且在独立级联模型下计算传播效率的过程是一个\#P-hard的问题。然后，我们证明了传播效率函数在独立级联模型下是\textbf{子模}（\textit{submodular}）的。最后本章设计了三个算法来解决提出的传播效率最大化问题，并且在真实数据集上验证了这些算法。实验结果展示了所提出的算法的性能。
 
-本章的内容组织如下：第\ref{3sec:motivation}节介绍了研究动机，讨论了传统的影响力最大化问题的不足和考虑了传播时延的传播效率最大化问题的意义。第\ref{3sec:definition}节介绍了相关定义，对本章中相关概念和所提出的问题进行了符号化的定义。第\ref{3sec:method}介绍了方法描述，详细地阐述了本章解决问题的方法以及相关证明过程。第\ref{3sec:experiment}节进行了实验分析，设计了一系列的实验，验证了本章所提出的方法，并对实验结果进行了分析。最后，第\ref{3sec:conclusion}对本章的内容进行了总结。
+本章的内容组织如下：第\ref{sec4:motivation}节介绍了研究动机，讨论了传统的影响力最大化问题的不足和考虑了传播时延的传播效率最大化问题的意义。第\ref{sec4:definition}节介绍了相关定义，对本章中相关概念和所提出的问题进行了符号化的定义。第\ref{sec4:method}介绍了方法描述，详细地阐述了本章解决问题的方法以及相关证明过程。第\ref{sec4:experiment}节进行了实验分析，设计了一系列的实验，验证了本章所提出的方法，并对实验结果进行了分析。最后，第\ref{sec4:conclusion}对本章的内容进行了总结。
 
 \section{研究动机}
-\label{3sec:motivation}
+\label{sec4:motivation}
 随着社交网络的兴盛发展，信息传播的速率变得越来越快。在传统的媒体环境下，一条消息需要通过较长时间才能传播到一定的范围。在社交网络中，个人通过关系（例如关注、好友等）连接形成网络，信息在网络中通过转发、复制等行为进行传播，信息传播的速率极大的加快了。在传统的媒体环境下，个人都是通过单一信息源（例如新闻、论坛等）来接收信息，接收信息的渠道受限，信息在个体之间难以形成传播扩散。而在社交网络环境下，个人既可以是信息的接收者也可以是信息的发布者，个人可以接收到在网络中与之相连的个人推送的信息。与此同时，信息通过个人构成的网络进行传播。影响力最大化问题是信息传播中的一个典型问题，是在给定网络和传播模型的条件下，研究如何选择种子节点集合使得传播的影响范围最大化。
 \begin{figure}[!ht]
     \centering
@@ -25,10 +25,10 @@
 影响力最大化问题作为市场营销的一种算法技术首先被Domingos和Richardson\upcite{domingos2001mining}所提出，该问题基于马尔科夫随机场的概率框架。而后，Kempe等人\upcite{kempe2003maximizing}首次将影响力最大化问题形式化成为一个离散的随机优化问题。信息传播的过程可以简述如下，在一个给定的网络中，选择部分节点做为种子集合，这些种子节点将会按照一定的规则去激活它们的邻居节点。被激活的节点在下一时刻将拥有能力去激活它们的邻居节点，这个过程将一直持续到没有新的节点可以被激活，整个信息传播的过程才会停止。影响力最大化问题是在给定网络和传播模型的条件下，研究如何选择种子节点集合使得传播的影响范围最大化，即激活的节点数目最大化。从上述信息传播过程的描述中，我们可以得知，一个被激活的节点会在被激活的下一时刻尝试激活它的邻居节点。因此，除去种子节点外，网络中的节点在被激活前都会有一个时间延迟，我们称之为传播时延。如果一个节点在信息传播结束时，仍然未被激活，则该节点的传播时延可以看作无穷大。而影响力最大化问题仅仅考虑了传播范围，忽略了节点的传播时延。在真实的场景中，例如市场营销、商业活动、竞选活动等，传播时延在信息传播中是一个非常重要的因素。为了让其他人接受自己的新产品或者新理念，人们总是希望能够尽快地将消息传播到群体中。我们以\textbf{传播效率}（\textit{influence efficiency}）来表示传播时延的倒数，传播时延小，则传播效率大。如果节点在信息传播结束时仍然未被激活，那么该节点的传播效率则为0。以上是针对单个节点的传播时延和传播效率的分析，下面我们对整个网络的传播时延和传播效率进行分析。在给定一个传播网络和初始的种子节点集合的情况下，如果整个网络中所有节点的传播效率高，这就意味着在信息传播过程中，网络中的节点将被迅速地激活。我们设想如下，针对传统的影响力最大化问题有两种选择种子节点集合的策略，它们有着相同的传播范围，即能够在信息传播过程结束时能够激活相同的节点数目。但是，这两种策略中，网络中的传播时延可能是不同的，即不同策略在同一网络中的传播效率是不同的，而这一问题在传统的影响力最大化问题中是没有讨论的。
 
 \section{相关定义}
-\label{3sec:definition}
-在本节中，第\ref{3subsec:model}节首先对\textbf{独立级联模型}（\textit{Independent Cascade Model}）以及在独立级联模型下的影响力最大化问题进行回顾，然后介绍了几种解决影响力最大化问题的方法，并且对这些算法进行分析，包括影响力函数期望的单调性和子模性等。其次，第\ref{3subsec:efficiency}节提出了\textbf{传播效率最大化}（\textit{Influence Efficiency Maximization}）问题，该问题是基于传统的影响力最大化问题，将传播时延考虑在内，研究如何使得整个网络的传播效率最大化。同时，第\ref{3subsec:efficiency}节对传播效率最大化问题进行了形式化的描述，分析了传播效率最大化和影响力最大化问题的区别。
+\label{sec4:definition}
+在本节中，第\ref{subsec4:model}节首先对\textbf{独立级联模型}（\textit{Independent Cascade Model}）以及在独立级联模型下的影响力最大化问题进行回顾，然后介绍了几种解决影响力最大化问题的方法，并且对这些算法进行分析，包括影响力函数期望的单调性和子模性等。其次，第\ref{subsec4:efficiency}节提出了\textbf{传播效率最大化}（\textit{Influence Efficiency Maximization}）问题，该问题是基于传统的影响力最大化问题，将传播时延考虑在内，研究如何使得整个网络的传播效率最大化。同时，第\ref{subsec4:efficiency}节对传播效率最大化问题进行了形式化的描述，分析了传播效率最大化和影响力最大化问题的区别。
 
-为了便于参照，表\ref{3tab:notation}中列出了频繁使用的符号。
+为了便于参照，表\ref{tab:notation}中列出了频繁使用的符号。
 
 \begin{table}[ht]
 \centering
@@ -60,11 +60,11 @@ $T\left(S\right)$ & 种子节点集合$S$在图$\mathcal{G}$中的传播效率�
 $T'\left(S\right)$ & 种子节点集合$S$在超图$\mathcal{H}$中的传播效率（参见算法\ref{alg:res}）\\
 \hline
 \end{tabular}
-\label{3tab:notation}
+\label{tab:notation}
 \end{table}
 
 \subsection{传播模型以及影响力最大化问题}
-\label{3subsec:model}
+\label{subsec4:model}
 本章采用一种广泛采用的信息传播模型，独立级联模型，进行传播影响的研究。在该模型下，一个社交网络可被建模表示为一个有向图$\mathcal{G}=\left(\mathcal{V},\mathcal{E}\right)$，其中$\mathcal{V}$代表网络中的个体，$\mathcal{E}$表示个体之间的社会关系。此外，图中的每一条边$\left(u, v\right) \in \mathcal{E}$上都关联着一个传播概率$p^\mathcal{G}_{u,v}$，表示着节点$u$到节点$v$的影响力度。如果传播概率$p^\mathcal{G}_{u,v}$越大，则节点$u$更加可能激活节点$v$。如果图$\mathcal{G}$与上下文无关，本章则用$p_{u,v}$来表示节点$u$到节点$v$的传播概率。
 
 独立级联模型描述了一个直观的信息传播过程，其过程如下。在独立级联模型下，网络中的个体会被其邻居所影响，这些影响之间是独立的。给定一个种子节点集合$S \subseteq \mathcal{V}$，信息传播在独立级联模型下是如下运作的。定义$S_t$为在$t \geq 0$的时刻激活的节点集合。显然，在$t=0$时刻时，满足$S_0=S$。在$t+1$时刻，每一个在$t$时刻被激活的节点$u \in S_t$会独立地去尝试激活它的出度边指向的未被激活的邻居节点$v \in \mathcal{V} \setminus \cup_{0 \leq i \leq t}S_i$，激活节点$v$的概率等于$p_{u,v}$。当节点$u$尝试了去激活所有它的出度边指向的节点后，它在信息传播的之后过程中将不再会有机会去激活。即在$t$时刻被激活的节点$u$只会在$t+1$时刻去尝试激活它的出度边指向的邻居节点。当$t$满足$S_t = \emptyset$时，整个信息传播过程停止。
@@ -88,7 +88,8 @@ $T'\left(S\right)$ & 种子节点集合$S$在超图$\mathcal{H}$中的传播效�
 以图\ref{fig:tinyGraph}中的社交网络$\mathcal{G}$为例，考虑种子节点集合$S=\left\{v_1\right\}$的信息传播过程。图\ref{fig:tinyGraph}中边上的数值代表着节点之间的传播概率$p^\mathcal{G}_{u,v}$。整个信息传播的过程可以描述如下。在$t=0$时刻，由于节点$v_1$是种子节点集合中唯一的节点，因此节点$v_1$被激活。在$t=1$时刻，因为节点$v_1$在$t=0$时刻被激活，而且图$\mathcal{G}$中存在一条从$v_1$到$v_2$概率为1的边，节点$v_1$将依概率1去激活节点$v_2$。因此，节点$v_2$将在$t=1$时刻被激活，$S_1=\left\{v_2\right\}$。此后，在$t=2$时刻，节点$v_2$将尝试去激活节点$v_3$、$v_4$、$v_5$以及$v_6$。假设这一次信息传播过程如图\ref{fig:tinyRandomGraph}所示，节点$v_3$和$v_5$被激活，则$S_2=\left\{v_3, v_5\right\}$。然后，在$t=3$时刻，由于被激活的节点没有后继节点可被激活，整个信息传播过程在此时刻停止。定义$I\left(S\right)$为在种子节点集合是$S$的条件下，整个信息传播过程中激活的节点数目，代表信息传播过程中的影响力。在上述的图$\mathcal{G}$的一次信息传播过程中，影响力$I\left(S\right)=4$。
 
 给定一个种子节点集合$S$，定义$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$表示种子节点集合在图$\mathcal{G}$中影响力的期望，它等于以种子节点集合为传播源，在图$\mathcal{G}$中信息传播结束时激活节点数目的期望值。在独立级联模型下，影响力最大化问题的目标是寻找一个大小至多为$k$的种子节点集合，使得影响力函数的期望值$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$最大化。给定一个输入$k$，影响力最大化问题可以形式化为如下，
-\begin{equation}\label{eq:imProblem}
+\begin{equation}
+\label{eq:imProblem}
     \begin{split}
         &S^{\ast} = \arg\max{\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]}\\
         &s.t.~~S \subseteq \mathcal{V},\left\vert{S}\right\vert = k
@@ -101,12 +102,14 @@ $T'\left(S\right)$ & 种子节点集合$S$在超图$\mathcal{H}$中的传播效�
 \mathbb{E}_\mathcal{G}\left[I\left(\{v_6\}\right)\right]=1$。由此，我们可以得出，在给定图$\mathcal{G}$以及$k=1$的条件下，影响力最大化问题的最优解为$S^\ast=\left\{v_1\right\}$。
 
 在上述的例子中，因为图$\mathcal{G}$的结构简单，并且种子节点集合的大小$k=1$，所以能够直接计算得出种子节点集合的影响力期望值，从而选择得出最优解。而在实际情况下，图$\mathcal{G}$的结构往往会复杂得多，而且$k>1$，很难直接计算种子节点集合的影响力期望值。Kempe等人\upcite{kempe2003maximizing}首先证明了在独立级联模型下，影响力最大化问题是一个NP-hard问题。因此，直接计算出有影响力的节点是十分困难的。为了解决此问题，Kempe等人又证明了在独立级联模型下，影响力函数的期望$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$是单调的以及子模的。这两个性质为求解影响力最大化问题的近似算法提供了理论保证。形式上，一个单调的函数对于任意的节点$u$和任意集合$S$，都满足$f\left(S\cup\left\{u\right\}\right) \geq f\left(S\right)$。而一个子模的函数对于任意的节点$u$以及任意的两个集合$S \subseteq W$，都满足$f\left(S\cup\left\{u\right\}\right) - f\left(S\right) \geq f\left(W\cup\left\{u\right\}\right) - f\left(W\right)$。针对具有单调性以及子模性的函数，Nemhauser等人\upcite{nemhauser1978analysis}提出了一种朴素的贪心算法来解决此类问题。算法的核心思想是首先从一个空的种子节点集合$S=\emptyset$开始，重复地选择当前边际收益（即$f\left(S\cup\left\{u\right\}\right) - f\left(S\right)$）最大的节点$u$加入到种子节点集合$S$中，直到满足种子节点集合的大小为$k$时结束迭代。选择节点$u$的准则可以形式化如下，
-\begin{equation}\label{eq:greedyIM}
+\begin{equation}
+\label{eq:greedyIM}
     u=\arg\max\limits_{w \in V \setminus S}\left({\mathbb{E}_\mathcal{G}\left[I\left(S\cup w\right)\right]-\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]}\right)
 \end{equation}
 
 Nemhauser等人证明了朴素的贪心算法得出解以$1-1/\mathsf{e}$的因子近似于最优解，即任意一个由贪心算法的出来的解$S$都满足$I\left(S\right) \geq (1-1/\mathsf{e}) I\left(S^{\ast}\right)$，其中$S^{\ast}$代表最优解，$\mathsf{e}$为自然常数。虽然贪心算法的核心思想比较简单，但是由于计算影响力期望值的过程是\#P-hard\upcite{Chen2010Scalable}的问题，因此实现该算法并不是简单的。为了解决该问题，Kempe等人\upcite{kempe2003maximizing}提出了使用\textbf{蒙特卡罗方法}（\textit{Monte Carlo method}）来对$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$在一定精度内进行估计。蒙特卡罗方法的步骤如下。假设我们对图$\mathcal{G}=\left(\mathcal{V},\mathcal{E}\right)$中的所有的边$e\in\mathcal{E}$都进行抛硬币实验，图$\mathcal{G}$中边的连接的概率为$p\left(e\right)$，我们以$1-p\left(e\right)$的概率移除掉边$e$。定义$g$为得到的结果图，$R_g\left(S\right)$为在图$g$中从种子节点集合$S$出发可达的节点集合。我们需要注意的是，图$g$中的边不再是概率性连接的边，而是确定性的边。对于任意节点$v\in g$，如果在图$g$中存在一条路径从节点集合$S$出发到达节点$v$，那么称节点$v$是从节点集合$S$可达的。Kempe等人\upcite{kempe2003maximizing}证明了$R_g\left(S\right)$的期望值与$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$是相等的，即可表示为如下，
-\begin{equation}\label{eq:influenceSpread}
+\begin{equation}
+\label{eq:influenceSpread}
     \mathbb{E}_\mathcal{G}\left[I\left(S\right)\right] = \mathbb{E}_{g\sim\mathcal{G}}\left[I_g\left(S\right)\right]
 \end{equation}
 其中$I_g\left(S\right) = \left\vert{R_g\left(S\right)}\right\vert$，即在图$g$中的影响力等于从种子节点集合出发可达的节点数目。因此，我们可以通过估计$R_g\left(S\right)$的期望值来估计$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$，即通过估计图$g$中可达的节点数目的期望来估计原图$\mathcal{G}$中的影响力期望值。在实际操作中，我们首先根据原来的社交网络生成多个实例$g\sim\mathcal{G}$，然后对每一个实例进行计算其影响力$I_g\left(S\right)$，最终计算其平均值作为$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$的一个估计。假设我们在估计$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$的过程中生成了$r$个实例图$g$，并且$r$足够大，那么在独立级联模型下，贪心算法能够得到一个$\left(1-1/\mathsf{e}-\varepsilon\right)$的近似最优解，其中$\varepsilon$是一个与图$\mathcal{G}$和$r$相关的常数\upcite{borgs2014maximizing,kempe2005influential}。一般来说，Kempe等人建议设置$r=10,000$，许多其他的工作都采用了相似的设置参数。
@@ -119,13 +122,15 @@ Nemhauser等人证明了朴素的贪心算法得出解以$1-1/\mathsf{e}$的因�
 
 为了解决朴素贪心算法的这一弊端，Borgs等人\upcite{borgs2014maximizing}提出了一种新的方法，突破了朴素贪心算法的限制。Tang等人\upcite{tang2014influence}将这种方法称之为\textbf{反向传播采样}（\textit{Reverse Influence Sampling}），并且阐述了其工作原理。为了解释反向传播采样算法的工作原理，我们首先引入如下的概念。
 
-\begin{mydef}[反向可达集合]\label{def:rrSet}
+\begin{mydef}[反向可达集合]
+\label{def:rrSet}
 给定一个图$\mathcal{G}=\left(\mathcal{V}, \mathcal{E}\right)$，我们对图中的$\mathcal{G}$中的每一条边$e \in \mathcal{E}$进行抛硬币实验，依概率$1-p\left(e\right)$移除掉边$e$。定义$g$为得到的图，对于任意的节点$v \in \mathcal{V}$，节点$v$在图$g$中的反向可达集合${RR}\left(v\right)$定义为图$g$中可达节点$v$的节点集合。这就是说，如果节点$u \in {RR}\left(v\right)$，则至少在图$g$中存在一条路经从节点$u$到达节点$v$。
 \end{mydef}
 
 根据定义\ref{def:rrSet}可知，如果节点$u$在节点$v$的反向可达集合${RR}\left(v\right)$中，那么节点$u$在图$\mathcal{G}$中能够依一定概率通过一条路径到达节点$v$。这也就表示，如果采用节点$u$作为种子节点集合$S=\{u\}$在图$\mathcal{G}$中进行信息传播，那么节点$u$是有一定概率激活节点$v$的。此外，Borgs等人给出了反向可达集合的性质如下，
 
-\begin{mylem}\label{lem:rrSet}
+\begin{mylem}
+\label{lem:rrSet}
 如果一个节点$v$的反向可达集合${RR}\left(v\right)$有$\rho$的概率与节点集合$S$存在交集，那么如果以$S$为种子节点集合在图$\mathcal{G}$中进行信息传播，则节点$v$将依概率$\rho$被激活。
 \end{mylem}
 
@@ -142,7 +147,7 @@ Nemhauser等人证明了朴素的贪心算法得出解以$1-1/\mathsf{e}$的因�
 与朴素贪心算法对比，反向传播采样算法之所以效率更高是因为避免了在计算$O\left(kn\right)$次迭代的影响力期望值的无效计算。算法的核心关键点是以反向可达集合$RR$取代了对信息传播的迭代模拟。为了平衡反向传播采样方法的有效性和高效性，算法需要控制生成反向可达集合的数目。Borgs等人证明了，为了在独立级联模型下得到一个$\left(1-1/\mathsf{e}-\varepsilon\right)$的近似最优解，$RR$的数目至少为$\Theta\left(k\left(m+n\right)\log{n}/\varepsilon^3\right)$\upcite{borgs2014maximizing}。
 
 \subsection{传播效率最大化问题}
-\label{3subsec:efficiency}
+\label{subsec4:efficiency}
 传统的影响力最大化问题的目标是解决在给定种子节点集合大小$k$的条件下，计算得到使得影响力期望值最大的种子节点集合$S$。这个问题没有考虑信息的传播时延，给定不同的种子节点集合会使得网络中的节点在不同的时刻$t$被激活。在实际应用中，人们不仅关心传播影响范围的大小，也关注信息的传播效率。例如，在市场营销中，如何迅速地将一个新产品的信息传播给潜在用户是十分重要的。由此产生了一个新的问题，在一定条件下，我们如何能够计算出一个种子节点集合，使得网络的传播效率最大化。我们对传播效率定义如下。
 
 \begin{mydef}[传播效率]\label{def:ie}
@@ -160,7 +165,8 @@ Nemhauser等人证明了朴素的贪心算法得出解以$1-1/\mathsf{e}$的因�
 以图\ref{fig:tinyGraph}为例，考虑种子节点集合$S=\left\{v_1\right\}$在图$\mathcal{G}$中的信息传播过程。假设信息传播过程的结果如图\ref{fig:tinyRandomGraph}所示。在$t=0$时刻，节点$v_1$作为种子节点被激活。下一时刻，$t=1$时节点$v_2$被节点$v_1$激活。然后，$t=2$时刻，节点$v_3$和节点$v_5$被激活。最后，在$t=3$时刻，没有新的节点可以被激活，信息传播过程结束。因此，传播效率$T\left(S\right)=1+\frac{1}{2}+2\times\frac{1}{3}=13/6$。
 
 定义$\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]$为种子节点集合$S$在图$\mathcal{G}$中的传播效率的期望值。那么传播效率最大化问题是在给定种子节点集合大小$k$的情况下，计算得出使得传播效率期望值$\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]$最大化的种子节点集合$S$。给定一个输入$k$，传播效率最大化问题可以形式化如下，
-\begin{equation}\label{iem:Problem}
+\begin{equation}
+\label{iem:Problem}
     \begin{split}
         &S^{\ast} = \arg\max{\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]}\\
         &s.t.~~S \subseteq \mathcal{V},\left\vert{S}\right\vert = k
@@ -175,9 +181,9 @@ Nemhauser等人证明了朴素的贪心算法得出解以$1-1/\mathsf{e}$的因�
 \end{equation}
 其中$T_g\left(S\right)$为种子节点集合$g$在图$g$中的传播效率。
 
-在第\ref{3sec:definition}节中，我们回顾了影响力最大化问题以及影响力函数的一些性质。影响力函数的单调性和子模性为问题的近似最优解算法提供了理论保证。基于该问题，本节将传播时延考虑在内，然后提出了传播效率最大化问题的定义。
+在第\ref{sec4:definition}节中，我们回顾了影响力最大化问题以及影响力函数的一些性质。影响力函数的单调性和子模性为问题的近似最优解算法提供了理论保证。基于该问题，本节将传播时延考虑在内，然后提出了传播效率最大化问题的定义。
 \section{方法描述}
-\label{3sec:method}
+\label{sec4:method}
 本节首先对传播效率最大化问题的复杂度，其次证明了近似最优解算法的保证，最后提出了\textbf{反向效率采样}（\textit{Reverse Efficiency Sampling}）算法来解决传播效率最大化问题。
 
 众所周知，影响力最大化问题在独立级联模型下是一个NP-hard的问题。本节首先对传播效率最大化问题的复杂度进行分析。
@@ -194,7 +200,8 @@ Nemhauser等人证明了朴素的贪心算法得出解以$1-1/\mathsf{e}$的因�
 
 此外，另一个重要的问题是计算一个种子节点集合的传播效率期望值是非常耗时的，时间复杂度为$O\left(mr\right)$。给定一个种子节点集合$S$，没有一个高效的方法直接计算传播效率期望值$\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]$。本节将这个问题规约到$s$-$t$连通性问题，证明了在独立级联模型下计算传播效率期望值是一个\#P-hard的问题。
 
-\begin{mytheo} \label{theo:sharpHard}
+\begin{mytheo}
+\label{theo:sharpHard}
 在独立级联模型下，给定一个种子节点集合$S$，计算其传播效率期望值$\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]$是一个\#P-hard的问题。
 \end{mytheo}
 
@@ -445,10 +452,10 @@ $\mathbb{E}_{g\sim\mathcal{G}}\left[T_g\left(S\right)\right]=n\Pr\nolimits_{v,g\
 由于传播效率函数期望值$\mathbb{E}_\mathcal{H}\left[T'\left(\cdot\right)\right]$是单调且子模的，则算法\ref{alg:res}中的反向效率采样算法能够得到一个$\left(1-1/\mathsf{e}-\varepsilon\right)$的近似最优解来解决独立级联模型下的传播效率最大化问题。其中$\varepsilon$与采样的次数$r$以及图$\mathcal{G}$的结构有关。如何计算$\varepsilon$与$r$以及$\mathcal{G}$的关系仍然是一个开放性的问题。下面本节对上述提及的算法的时间复杂度进行分析。其中朴素贪心算法和惰性贪心算法都是基于贪心算法框架下实现的。这一类算法进行$k$轮迭代来选择种子节点集合$S$，每一轮迭代需要对$O\left(n\right)$个节点进行传播效率期望值的估计。而每一次传播效率期望值的估计需要在$r$个生成的实例图$g$上进行$O\left(m\right)$次计算。因此，朴素贪心算法和惰性贪心算法的时间复杂度都是$O\left(knmr\right)$的。但是由于惰性贪心算法基于惰性计算避免了一些不必要的模拟评估，惰性贪心算法在实际运行中比朴素贪心算法的效率要高。相比之下，反向效率采样算法是在另一个框架下设计的。首先，反向传播采样算法生成了$r$条超边，构造了超图$\mathcal{H}$，每生成一条超边需要消耗$O\left(m\right)$的时间，因此生成整个超图$\mathcal{H}$需要消耗$O\left(rm\right)$的时间。然后，算法迭代$k$轮来生成种子节点集合$S$，每一轮迭代需要对$O\left(n\right)$个节点进行模拟估计，每一次模拟估计需要对$r$条超边进行运算，因此计算种子节点集合$S$的时间复杂度为$O\left(knr\right)$。有上述分析可知，反向效率采样的时间复杂度相比于朴素贪心算法和惰性贪心算法要低。
 
 \section{实验分析}
-\label{3sec:experiment}
+\label{sec4:experiment}
 本节设计了若干组实验来验证上述提出的算法。首先，我们介绍实验的设置。其次，我们详细地展示了实验结果，并对其进行分析。本节中的实验基于八核（Intel Xeon 1.80GHz CPU）、64GB内存的机器运行，操作系统为64位 CentOS release 6.7。以上所有算法都是基于Java实现，在JDK 1.8.0\_40环境下编译。
 \subsection{实验设置}
-\label{3subsec:settings}
+\label{subsec4:settings}
 本小节介绍实验的设置，包括数据集、传播模型以及算法等。
 \begin{table}[!ht]
 \centering
@@ -479,7 +486,7 @@ $\mathbb{E}_{g\sim\mathcal{G}}\left[T_g\left(S\right)\right]=n\Pr\nolimits_{v,g\
 $\cdots$，直到50。对于惰性贪心算法，我们根据之前相关的工作，经验性地设置蒙特卡罗方法的重复模拟次数$r=10,000$。对于反向效率采样算法，我们设置$r=n\log{n}$来得到一个$(1-1/\mathsf{e}-\varepsilon)$的近似最优解，其中$\varepsilon$与$r$以及网络相关。在所有实验中，我们都重复算法5次，记录其平均值作为实验结果。
 
 \subsection{相似度对比}
-\label{subsec:compare}
+\label{subsec4:compare}
 \begin{figure}[ht]
    \begin{minipage}{0.48\textwidth}
      \centering
@@ -517,7 +524,7 @@ $\cdots$，直到50。对于惰性贪心算法，我们根据之前相关的工�
 其中$\vert S \cap S' \vert$表示集合$S$与集合$S'$的交集大小，$\vert S \cup S' \vert$表示集合$S$与集合$S'$的并集大小。实验结果如图\ref{fig:facebookJaccard}至图\ref{fig:dblpJaccard}所示。从实验结果可知，在$k$较小的时候，例如$k=1$时，Jaccard相似度相似度是不稳定的。在$k=1$的情况下，\textit{Facebook}, \textit{HepPh} and \textit{DBLP}网络中的$S=S'$，而\textit{Twitter}网络中的$S \neq S'$。由此可知，当$k$比较小的时候，使得网络有最大影响力期望值的节点也可能是使得网络有最大传播效率期望值的节点。当$k$比较小的时候，大部分节点处于未激活状态，能够激活尽可能多的节点也许就能获得更大的传播效率。随着$k$的增加，例如超过10以后，在均匀独立级联模型和加权独立级联模型下的$J(S,S')$值变得相对稳定。在均匀独立级联模型中$J(S,S')$约等于0.2，在加权独立级联模型中$J(S,S')$约等于0.5。因此，我们可知传播效率最大化问题的种子节点集合与影响力最大化问题的种子节点集合并不是相同的，即传播效率最大化问题与影响力最大化问题是两个不同的问题。
 
 \subsection{算法精确度对比}
-\label{subsec:accuracy}
+\label{subsec4:accuracy}
 \begin{figure}[!ht]
    \begin{minipage}{0.48\textwidth}
      \centering
@@ -553,7 +560,7 @@ $\cdots$，直到50。对于惰性贪心算法，我们根据之前相关的工�
 由上述在均匀独立级联模型以及加权独立级联模型下各数据集上的实验结果可知，反向效率采样算法和惰性贪心算法都有理论上的精确度保证，性能优于启发式算法，例如最大度算法。
 
 \subsection{运行时间对比}
-\label{subsec:runningTime}
+\label{subsec4:runningTime}
 \begin{figure}[!ht]
    \begin{minipage}{0.48\textwidth}
      \centering
@@ -584,10 +591,10 @@ $\cdots$，直到50。对于惰性贪心算法，我们根据之前相关的工�
    \end{minipage}
 \end{figure}
 
-本小节我们对各算法的运行时间进行对比实验。为了验证反向效率采样算法的效率，我们在均匀独立级联模型以及加权独立级联模型下各数据集上不同$k$的情况下，与惰性贪心算法以及最大度算法进行实验对比，结果如图\ref{fig:facebookTime}至图\ref{fig:dblpTime}。如图所示，在均匀独立级联模型以及加权独立级联模型下，反向效率采样算法相比惰性贪心算法都能提高一个数量级的效率。而最大度算法是一种启发式的算法，因此运行时间最少，且不随$k$的变化而变化，但是如第\ref{subsec:accuracy}小节所示，该算法不能提供性能的保证。因为最大度算法算法简单，本小节利用该算法来作运行时间的一个下限基准。从图中我们可以得出，反向效率采样算法和惰性贪心算法的运行时间都随着$k$的增加而增加，其中惰性贪心算法运行时间的增长速率高于反向效率采样算法。例如，在图\ref{fig:twitterTime}中在$k=1$时，惰性贪心算法的运行时间约为反向效率采样的10倍，在$k=50$时，增长为约20倍。因此，反向效率采样算法的效率优于其他的算法。
+本小节我们对各算法的运行时间进行对比实验。为了验证反向效率采样算法的效率，我们在均匀独立级联模型以及加权独立级联模型下各数据集上不同$k$的情况下，与惰性贪心算法以及最大度算法进行实验对比，结果如图\ref{fig:facebookTime}至图\ref{fig:dblpTime}。如图所示，在均匀独立级联模型以及加权独立级联模型下，反向效率采样算法相比惰性贪心算法都能提高一个数量级的效率。而最大度算法是一种启发式的算法，因此运行时间最少，且不随$k$的变化而变化，但是如第\ref{subsec4:accuracy}小节所示，该算法不能提供性能的保证。因为最大度算法算法简单，本小节利用该算法来作运行时间的一个下限基准。从图中我们可以得出，反向效率采样算法和惰性贪心算法的运行时间都随着$k$的增加而增加，其中惰性贪心算法运行时间的增长速率高于反向效率采样算法。例如，在图\ref{fig:twitterTime}中在$k=1$时，惰性贪心算法的运行时间约为反向效率采样的10倍，在$k=50$时，增长为约20倍。因此，反向效率采样算法的效率优于其他的算法。
 
 \subsection{可扩展性}
-\label{subsec:scalability}
+\label{subsec4:scalability}
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.5\textwidth]{resScalability}
@@ -597,6 +604,6 @@ $\cdots$，直到50。对于惰性贪心算法，我们根据之前相关的工�
 
 本小节进行了反向效率采样算法的可扩展性实验。实验使用\textit{DBLP}网络来生成各种大小的子图。生成过程如下所示。首先，我们随机地选取图中的一个节点，然后做宽度优先搜索来添加边到子图中，该过程直到子图的大小满足要求时停止。如果宽度优先搜索过程在子图大小没有满足前就停止了，那么在重新随机地选择一个不在目前子图中的节点，继续进行宽度优先搜索，重复上述过程直到满足要求。利用该方法，我们可以得到各种大小的子图。本小节的实验中，我们令子图的边的大小从$m=1,000$到$m=1,000,000$变化，然后运行反向效率采样算法，记录运行的时间。在均匀独立级联模型以及加权独立级联模型下的实验结果如图\ref{fig:scalability}所示。由图可知，随着图大小的增长，运行时间的增长是线性的。因此，反向效率采样算法是可扩展的。
 \section{本章小结}
-\label{3sec:conclusion}
+\label{sec4:conclusion}
 为了更好地理解网络中的传播效率，本章将信息传播过程中的传播时延考虑在内，提出了一个新的问题，传播效率最大化问题。该问题的目的在于最大化网络中的传播效率期望值。然后，我们证明了在独立级联模型下，传播效率最大化问题是一个NP-hard的问题，而且计算传播效率的过程是一个\#P-hard的问题。为了解决该问题，我们证明了在独立级联模型下，传播效率函数的期望值是单调且子模性的。基于上述的性质，我们设计了三种算法来解决该问题。最后，我们在真实的数据集上进行了一系列的实验来验证所提出的算法。实验结果表明了传播效率最大化问题与影响力最大化问题的不同，证明了提出的算法的正确性和有效性。本章所研究的内容对充分理解信息传播过程有着一定的帮助。
 
