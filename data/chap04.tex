@@ -374,6 +374,8 @@ $\mathbb{E}_\mathcal{G}\left[T\left(\cdot\right)\right]$的单调性是显而易
     \caption{$LazyGreedy(k,T)$}
     \label{alg:lazygreedy}
     \begin{algorithmic}[1]
+	\REQUIRE $k,\mathcal{G},T$
+    \ENSURE $S$
     \STATE initialize $S=\emptyset$, priority queue $Q=\emptyset$, iteration $i=1$
     \FOR{$j=1$ to $n$}
         \STATE $u.mg=T\left(u|\emptyset\right)$, $u.i=1$
@@ -401,6 +403,8 @@ $\mathbb{E}_\mathcal{G}\left[T\left(\cdot\right)\right]$的单调性是显而易
     \caption{$RES$($k$,$r$,$T'\left(\cdot\right)$)}
     \label{alg:res}
     \begin{algorithmic}[1]
+	\REQUIRE $k,r,T'$
+    \ENSURE $S$
     \STATE {initialize $\mathcal{H}=\left(\mathcal{V}, \emptyset \right)$}
     \FOR{$i=1$ to $r$}
         \STATE{stochastically select a node $v \in \mathcal{V}$ uniformly}

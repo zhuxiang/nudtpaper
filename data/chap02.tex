@@ -35,9 +35,9 @@
 \label{sec2:definition}
 本节首先将对社交网络中的实时个性化搜索的任务进行定义，并将其形式化，然后对TREC 2015 Microblog Track的具体任务进行描述。
 
-社交网络中的实时个性化搜索任务可以描述如下。在社交网络中平台中，令信息流表示为\textbf{T}，信息流在社交网络中随着时间不断地产生，信息流\textbf{T}中包含许多种类的话题。令\textbf{P}表示用户集合，每一个用户$p_i \in \textbf{P}$表示着用户感兴趣的一个话题，用户的兴趣爱好可以通过文本等形式来表示。则社交网络中的实时个性化搜索任务可以定义如下，
+社交网络中的实时个性化搜索任务可以描述如下。在社交网络中平台中，令信息流表示为$\mathbf{T}$，信息流在社交网络中随着时间不断地产生，信息流$\mathbf{T}$中包含许多种类的话题。令$\mathbf{P}$表示用户集合，每一个用户$p_i \in \mathbf{P}$表示着用户感兴趣的一个话题，用户的兴趣爱好可以通过文本等形式来表示。则社交网络中的实时个性化搜索任务可以定义如下，
 \begin{mydef}[实时个性化搜索]\label{def:realPrnzdSearch}
-在社交网络中，给定信息流\textbf{T}以及用户集合\textbf{P}，实时个性化搜索的目的是针对不同的用户兴趣爱好$p_i \in \textbf{P}$，自动地实时地为其推荐高质量的、相关的信息。
+在社交网络中，给定信息流$\mathbf{T}$以及用户集合$\mathbf{P}$，实时个性化搜索的目的是针对不同的用户兴趣爱好$p_i \in \mathbf{P}$，自动地实时地为其推荐高质量的、相关的信息。
 \end{mydef}
 
 根据定义\ref{def:realPrnzdSearch}可知，社交网络中的实时个性化搜索需要解决的几个核心关键问题如下。首先是如何表示信息流与用户，其次是如何实现实时推荐，以及如何保证信息的高质量和高相关性。社交网络平台中信息的实时个性化搜索任务可以通过图\ref{fig:real-timeSearch}来表示。
@@ -201,7 +201,7 @@ $narr$ & 用户查询的详情\\
 \label{subsec2:featureRep}
 已有的工作对语义特征的表示模型有着很多的研究，例如\textbf{词袋模型}（\textit{Bag of Words Model}）等。词袋模型忽略了文本的语法和词序，仅仅将文本当作词语的聚集。该模型假设每一个词是独立的，即文本中词的概率与上下文是无关的，它简化了表示方法，但是忽略了语法和词序，在某些情况下带来了一些缺陷。基于此的一些改进算法，例如二元词袋模型、三元词袋模型等在一定程度上解决了这些缺陷。然而，词语失配问题仍然是词袋模型无法解决的问题。
 
-为了解决词语失配问题，\textbf{词向量模型}（Word Vector Model）被提出来表示语义特征。使用\textit{word2vec}技术来对词语进行向量化，\textit{gensim}\footnote{\url{http://radimrehurek.com/gensim/index.html}}是一个比较方便的工具来处理该问题。为了训练词向量模型，维基百科的英文预料库被用于训练\footnote{\url{https://dumps.wikimedia.org/enwiki/20160113/}}。图\ref{fig:real-timeSearch}中的知识库基于维基百科英文语料库使用\textit{gensim}工具训练得到。推文$\mathbf{ts}$中的每一个词语$\mathbf{t}_i$，可被表示成一个向量$\mathbf{t}_i=\left(\alpha_1,\alpha_2,\cdots,\alpha_m\right)$，其中$m$为词向量模型设置的维度（例如200、400等），参数$\alpha_j$表示词向量第$j$维的值。因此，一条推文$\mathbf{ts}$可向量化为$\mathbf{ts}= \sum w_i \mathbf{t}_i$，其中$w_i$为词语$\mathbf{t}_i$的权重。与处理推文的方式相似，语义增强后的用户查询$q$中的每一个关键词$\mathbf{k}_i$可以表示成$\mathbf{k}_i = \left(\beta_1,\beta_2,\cdots,\beta_m\right)$，其中参数$\beta_j$为关键词$\mathbf{k}_i$第$j$维的值。而且语义增强后的用户查询$\mathbf{q} = \sum v_i \mathbf{k}_i$，$v_i$为词语$\mathbf{k}_i$的权重。按照上述流程，推文信息以及用户查询通过词向量模型转化成了向量形式。
+为了解决词语失配问题，\textbf{词向量模型}（Word Vector Model）被提出来表示语义特征。使用\textit{word2vec}技术来对词语进行向量化，\textit{gensim}\footnote{\url{http://radimrehurek.com/gensim/index.html}}是一个比较方便的工具来处理该问题。为了训练词向量模型，维基百科的英文预料库被用于训练\footnote{\url{https://dumps.wikimedia.org/enwiki/20160113/}}。图\ref{fig:real-timeSearch}中的知识库基于维基百科英文语料库使用\textit{gensim}工具训练得到。推文$\mathbf{ts}$中的每一个词语$\mathbf{t}_i$，可被表示成一个向量$\mathbf{t}_i=\left(\alpha_1,\alpha_2,\cdots,\alpha_m\right)^T$，其中$m$为词向量模型设置的维度（例如200、400等），参数$\alpha_j$表示词向量第$j$维的值。因此，一条推文$\mathbf{ts}$可向量化为$\mathbf{ts}= \sum w_i \mathbf{t}_i$，其中$w_i$为词语$\mathbf{t}_i$的权重。与处理推文的方式相似，语义增强后的用户查询$q$中的每一个关键词$\mathbf{k}_i$可以表示成$\mathbf{k}_i = \left(\beta_1,\beta_2,\cdots,\beta_m\right)^T$，其中参数$\beta_j$为关键词$\mathbf{k}_i$第$j$维的值。而且语义增强后的用户查询$\mathbf{q} = \sum v_i \mathbf{k}_i$，$v_i$为词语$\mathbf{k}_i$的权重。按照上述流程，推文信息以及用户查询通过词向量模型转化成了向量形式。
 
 \subsection{候选生成模块}
 \label{subsec2:candidate}
@@ -301,19 +301,61 @@ $narr$ & 用户查询的详情\\
 \end{equation}
 其中$sim$为语义相似度得分，参见公式（\ref{eq:tf-idf}）和公式（\ref{eq:bm25}）。基于tf-idf和基于BM25算法的语义相似度得分在系统中是可选的。$h_ {\bm{\theta}}$为推文的质量得分，参见公式（\ref{eq:lr}）。
 
-当计算完一条推文和各个用户查询之间的分数后，推文将分类到得分最高的用户查询作为候选。候选队列中的推文按照得分$f\left( \mathbf{ts}, \mathbf{q} \right)$进行排序。按照任务需求，如果推文对于一个用户查询是相关的且高质量的，那么系统将把该推文推送给感兴趣的用户。但是如果一直推送给用户信息，那么将导致信息淹没。任务要求系统在保证用户不被信息淹没的情况下，同时实时地推送给用户消息，这是一个约束满足问题。问题可形式化为，用户每天接受信息的数量是一定的，系统需要根据当前队列中的信息来决策何时推送给用户。系统提出了一种\textbf{动态阈值调整算法}来保证相关的高质量的推文及时的推送，且在时间上是均匀分布的。算法根据候一个用户查询的选集队列的历史数据，可以得到一个最高得分$f_{max}$，设计一个梯度函数如下所示，
+当计算完一条推文和各个用户查询之间的分数后，推文将分类到得分最高的用户查询作为候选。候选队列中的推文按照得分$f\left( \mathbf{ts}, \mathbf{q} \right)$进行排序。按照任务需求，如果推文对于一个用户查询是相关的且高质量的，那么系统将把该推文推送给感兴趣的用户。但是如果一直推送给用户信息，那么将导致信息淹没。任务要求系统在保证用户不被信息淹没的情况下，同时实时地推送给用户消息，这是一个约束满足问题。问题可形式化为，用户每天接受信息的数量是一定的，系统需要根据当前队列中的信息来决策何时推送给用户。系统提出了一种\textbf{动态阈值调整算法}来保证相关的高质量的推文及时的推送，且在时间上是均匀分布的。算法根据候一个用户查询的选集队列的历史数据，可以得到一个最高得分$f_{max}$，设计一个梯度阈值函数$\zeta\left(f_{max},t\right)$如下所示，
 \begin{equation}
 \label{eq:thresholdDynamic}
-  threshold = \left\{ {\begin{array}{*{20}{c}}
+  \zeta\left(f_{max},t\right) = \left\{ {\begin{array}{*{20}{c}}
 {(0.9 - d) \cdot {f_{\max }}}&{d < 0.4}\\
 {0.5 \cdot {f_{\max }}}&{d \ge 0.4}
 \end{array}} \right.
 \end{equation}
-其中$d$表示衰减值，且$d = c \cdot floor(t/2)$。式中的$c$表示衰减系数，$floor$为向下取整函数，$t$为一天中的时间，$t \in [0,24]$。观察公式（\ref{eq:thresholdDynamic}）可知，阈值的变化与队列中的最高得分$f_{max}$和时间$t$相关。为了得到相关性强、质量高的推文，阈值在一开始时相对较高。在$t=0$时刻，阈值为$0.9 \cdot f_{max}$。为了给用户带来更多更全面的信息，阈值随着时间的变化不断减小。为了避免推送不相关或者低质量的信息，阈值在降低一定程度后不再变化，最终保持在$0.5 \cdot f_{max}$。例如，经验性地设置衰减系数$c=0.05$，当$t=16$时，阈值衰减为$0.5 \cdot f_{max}$后不再变化。动态阈值调整算法的思想是在一开始设置一个相对较高的阈值来获取高质量的推文，然后降低阈值来保证信息的数量。当推文的最终得分超过当时的阈值，则系统将立即推送该信息给相应的用户。
+其中$d$表示衰减值，且$d = c \cdot floor(t/2)$。式中的$c$表示衰减系数，$floor$为向下取整函数，$t$为一天中的时间，$t \in [0,24]$。观察公式（\ref{eq:thresholdDynamic}）可知，阈值的变化与队列中的最高得分$f_{max}$和时间$t$相关。为了得到相关性强、质量高的推文，阈值在一开始时相对较高。在$t=0$时刻，阈值为$0.9 \cdot f_{max}$。为了给用户带来更多更全面的信息，阈值随着时间的变化不断减小。为了避免推送不相关或者低质量的信息，阈值在降低一定程度后不再变化，最终保持在$0.5 \cdot f_{max}$。例如，经验性地设置衰减系数$c=0.05$，当$t=16$时，阈值衰减为$0.5 \cdot f_{max}$后不再变化。动态阈值调整算法的思想是在一开始设置一个相对较高的阈值来获取高质量的推文，然后降低阈值来保证信息的数量。当推文的最终得分超过当时的阈值，则系统将立即推送该信息给相应的用户。由上述的各个模块描述可知，实时个性化搜索算法如算法所示，且阈值将随时间动态变化。
+\begin{algorithm}[!ht]
+\caption{实时个性化搜索算法}
+\label{alg:livePush}
+\begin{algorithmic}[1]
+  \REQUIRE $\mathbf{T} = \{ \mathbf{ts}_1, \mathbf{ts}_2, \cdots, \mathbf{ts}_N \}$, $\mathbf{P} = \{ p_1, p_2, \cdots, p_M \}$, $Z$
+  \ENSURE $\mathbf{R} = \{ \mathbf{R}_1, \mathbf{R}_2, \cdots, \mathbf{R}_M \}$
+  \FORALL {$p_i \in \mathbf{P}$}
+    \STATE $\mathbf{q}_i = \{ {\mathbf{k}_1}:{v_1},{\mathbf{k}_2}:{v_2},...,{\mathbf{k}_n}:{v_n}\}$
+    \STATE $p_i = \{1:\left(\mathbf{t}_1 || \mathbf{t}_2\right) \& \& \left(\mathbf{t}_3 || \mathbf{t}_4\right),~~0:\mathbf{t}_5 || \mathbf{t}_6\}$
+  \ENDFOR
+  \FORALL {$\mathbf{k}_j$}
+    \STATE $\mathbf{k}_j = \left(\beta_1,\beta_2,\cdots,\beta_m\right)^T$
+    \STATE $\mathbf{q}_i = \sum v_i \mathbf{k}_i$
+  \ENDFOR
+  \WHILE {$\left| \mathbf{R}_i \right| < Z$ $\& \& \mathbf{T} = \emptyset$}
+    \STATE $\mathbf{ts}_i = pop\left(\mathbf{T}\right)$
+    \STATE $\mathbf{ts}_i = \{ {w_1}{\mathbf{t}_1},{w_2}{\mathbf{t}_2},\cdots,{w_n}{\mathbf{t}_n}\}$
+    \IF {$\mathbf{ts}_i$ matches $p_j$}
+     \FORALL {$\mathbf{t}_k \in \mathbf{ts}_i$}
+       \STATE $\mathbf{t}_k=\left(\alpha_1,\alpha_2,\cdots,\alpha_m\right)^T$
+     \ENDFOR
+     \STATE $\mathbf{ts}_k = \sum w_i \mathbf{t}_i$
+     \STATE $f\left( \mathbf{ts}_i, \mathbf{q}_j \right) = sim \cdot {h_ {\bm{\theta}}}\left(x\right)$
+    \ENDIF
+    \IF {$f\left( \mathbf{ts}_i, \mathbf{q}_j \right) \geq \zeta$}
+      \STATE $\mathbf{R}_j = \mathbf{R}_j \cup \mathbf{ts}_i$
+    \ENDIF
+  \ENDWHILE
+\end{algorithmic}
+\end{algorithm}
 
-有上述的各个模块描述可知，实时个性化搜索算法如算法所示，且阈值将随时间动态变化。
 \section{实验分析}
 \label{sec2:experiment}
+本节中，我们通过TREC 2015 Microblog Track的实时测评对系统进行了多方面的验证。并对实验结果进行了分析。首先，本节介绍了实验的设置，其次介绍了评测标准，最后对实验结果进行了分析。本节中的实验基于八核、16GB内存、SSD硬盘的机器上运行，操作系统为Ubuntu 14.04 64位系统。系统主要基于Python和Java语言实现，Python版本为2.7，JDK版本为1.8版本。
+
+\subsection{数据集及实验环境}
+\label{subsec2:dataset}
+\begin{figure}[!htbp]
+  \centering
+  % Requires \usepackage{graphicx}
+  \includegraphics[width=\textwidth]{stream}
+  \caption{推特数据流的分布}
+  \label{fig:twitterDis}
+\end{figure}
+
+为了评估系统的稳定性和算法的有效性，TREC 2015 Microblog Track的实时测评采用了10天的推特信息流数据，时间从2015年07月20日00:00:00 UTC至2015年07月29日23:59:59 UTC，时区为世界标准时间。数据集总共包含51,770,318条真实推文，共有225个用户查询由官方提供。推文的时间分布如图\ref{fig:twitterDis}所示，横轴代表时间，纵轴代表推文的数量。从图中可知，推文的分布具有一定的周期性，周期大约为12个小时。
 
 \section{本章小结}
 \label{sec2:conclusion}
