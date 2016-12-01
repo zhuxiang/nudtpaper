@@ -205,7 +205,7 @@ $narr$ & 用户查询的详情\\
 
 \subsection{候选生成模块}
 \label{subsec2:candidate}
-依靠词向量模型，词语的失配问题得到了比较好的解决。但是该方法也是一把双刃剑，词向量模型在获取更多相关的信息的时候也会带来许多低相关的信息给用户，即词向量模型在提高召回率的时候降低了准确率。为了解决该问题，系统使用了一个规则过滤器\textbf{布尔逻辑关键词模型}（\textit{Boolean Logic Keyword Model}）来提高准确率。布尔逻辑关键词模型将用户查询表示成如下形式，
+依靠词向量模型，词语的失配问题得到了比较好的解决。但是该方法也是一把双刃剑，词向量模型在获取更多相关的信息的时候也会带来许多低相关的信息给用户，即词向量模型在提高召回率的时候降低了准确率。为了解决该问题，系统使用了一个规则过滤器\textbf{布尔逻辑关键词过滤}（\textit{Boolean Logic Keyword Filter}）来提高准确率。布尔逻辑关键词模型将用户查询表示成如下形式，
 \begin{equation}
 \label{eq:blkm}
   p = \{1:\left(\mathbf{t}_1 || \mathbf{t}_2\right) \& \& \left(\mathbf{t}_3 || \mathbf{t}_4\right),~~0:\mathbf{t}_5 || \mathbf{t}_6\}
@@ -393,9 +393,9 @@ $narr$ & 用户查询的详情\\
   \hline
    &ELG&nCG&nDCG@10\\
   \hline
-  \textbf{BLKW+tf-idf+QM}&0.3086&\textbf{0.3349}&0.3345\\
+  \textbf{BLKF+tf-idf+QM}&0.3086&\textbf{0.3349}&0.3345\\
   \hline
-  \textbf{BLKW+BM25+QM}&0.2863&0.2974&\textbf{0.3670}\\
+  \textbf{BLKF+BM25+QM}&0.2863&0.2974&\textbf{0.3670}\\
   \hline
   \textbf{KL+LM}&\textbf{0.3175}& 0.3127&0.2228\\
   \hline
@@ -408,8 +408,64 @@ $narr$ & 用户查询的详情\\
   \end{tabular}
 \end{table}
 
-Fan等人\upcite{lvpkuicst}提出了一种时间自适应的话题相关过滤框架来评估推文与用户查询之间的相关性，即\textbf{KL+LM}。基于Web的查询扩展技术用于解决词语失配的问题。系统使用K-L散度算法来度量推文和用户查询之间的相关性。在推送方面，系统使用一种时间自适应的方法来估测相关性的阈值和创新性的阈值。Tan等人\upcite{tanuniversity}提出了一种基于K-L散度和动态推送策略的框架。该框架中，模拟相关反馈技术用于估测话题中词语的概率分布。然后，用户查询作为基准模型，来计算每一个用户查询中的词语的K-L散度值。然后排名前10的词语被加入到用户查询中的特征向量中。在这些词语组成的特征空间中，经典的向量模型用于计算推文和用户查询间的相似度。最后，动态推送策略被利用来处理推送问题，这是一个多目标的秘书问题\footnote{\url{https://en.wikipedia.org/wiki/Secretary_problem}}。动态推送策略维护一个低阈值和一个高阈值来决定是否推送还是等待。
+Fan等人\upcite{lvpkuicst}提出了一种时间自适应的话题相关过滤框架来评估推文与用户查询之间的相关性，即\textbf{KL+LM}。基于Web的查询扩展技术用于解决词语失配的问题。系统使用K-L散度算法来度量推文和用户查询之间的相关性。在推送方面，系统使用一种时间自适应的方法来估测相关性的阈值和创新性的阈值。Tan等人\upcite{tanuniversity}提出了一种基于K-L散度和动态推送策略的框架。该框架中，模拟相关反馈技术用于估测话题中词语的概率分布。然后，用户查询作为基准模型，来计算每一个用户查询中的词语的K-L散度值。然后排名前10的词语被加入到用户查询中的特征向量中。在这些词语组成的特征空间中，经典的向量模型用于计算推文和用户查询间的相似度。最后，动态推送策略被利用来处理推送问题，这是一个多目标的秘书问题\footnote{\url{https://en.wikipedia.org/wiki/Secretary_problem}}。动态推送策略维护一个低阈值和一个高阈值来决定是否推送还是等待。Bagdouri等人\upcite{bagdouri2015clip}提出了一个框架，使用词向量模型以及查询扩展来表示用查询，采取tf-idf和BM25的混合算法计算推文和用户查询之间的相似度，Jaccard相似度算法用来做冗余性消除。如表\ref{tab:trecRes}所示，使用布尔逻辑关键词过滤、tf-idf相关性和质量模型（\textbf{BLKF+tf-idf+QM}）的nCG的性能最佳，使用布尔逻辑关键词过滤、BM25以及质量模型（\textbf{BLKF+BM25+QM}）的nDCG@10的性能最佳，\textbf{KL+LM}的ELG的性能最佳，\textbf{KL+DE}、\textbf{BLKF+tf-idf+QM}与\textbf{KL+LM}有着相似的ELG性能。根据结果可知，我们的系统在nCG的性能比其他系统好，说明我们的系统能够检索到更多的相关推文，相当于系统的召回率较高。这个结果是由于系统使用了词向量模型以及基于搜索引擎的扩展。此外，系统的nDCG@10的性能远超了其他系统，这是因为系统使用了质量模型，使得结果的排序更加合理。换言之，系统将推文的质量考虑在内，对场景B中的结果进行了排序。最后一栏的最优解（\textbf{the optimal}）是理论上的最优解，是选取TREC 2015 Microblog Track中每一个话题中最好的结果进行平均得到的理论最优解，作为一个上限参照标准。
+
+系统的两种算法的ELG性能指标在话题上的分布如图如图\ref{fig:elg1}和\ref{fig:elg2}所示，
+\begin{figure}[!htbp]
+  \centering
+  % Requires \usepackage{graphicx}
+  \includegraphics[width=0.85\textwidth]{ELG-1}
+  \caption{话题MB226至MB344上的ELG性能分布}
+  \label{fig:elg1}
+\end{figure}
+\begin{figure}[!htbp]
+  \centering
+  % Requires \usepackage{graphicx}
+  \includegraphics[width=0.85\textwidth]{ELG-2}
+  \caption{话题MB348至MB448上的ELG性能分布}
+  \label{fig:elg2}
+\end{figure}
+图中的横轴为用户查询的ID，纵轴为ELG的性能，用户查询为官方随机从225个用处查询中抽取。由系统的ELG性能在话题上的分布图可知，我们系统中算法的性能与理论最优解在大多数情况下是相同的。但是，在一些话题上算法的得分为0，这是由于推特信息流中没有出现该话题的信息，而系统推送了推文。这也是查询扩展在提高nCG性能的同时，对ELG的性能有所降低。
+
+系统的两种算法的nCG性能指标在话题上的分布如图如图\ref{fig:ncg1}和\ref{fig:ncg2}所示，
+\begin{figure}[!htbp]
+  \centering
+  % Requires \usepackage{graphicx}
+  \includegraphics[width=0.85\textwidth]{nCG-1}
+  \caption{话题MB226至MB344上的nCG性能分布}
+  \label{fig:ncg1}
+\end{figure}
+\begin{figure}[!htbp]
+  \centering
+  % Requires \usepackage{graphicx}
+  \includegraphics[width=0.85\textwidth]{nCG-2}
+  \caption{话题MB348至MB448上的nCG性能分布}
+  \label{fig:ncg2}
+\end{figure}
+图中的横轴为用户查询的ID，纵轴为nCG的性能。由于nCG的计算方式与ELG相似，因此可以看出我们系统的nCG的性能与ELG的性能相似。
+
+系统的两种算法的nCG性能指标在话题上的分布如图如图\ref{fig:ndcg1}和\ref{fig:ndcg2}所示，
+\begin{figure}[!htbp]
+  \centering
+  % Requires \usepackage{graphicx}
+  \includegraphics[width=0.85\textwidth]{nDCG-1}
+  \caption{话题MB226至MB344上的nDCG性能分布}
+  \label{fig:ndcg1}
+\end{figure}
+\begin{figure}[!htbp]
+  \centering
+  % Requires \usepackage{graphicx}
+  \includegraphics[width=0.85\textwidth]{nDCG-2}
+  \caption{话题MB348至MB448上的nDCG性能分布}
+  \label{fig:ndcg2}
+\end{figure}
+图中的横轴为用户查询的ID，纵轴为nDCG的性能。由图可知，我们系统的算法的nDCG性能在大多数话题上都是最优解，性能远超其他的系统。但是在一些话题上我们系统的算法没有得分，这也是由于推特信息流中没有出现该话题的信息，而系统推送了信息，这与ELG性能中出现的边缘情况相似。
+
+由上述全面的实验，我们对系统的ELG、nCG以及nDCG@10等性能进行了度量和分析，实验结果验证了所提出的系统的正确性和有效性。
 \section{本章小结}
 \label{sec2:conclusion}
+本章提出了一种基于语义扩展和文本质量的实时个性化搜索算法系统框架并进行了实现。系统框架综合了用户发布推文信息的语义特征和用户在网络中的社交属性。此外，系统设计了一种布尔逻辑关键词过滤的用户模型来提高相似度的准确性。然后，系统基于外部的搜索引擎来进行查询扩展，这使得系统能够更好地理解用户的需求。基于TREC 2015 Microblog Track的真实数据评测对系统进行了全面的验证，测评结果显示了系统相对于其他算法的有效性和优越性。
+
+下一步工作，我们希望能够实现布尔逻辑关键词过滤的全自动生成，对质量模型进行优化。除此之外，我们计划加入更多有效的特征，例如地理位置、时间特性等，来对用户的偏好进行全方位的理解。
 
 
