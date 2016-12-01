@@ -382,6 +382,33 @@ $narr$ & 用户查询的详情\\
   \item \textbf{场景B：周期性邮件摘要}。在场景B中的度量标准如下，对于每一个话题，返回的推文将被当做一个有序的列表，然后计算该返回列表的\textbf{归一化衰减累计得分}（\textit{normalized Discounted Cumulative Gain}）\footnote{\url{https://en.wikipedia.org/wiki/Discounted_cumulative_gain}}，即nDCG@k。其中k根据返回的信息池的深度决定，相对较小（评测中取k=10）。某一个话题的度量标准为评测时间内的NDCG@k平均得分，系统的度量标准为所有话题的NDCG@k平均得分。
 \end{itemize}
 
+\subsection{结果分析}
+\label{subsec2:res}
+系统在TREC 2015 Microblog Track的评测结果如表\ref{tab:trecRes}所示\upcite{lin2015overview}，我们将系统与参与测评的其他好的系统进行对比，其他系统使用的算法主要有基于K-L散度的语言模型的检索方法（\textbf{KL+LM}）\upcite{lvpkuicst}，K-L散度结合动态推送策略的方法（KL+DE）\upcite{tanuniversity}，tf-idf和BM25算法的混合模型集合质量模型的方法（\textbf{tf-idf+BM25+QM}）\upcite{bagdouri2015clip}。
+\begin{table}[!htbp]
+  \centering
+  \caption{Metrics performance comparison with other methods}
+  \label{tab:trecRes}
+  \begin{tabular}{cccc}
+  \hline
+   &ELG&nCG&nDCG@10\\
+  \hline
+  \textbf{BLKW+tf-idf+QM}&0.3086&\textbf{0.3349}&0.3345\\
+  \hline
+  \textbf{BLKW+BM25+QM}&0.2863&0.2974&\textbf{0.3670}\\
+  \hline
+  \textbf{KL+LM}&\textbf{0.3175}& 0.3127&0.2228\\
+  \hline
+  \textbf{KL+DE}&0.3150&0.2679&0.2200\\
+  \hline
+  \textbf{tf-idf+BM25+QM}&0.1753&0.2426&0.2420\\
+  \hline
+  \textbf{the optimal}&0.4623&0.4846&0.5014\\
+  \hline
+  \end{tabular}
+\end{table}
+
+Fan等人\upcite{lvpkuicst}提出了一种时间自适应的话题相关过滤框架来评估推文与用户查询之间的相关性，即\textbf{KL+LM}。基于Web的查询扩展技术用于解决词语失配的问题。系统使用K-L散度算法来度量推文和用户查询之间的相关性。在推送方面，系统使用一种时间自适应的方法来估测相关性的阈值和创新性的阈值。Tan等人\upcite{tanuniversity}提出了一种基于K-L散度和动态推送策略的框架。该框架中，模拟相关反馈技术用于估测话题中词语的概率分布。然后，用户查询作为基准模型，来计算每一个用户查询中的词语的K-L散度值。然后排名前10的词语被加入到用户查询中的特征向量中。在这些词语组成的特征空间中，经典的向量模型用于计算推文和用户查询间的相似度。最后，动态推送策略被利用来处理推送问题，这是一个多目标的秘书问题\footnote{\url{https://en.wikipedia.org/wiki/Secretary_problem}}。动态推送策略维护一个低阈值和一个高阈值来决定是否推送还是等待。
 \section{本章小结}
 \label{sec2:conclusion}
 
