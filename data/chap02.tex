@@ -366,7 +366,21 @@ $narr$ & 用户查询的详情\\
 场景A中返回结果形式为$(topic\_id,tweet\_id,delivery\_time,runtag)$的四元组，其中$topic\_id$为官方给出的用户查询ID（即话题），$tweet\_id$是推送的推文的ID，$delivery\_time$为系统的推送时间戳，$runtag$为系统的运行标志。场景B中返回结果形式为$(YYYYMMDD, topic\_id, Q0, tweet\_id, rank, score, runtag)$的七元组，其中$YYYYMMDD$为日期，$topic\_id$为官方给出的用户查询ID，$Q0$为TREC默认的一个字符（对系统无影响），$tweet\_id$为推文的ID，$rank$为改推文的排序，$score$为推文的得分，$runtag$为系统的运行标志。
 \subsection{评测标准}
 \label{subsec2:evalMetrics}
-
+在两个场景中，系统提交的所有结果都会由NIST的评测员独立的进行结果评估。每一条推文都会被评论员按照四挡进行打分，分别为\textbf{垃圾信息}，\textbf{不相关}，\textbf{相关}，\textbf{高相关}。为了简化任务，非英文的推文将直接标记为垃圾信息。如果一条推文中既包含英文信息又包含非英文信息，则由评测员来决定。值得注意的是，评测员会检查推文中的短链接里的内容，除此之外不会再有更多的评判依据。对于冗余的处理如下所示，对于所有相同内容的推文将被分到同一个组，系统只被允许提交一条谈论该话题的推文，多余的推文将是无效推文\upcite{lin2014overview,wang2015assessor}。针对场景A和场景B的评测指标具体如下所示。
+\begin{itemize}
+  \item \textbf{场景A：即时性信息推送}。在场景A中对于某一天中的某一个用户查询（即话题）的评测由两个时间衰减的度量来表示，详见公式（\ref{eq:ELG}）和公式（\ref{eq:nCG}）。某一个话题的指标由评测期（10天）内的该话题的平均指标来度量。系统的指标由所有话题的平均指标来度量。第一个度量指标为\textbf{期望时延得分}（\textit{Expected Latency-discounted Gain}），借鉴Temporal Summarization track中的度量\upcite{aslam2014trec}，如公式（\ref{eq:ELG}）所示,
+  \begin{equation}
+  \label{eq:ELG}
+    ELG = \frac{1}{N}\sum {G\left( {\mathbf{ts}} \right)}
+  \end{equation}
+  其中$N$表示针对于一个话题一天内返回的推文数目，$G\left( {\mathbf{ts}} \right)$为每一条推文的得分。垃圾信息和不相关的推文得分为0，相关的推文得分为0.5，高相关的推文得分为1。相同内容的推文只有一条推文能够得分，不会重复计算得分。同时，一个时延惩罚将用于检查系统推送的实时性，即检查系统的推送时间戳和推文的创建时间戳之间的时间间隔。得分的时延衰减系数应用于所有推文的得分计算，衰减系数为$MAX\left( {0,\left( {100 - delay} \right)/100} \right)$，$delay$为时间间隔，以分钟为单位。有上述可知，如果系统的推送时间和推文的创建时间间隔小于1分钟，则系统将不会受到时延惩罚；如果系统的推送时间和推文的创建时间间隔大于100分钟，则得分将被惩罚为0。度量指标$ELG$将作为主要的度量，第二个指标为\textbf{标准累计得分}（\textit{normalized Cumulative Gain}），如公式（\ref{eq:nCG}）所示，
+  \begin{equation}
+  \label{eq:nCG}
+    nCG = \frac{1}{Z}\sum {G\left( {\mathbf{ts}} \right)}
+  \end{equation}
+  其中$Z$为最大的允许推送的推文数（测评中设置为10），$G\left( {\mathbf{ts}} \right)$的计算与$ELG$中相同。按照如上定义，则在评判的时候将会出现一些边缘情况。例如在某一天中的某一个话题没有出现相关的推文信息，则系统当天应当是“安静的”，即不推送任何信息给对该话题感兴趣的用户。为了处理没有某个话题出现相关的信息和系统没有推送信息给某个话题这两种情况的评测，可以分成如下两种情况。第一种情况是该天有某话题的相关推文信息，如果系统没有推送推文，则系统得零分，如果系统推送了推文，则按照公式计算；第二种情况是该天没有某话题的相关推文信息，如果系统没有推送推文，则系统得满分，如果系统推送了推文，则按照公式计算。
+  \item \textbf{场景B：周期性邮件摘要}。在场景B中的度量标准如下，对于每一个话题，返回的推文将被当做一个有序的列表，然后计算该返回列表的\textbf{归一化衰减累计得分}（\textit{normalized Discounted Cumulative Gain}）\footnote{\url{https://en.wikipedia.org/wiki/Discounted_cumulative_gain}}，即nDCG@k。其中k根据返回的信息池的深度决定，相对较小（评测中取k=10）。某一个话题的度量标准为评测时间内的NDCG@k平均得分，系统的度量标准为所有话题的NDCG@k平均得分。
+\end{itemize}
 
 \section{本章小结}
 \label{sec2:conclusion}
