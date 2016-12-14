@@ -73,7 +73,7 @@ Gruhl等人\upcite{gruhl2004information}首先信息传播模型的传播概率�
   \item \textbf{转发行为}，指用户阅读到时间线上的信息后，对信息进行了转发，即自身也变成了一个传播源。转发行为不仅对于事件传播影响力的贡献是确定性的，而且转发信息的用户自身也具备了传播能力，产生了级联效应。
 \end{itemize}
 
-由上可以看出不同的行为对于事件的传播影响的贡献是不同的，针对不同的用户的行为，需要按照不同的计算方式来衡量其对于事件传播影响力的贡献。在独立级联模型下事件的初始种子节点集合为发布事件中信息的用户集合。令发布事件中信息的用户集合为$S=\{s_1,s_2,\cdots,s_m\}$，其中$s_i$为某个用户，则初始种子节点集合为$S$。在信息传播过程中，转发信息的用户在转发行为的时刻转变为激活节点，具备传播信息的能力，即可能激活其他的用户变为激活状态，形成级联效应。
+由上可以看出不同的行为对于事件的传播影响的贡献是不同的，针对不同的用户的行为，需要按照不同的计算方式来衡量其对于事件传播影响力的贡献。在独立级联模型下事件的初始种子节点集合为发布事件中信息的用户集合。令发布事件中信息的用户集合为$S=\{s_1,s_2,\cdots,s_k\}$，其中$s_i$为某个用户，则初始种子节点集合为$S$。在信息传播过程中，转发信息的用户在转发行为的时刻转变为激活节点，具备传播信息的能力，即可能激活其他的用户变为激活状态，形成级联效应。
 
 \begin{figure}[!ht]
     \centering
@@ -83,9 +83,57 @@ Gruhl等人\upcite{gruhl2004information}首先信息传播模型的传播概率�
 \end{figure}
 
 如图\ref{fig:affairInf}所示，图中为三种行为在事件的传播中对影响力的贡献示意图。例如节点$v_4$转发了节点$v_2$发布的信息，则节点$v_4$对于事件传播影响力的贡献是确定性的，并且节点$v_4$具备了传播信息的能力。节点$v_7$以一定的概率阅读了节点$v_4$发布的信息，故$v_7$对于事件的传播影响力贡献是概率性的。节点$v_8$评论了节点$v_4$发布的信息，故$v_8$对于事件的传播影响力贡献是确定性的。故计算事件在图\ref{fig:affairInf}中的传播影响力为计算三种行为对于传播影响力的贡献。令$I\left(A\right)$表示事件$A$的传播影响力，定义其为影响到的节点的数目。假设途中节点$v_7$阅读到信息的概率为0.6，节点$v_12$阅读到信息的概率为0.4，则事件的传播影响力$I\left(A\right)=13$。
+
+在计算事件的传播影响力时，转发行为和评论行为的贡献是确定性的，而阅读行为是概率性的。因此，相对于传统的模型，需要对用户阅读到信息的过程进行建模。
 \section{方法描述}
 \label{sec5:method}
+事件传播影响力的计算与传统模型的传播影响力的计算相比，面临如下几个问题。首先是多条信息的传播网络图的融合。根据定义\ref{def:event}，事件由多条信息组成，因此事件的信息源是多源的。其次，社交网络中存在着很多垃圾用户，这些用户对于事件的传播影响力计算会造成干扰，因此需要将垃圾用户进行滤除。然后，阅读行为为一种概率性的行为，概率与信息发布的时间和用户的活跃时间的间隔相关。因此需要对阅读行为进行建模。
+\subsection{事件传播网络融合}
+\label{subsec5:mix}
+在给定了事件$A=\{a_1, a_2, \cdots, a_n\}$后，我们可以根据组成事件的信息的源节点得到种子节点集合$S=\{s_1,s_2,\cdots,s_k\}$。每一个种子节点$s_i$的传播都是一个网络，而微博用户之间的网络拓扑结构是一个高集聚性的复杂网络，种子节点$s_i$的后继节点中会有大量相同的节点。因此，在进行多源信息传播网络融合时需要对重复的网络节点进行去重。
 
+得到种子节点集合后，可以利用新浪微博提供的API爬取种子节点的粉丝，即后继节点。然后，对于转发或者评论事件$A$中不同的信息$a_i$而形成的边进行去重。事件传播网络融合的算法可以描述如算法\ref{alg:affairDiff}所示，
+
+\begin{algorithm}[!ht]
+    \caption{$Merge(A,S)$}
+    \label{alg:affairDiff}
+    \begin{algorithmic}[1]
+	\REQUIRE $A,S$
+    \ENSURE $\mathcal{G}$
+    \STATE initialize $\mathcal{G}=\left(\mathcal{V},\mathcal{E}\right)$, $\mathcal{V}=\emptyset$, $\mathcal{E}=\emptyset$
+    \STATE initialize $Q = \emptyset$
+    \FOR{$s_i \in S$}
+    		\STATE $\mathcal{V} = \mathcal{V} \cup \{s_i\}$
+    	\ENDFOR
+    	\FOR{$a_i \in A$}
+    		\STATE $v = pop\left(a_i\right)$
+    		\IF{$v \notin Q$}
+    			\IF{$v \in Q_{repost}\left(a_i\right)$ and $e_{u,v} \notin \mathcal{E}$}
+    				\WHILE{$Q_{repost}\left(a_i\right) \neq \emptyset$}
+    					\STATE $Q = Q \cup \{v\}$
+    					\STATE $\mathcal{V} = \mathcal{V} \cup \{v\}$
+    					\STATE $e_{u,v}.p = 1$, $\mathcal{E} = \mathcal{E} \cup \{e_{u,v}\}$
+    					\STATE $Q_{repost}\left(a_i\right)=Q_{repost}\left(a_i\right) \cup \{v\}$		
+    				\ENDWHILE
+    			\ENDIF
+    			\IF{$v \in Q_{comment}\left(a_i\right)$ and $e_{u,v} \notin \mathcal{E}$}
+    				\STATE $Q = Q \cup \{v\}$
+    				\STATE $\mathcal{V} = \mathcal{V} \cup \{v\}$
+    				\STATE $e_{u,v}.p = 1$, $\mathcal{E} = \mathcal{E} \cup \{e_{u,v}\}$
+    			\ENDIF
+    			\IF{$v \in Q_{follwer}\left(a_i\right)$ and $e_{u,v} \notin \mathcal{E}$}
+    				\STATE $Q = Q \cup \{v\}$
+    				\STATE $\mathcal{V} = \mathcal{V} \cup \{v\}$
+    				\STATE $\mathcal{E} = \mathcal{E} \cup \{e_{u,v}\}$
+    			\ENDIF
+    		\ENDIF
+    	\ENDFOR
+    \end{algorithmic}
+\end{algorithm}
+
+首先对事件传播网络图$\mathcal{G}$进行初始化，对节点集合$\mathcal{V}$和边集合$\mathcal{E}$都赋值为空，如算法中第1行所示。设计一个队列$Q$来记录已经存在的节点，初始值为空，见算法中的第2行。第3行至第5行为将所有的种子节点加入事件传播网络图中。然后算法对事件传播中的三种行为，即转发行为、评论行为和阅读行为分别进行不同的处理。针对转发行为，令$Q_{repost}\left(a_i\right)$表示转发了信息$a_i$的用户集合。如果节点$v$对事件$A$进行了转发且不重复，则算法记录其传播影响，将节点$v$加入到队列$Q$中，更新图$\mathcal{G}$。由于转发行为对于事件传播影响力的贡献是确定性的，故边的权重$e_{u,v}.p = 1$。转发行为使得节点$v$也具备传播能力，故将节点$v$加入队列$Q_{repost}\left(a_i\right)$。针对评论行为，令$Q_{comment}\left(a_i\right)$表示评论了信息$a_i$的用户集合。如果节点$v$对事件$A$进行了评论且不重复，则算法记录其传播影响，将节点$v$加入到队列$Q$中，更新图$\mathcal{G}$。由于评论行为对于事件传播影响力的贡献是确定性的，故边的权重$e_{u,v}.p = 1$。评论行为不能使得节点$v$变成激活状态，故节点$v$不能继续传播。针对阅读行为，令$Q_{follwer}\left(a_i\right)$为发布信息$a_i$的用户$u$的粉丝集合，粉丝阅读到信息是一个概率性的事件，因此对边的权重不能进行赋值，需要进一步的处理，算法仅更新了图$\mathcal{G}$。
+
+通过事件传播网络融合，我们将事件$A$中的多源信息传播网络进行融合，对三种不同的行为分别处理，最终得到事件$A$的传播图$\mathcal{G}=\left(\mathcal{V},\mathcal{E}\right)$。
 \section{实验分析}
 \label{sec5:experiment}
 
