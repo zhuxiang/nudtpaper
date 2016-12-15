@@ -235,7 +235,7 @@ $narr$ & 用户查询的详情\\
 \label{eq:lr}
   h_ {\bm{\theta}} \left(\mathbf{x}\right) = \frac{1}{1 + e^{-{{\bm{\theta}}^T}\mathbf{x}}}
 \end{equation}
-其中$\mathbf{x}=\left({x_1},{x_2},\cdot,{x_n}\right)$是抽取的社交属性，$\bm{\theta}=\left({\theta _1},{\theta _2},\cdot,{\theta _n}\right)$为待训练的参数。实现一般来说，用户更倾向于接受文本质量高的、由权威发布的信息，基于以上假设，我们选取如下的社交属性作为特征。
+其中$\mathbf{x}=\left({x_1},{x_2},\cdots,{x_n}\right)$是抽取的社交属性，$\bm{\theta}=\left({\theta _1},{\theta _2},\cdots,{\theta _n}\right)$为待训练的参数。实现一般来说，用户更倾向于接受文本质量高的、由权威发布的信息，基于以上假设，我们选取如下的社交属性作为特征。
 \begin{itemize}
   \item \textbf{用户粉丝数}（\textit{FollowerCnt}），表示发布推文信息的用户的粉丝数。粉丝数高的用户表示该用户在社交网络中是受欢迎的，因此该用户发布的推文信息很大概率上是高质量的信息。
   \item \textbf{用户推文数}（\textit{StatusCnt}），表示发布推文信息的用户历史上发布的推文数。用户发布推文的数目预示着用户的活跃度，而一个活跃的用户更可能发布高质量的信息。
