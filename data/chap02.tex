@@ -38,9 +38,9 @@
 本节首先将对社交网络中的实时个性化搜索的任务进行定义，并将其形式化，然后对TREC 2015 Microblog Track的具体任务进行描述。
 
 社交网络中的实时个性化搜索任务可以描述如下。在社交网络中平台中，令信息流表示为$\mathbf{T}$，信息流在社交网络中随着时间不断地产生，信息流$\mathbf{T}$中包含许多种类的话题。令$\mathbf{P}$表示用户集合，每一个用户$p_i \in \mathbf{P}$表示着用户感兴趣的一个话题，用户的兴趣爱好可以通过文本等形式来表示。则社交网络中的实时个性化搜索任务可以定义如下，
-\begin{mydef}[实时个性化搜索]\label{def:realPrnzdSearch}
+\begin{definition}[实时个性化搜索]\label{def:realPrnzdSearch}
 在社交网络中，给定信息流$\mathbf{T}$以及用户集合$\mathbf{P}$，实时个性化搜索的目的是针对不同的用户兴趣爱好$p_i \in \mathbf{P}$，自动地实时地为其推荐高质量的、相关的信息。
-\end{mydef}
+\end{definition}
 
 根据定义\ref{def:realPrnzdSearch}可知，社交网络中的实时个性化搜索需要解决的几个核心关键问题如下。首先是如何表示信息流与用户，其次是如何实现实时推荐，以及如何保证信息的高质量和高相关性。社交网络平台中信息的实时个性化搜索任务可以通过图\ref{fig:real-timeSearch}来表示。
 \begin{figure}[!htbp] % use float package if you want it here
