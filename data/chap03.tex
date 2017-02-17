@@ -109,11 +109,32 @@
     \end{algorithmic}
 \end{algorithm}
 
-本节中的算法步骤可以概括为算法\ref{alg:cnn}所示。如算法VecCNN算法所示，输入为已标注的长文本信息集合，即文档集合$\mathbf{D}$，输出为所设计的卷积神经网络各层的参数。算法中的第1行至第6行为词语的tf-idf值计算。在这个步骤中，我们计算了每一个文档中各个词语的tf-idf值，为之后的文本摘要提取做准备。算法中的第7行至第12行，我们根据语句中词语的tf-idf值来对文档中的语句进行排序，从而挑选出关键语句代表文档的主题。这个过程减少了输入文本信息的规模，方便了之后卷积神经网络的训练。算法的第13行至第17行是卷积神经网络的训练。我们选择top-$k$的语句构建矩阵，作为卷积神经网络的输入，计算各个神经元中参数的梯度，通过迭代的方法求得极值，训练得到网络各层的参数。
-
+本节中的算法步骤可以概括为算法\ref{alg:cnn}所示。如\textit{VecCNN}算法所示，输入为已标注的长文本信息集合，即文档集合$\mathbf{D}$，输出为所设计的卷积神经网络各层的参数。算法中的第1行至第6行为词语的tf-idf值计算。在这个步骤中，我们计算了每一个文档中各个词语的tf-idf值，为之后的文本摘要提取做准备。算法中的第7行至第12行，我们根据语句中词语的tf-idf值来对文档中的语句进行排序，从而挑选出关键语句代表文档的主题。这个过程减少了输入文本信息的规模，方便了之后卷积神经网络的训练。算法的第13行至第17行是卷积神经网络的训练。我们选择top-$k$的语句构建矩阵，作为卷积神经网络的输入，计算各个神经元中参数的梯度，通过迭代的方法求得极值，训练得到网络各层的参数。
 
 \section{实验分析}
 \label{sec3:experiment}
+在本节中，我们进行了几组实验来验证所提出的方法。首先，我们介绍本节中实验所使用的实验数据集以及实验设置。然后，我们将展示实验结果并详细地分析实验结果。本节中所有的实验都在4 CPU、32 GB内存的服务器运行，操作系统为Ubuntu 14.04 x64。文章的算法基于Python实现，在python 3.4的环境下运行。
 
+\subsection{实验设置}
+\label{subsec3:settings}
+为了验证与评估我们所提出的算法，我们使用不同领域和量级大小的数据集来进行实验。其中20 newsgroups文本数据集（\textit{newsgroups}\footnote{\url{http://scikit-learn.org/stable/datasets/twenty_newsgroups.html}})包含大约18,000篇20个主题的新闻报道。数据集分成两个子类，一类用于训练，一类用于实验测试。其中Large Movie Review数据集\upcite{maas2011learning}（\textit{LMR}\footnote{\url{http://ai.stanford.edu/~amaas/data/sentiment/}}）为大电影评论的数据集，为二元的情感分类数据集。其中包含约25,000篇情感鲜明的评论用于训练，还有25,000篇评论用于训练。Li等人\upcite{li2002learning}提供了一个问题分类的实验数据集（\textit{QC}\footnote{\url{http://cogcomp.cs.illinois.edu/Data/QA/QC/}}）。数据集包括5个训练集以及一个TREC中的真实测试集。数据集的一个简要说明如表\ref{tab:dataset}所示。
+
+\begin{table}
+    \centering
+    \caption{Dataset characteristics}\label{tab:dataset}
+    \begin{tabular}{ccc}
+        \hline
+         & \textit{size} & \textit{label}\\
+        \hline
+        \textit{newsgroups} & 18000 & 20\\
+        \hline
+        \textit{LMR} & 50000 & 2\\
+        \hline
+        \textit{QC} & 15500 & 6\\
+        \hline
+    \end{tabular}
+\end{table}
+
+在算法的比较方面，我们将所提出的\textit{VecCNN}算法与两个基准算法朴素贝叶斯（\textit{Naive Bayes}）和支撑向量机（\textit{Support Vector Machine}）进行比较。
 \section{本章小结}
 \label{sec3:conclusion}
