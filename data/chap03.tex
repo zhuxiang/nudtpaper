@@ -81,6 +81,37 @@
 	\mathbf{c}  = ({c_1},{c_2},...,{c_{N - h + 1}})^T
 \end{equation}
 其中$\mathbf{c} \in \mathbb{R}^{N-h+1}$。在经过卷积层后，得到的特征维数仍然很高，很容易出现过拟合的现象。为了解决这个问题，我们在卷积层后加上一个池化（Pooling）操作，也就是子采样（Subsampling），构成子采样层。子采样层能够大大降低特征的维数，避免过拟合。池化操作作用在特征向量$\mathbf{c}$将得到$\mathbf{c}$中的最大值$c_{\max} = \max\limits_{c_i \in \mathbf{c}} c_i$。子采样层的目的是为了得到特征向量中最为重要的特征值，即具有最大的特征值。为了得到更多的特征值，我们可以调整窗口的大小来产生不同的特征向量。最后，子采样层得到的特征作为最后分类器的输入，该层为一个softmax函数的全连接层，输出层为文档在各个类别上的概率分布。
+
+此外，我们使用了两个通道\upcite{kim2014convolutional}的词向量作为输入。其中一个通道在训练过程中保持不变，另一个通道通过反向传播进行微调。每一个滤波器都会作用于这两个通道来产生不同的特征。
+
+\begin{algorithm}[!ht]
+    \caption{\textit{VecCNN}($\mathbf{D}$)}\label{alg:cnn}
+    \begin{algorithmic}[1]
+    \REQUIRE $\mathbf{D}$
+    \ENSURE \textit{CNN}
+    \FOR{each $\mathbf{d}_j$ in $\mathbf{D}$}
+        \FOR{each $t_i$ in $\mathbf{d}_j$}
+            \STATE{${tf}_{ij} = \frac{p_{ij}}{\sum_{tl \in \mathbf{d}_j}{p_{lj}}}$}
+            \STATE{${idf}_i = \log \frac{\vert \mathbf{D} \vert}{1 + \vert \{\mathbf{d} \in \mathbf{D} : \mathbf{t}_i \in \mathbf{d}\}\vert}$}
+        \ENDFOR
+    \ENDFOR
+    \FOR{each $\mathbf{d}_j$ in $\mathbf{D}$}
+        \FOR{each $\mathbf{s}_i$ in $\mathbf{d}_j$}
+            \STATE{$I(\mathbf{s}_i, \mathbf{d}_j)=\frac{\sum \nolimits_{\mathbf{t}_i \in \mathbf{s}_i} {tf}_{ij}\cdot{idf}_i }{\log \left(\vert\mathbf{s}_i\vert\right)}$}
+        \ENDFOR
+        \STATE{$\mathbf{S}_j = \left\{\mathbf{s}'_1, \mathbf{s}'_2, \cdots, \mathbf{s}'_k\right\}$}
+    \ENDFOR
+    \FOR{each $\mathbf{S}_j$ in $\mathbf{D}$}
+        \STATE{generate text matrix $\mathbf{A}_j$ based on $\mathbf{S}_j$}
+    \ENDFOR
+    \STATE{train \textit{CNN} based on the matrix set}
+    \STATE {\textbf{return:} \textit{CNN}}
+    \end{algorithmic}
+\end{algorithm}
+
+本节中的算法步骤可以概括为算法\ref{alg:cnn}所示。如算法VecCNN算法所示，输入为已标注的长文本信息集合，即文档集合$\mathbf{D}$，输出为所设计的卷积神经网络各层的参数。算法中的第1行至第6行为词语的tf-idf值计算。在这个步骤中，我们计算了每一个文档中各个词语的tf-idf值，为之后的文本摘要提取做准备。算法中的第7行至第12行，我们根据语句中词语的tf-idf值来对文档中的语句进行排序，从而挑选出关键语句代表文档的主题。这个过程减少了输入文本信息的规模，方便了之后卷积神经网络的训练。算法的第13行至第17行是卷积神经网络的训练。我们选择top-$k$的语句构建矩阵，作为卷积神经网络的输入，计算各个神经元中参数的梯度，通过迭代的方法求得极值，训练得到网络各层的参数。
+
+
 \section{实验分析}
 \label{sec3:experiment}
 
