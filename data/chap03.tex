@@ -121,7 +121,7 @@
 
 \begin{table}
     \centering
-    \caption{Dataset characteristics}\label{tab:dataset}
+    \caption{数据集特性}\label{tab:dataset}
     \begin{tabular}{ccc}
         \hline
          & \textit{size} & \textit{label}\\
@@ -135,6 +135,120 @@
     \end{tabular}
 \end{table}
 
-在算法的比较方面，我们将所提出的\textit{VecCNN}算法与两个基准算法朴素贝叶斯（\textit{Naive Bayes}）和支撑向量机（\textit{Support Vector Machine}）进行比较。
+在算法的比较方面，我们将所提出的\textit{VecCNN}算法与两个基准算法朴素贝叶斯（\textit{Naive Bayes}）和支撑向量机（\textit{Support Vector Machine}）进行比较。我们选取了几个评判准则来评估算法的性能，包括准确率、召回率、$F_1$值。为了测试\textit{VecCNN}算法的可扩展性，我们在不同量级大小的数据集中进行实验，记录其运行时间。此外，实验中，词向量模型的维度设置为$m=200$，文档长度的截断阈值设置为$n=300$。
+
+\subsection{结果分析}
+\label{subsec3:analysis}
+为了验证算法的准确性，我们在数据集\textit{newsgroups}、\textit{LMR}和\textit{QC}上运行了朴素贝叶斯算法、支撑向量机算法以及\textit{VecCNN}算法，进行对比分析。对于每一个数据集，实验运行算法5次，取平均值作为最后的结果。准确率的实验结果如表\ref{tab:avgPrecision}所示。
+
+\begin{table}[!ht]
+    \centering
+    \caption{算法在各数据集上的平均准确率}\label{tab:avgPrecision}
+    \begin{tabular}{cccc}
+        \hline
+         & \textit{newsgroups} & \textit{LMR} & \textit{QC} \\
+        \hline
+        \textit{Bayes} & 0.36 & 0.66 & 0.51\\
+        \hline
+        \textit{SVM} & 0.47 & 0.80 & 0.52\\
+        \hline
+        \textit{VecCNN} & \textbf{0.72} & \textbf{0.88} & \textbf{0.99}\\
+        \hline
+    \end{tabular}
+\end{table}
+
+从表\ref{tab:avgPrecision}可以看出\textit{VecCNN}算法与朴素贝叶斯算法、支撑向量机算法相比，在\textit{newsgroups}数据集上的分类准确率相对较高。在\textit{LMR}数据集上，\textit{VecCNN}算法与支撑向量机算法的准确率相近，而朴素贝叶斯算法准确率较低。在\textit{QC}数据集上，\textit{VecCNN}算法的准确率远好于其余两个算法。由此可以看出，在多元分类问题中，\textit{VecCNN}相对其他两种算法准确率更高，而在二元分类问题中，\textit{VecCNN}与支撑向量机算法的准确率相近。表\ref{tab:avgRecall}为各个算法在数据集上的召回率结果，表\ref{tab:avgF1}为各个算法在数据集上的$F_1$值结果。结果都显示了\textit{VecCNN}算法的性能。
+
+\begin{table}[!ht]
+    \centering
+    \caption{算法在各数据集上的平均召回率}\label{tab:avgRecall}
+    \begin{tabular}{cccc}
+        \hline
+         & \textit{newsgroups} & \textit{LMR} & \textit{QC} \\
+        \hline
+        \textit{Bayes} & 0.18 & 0.66 & 0.51\\
+        \hline
+        \textit{SVM} & 0.46 & 0.80 & 0.52\\
+        \hline
+        \textit{VecCNN} & \textbf{0.69} & \textbf{0.93} & \textbf{0.99}\\
+        \hline
+    \end{tabular}
+\end{table}
+
+\begin{table}[!ht]
+    \centering
+    \caption{算法在各数据集上的平均$F_1$值}\label{tab:avgF1}
+    \begin{tabular}{cccc}
+        \hline
+         & \textit{newsgroups} & \textit{LMR} & \textit{QC} \\
+        \hline
+        \textit{Bayes} & 0.18 & 0.66 & 0.51\\
+        \hline
+        \textit{SVM} & 0.45 & 0.80 & 0.51\\
+        \hline
+        \textit{VecCNN} & \textbf{0.70} & \textbf{0.88} & \textbf{0.99}\\
+        \hline
+    \end{tabular}
+\end{table}
+
+对于\textit{LMR}数据集，我们计算了各个算法的roc曲线，如图\ref{fig:roc}所示。图中的roc曲线描述了各个算法训练出的二元分类器在判别阈值变化时，性能的变化。曲线下的面积越大说明算法的性能越好。
+
+\begin{figure}[!htbp]
+  \centering
+  % Requires \usepackage{graphicx}
+  \includegraphics[width=0.55\textwidth]{roc}
+  \caption{算法在\textit{LMR}数据集上的roc曲线}
+  \label{fig:roc}
+\end{figure}
+
+图\ref{fig:roc}的横坐标\textit{fpr}为假阳性率（false positive rate），表示被预测为正样本的负样本比例；纵坐标\textit{tpr}为假阳性率（true positive rate），表示被预测为正样本的正样本比例。由图可以看出，\textit{VecCNN}算法的roc曲线下面积相对较大，说明\textit{VecCNN}算法相对于其他两个算法更加的有效。
+
+\textit{newsgroups}和\textit{QC}数据集为多标签数据集，我们给出了算法在各个类别的准确率和召回率，如图\ref{fig:barNGP}至\ref{fig:barQCR}所示。
+
+\begin{figure}[!htbp]
+   \begin{minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{barNGP}
+     \caption{算法在\textit{newsgroups}数据集上各类别的准确率}
+     \label{fig:barNGP}
+   \end{minipage}
+   \hfill
+   \begin{minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{barNGR}
+     \caption{算法在\textit{newsgroups}数据集上各类别的召回率}
+     \label{fig:barNGR}
+   \end{minipage}
+   \\ 
+   \begin {minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{barQCP}
+     \caption{算法在\textit{QC}数据集上各类别的准确率}
+     \label{fig:barQCP}
+   \end{minipage}
+   \hfill
+   \begin {minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{barQCR}
+     \caption{算法在\textit{QC}数据集上各类别的召回率}
+     \label{fig:barQCR}
+   \end{minipage}
+\end{figure}
+
+如图\ref{fig:barNGP}所示，\textit{VecCNN}算法的准确率在绝大多数类别中要优于支撑向量机算法，在所有的类别中都比朴素贝叶斯算法要好高。图\ref{fig:barNGR}表示，在绝大多数类别中，\textit{VecCNN}算法的召回率都要优于其他两种算法。图\ref{fig:barQCP}显示了在\textit{QC}数据集各类型的问题分类中，\textit{VecCNN}算法准确率相对于其他两种算法更高。图\ref{fig:barQCR}显示了\textit{VecCNN}算法在\textit{QC}数据集上各类别的召回率更高。由以上的实验，我们验证了所提出算法的有效性，\textit{VecCNN}算法在多元分类问题上相对于另外两种基准算法性能更好，在二元分类问题上同样也有效。
+
+为了验证\textit{VecCNN}算法的可扩展性，我们使用不同规模的数据集来运行实验，记录其运行时间。对于数据集，我们均匀随机地选取指定大小规模的子集，运行算法5次，计算其平均运行时间作为最终结果。实验结果如图\ref{fig:scalability}所示。
+
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=0.55\textwidth]{scalability}
+    \caption{算法的可扩展性}
+    \label{fig:scalability}
+\end{figure}
+
+图\ref{fig:scalability}中横坐标为数据集相对于原始数据集的比例，纵坐标为训练网络的运行时间。我们可以看出，运行时间的增长是近似线性的，因此所提出的算法具备可扩展性。
 \section{本章小结}
 \label{sec3:conclusion}
+本章提出了一个结合文本摘要提取、词向量模型以及卷积神经网络的长文本信息分类算法。首先，算法通过文本中词语的tf-idf值来对关键语句进行排序，提取文本核心语句，得到文本摘要。然后，所得到的文本摘要通过词向量模型转换为向量形式。最后，文本转换成的向量作为神经网络的输入用于训练网络参数，从而得到分类器。其中，算法提出了一种基于词语tf-idf值的语句排序方法，能够快速的提取文本的摘要。同时，算法将词向量模型与卷积神经网络结合来实现文本分类。实验验证了所提出算法的正确性和有效性，在多个评判准则中，所提出的算法都优于基准算法。
+
+下一步工作中，训练更加准确的词向量模型以及根据不同的数据调整神经网络的结构是提高文本分类性能的途径。
