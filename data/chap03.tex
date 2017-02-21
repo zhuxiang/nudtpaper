@@ -8,6 +8,11 @@
 本章的内容组织如下：第\ref{sec3:motivation}节介绍了研究动机，讨论了传统的文本分类方法的不足以及深度学习方法对于文本分类的帮助。第\ref{sec3:definition}节介绍了相关定义，对本章中相关概念和所提出的问题进行了符号化的定义。第\ref{sec3:method}介绍了方法描述，详细地阐述了本章所提出的框架以及相关算法的详细过程。第\ref{sec3:experiment}节进行了实验分析，设计了一系列的实验，验证了本章所提出的方法，并对实验结果进行了分析。最后，第\ref{sec3:conclusion}对本章的内容进行了总结。
 \section{研究动机}
 \label{sec3:motivation}
+随着各类社交媒体的蓬勃发展，人们所需要面对的信息量呈指数式爆炸增长。信息中包含各种各样的内容和话题，信息的呈现方式多样，包括文字、图片、视频以及音频等等。这对人们处理信息的能力提出了新的挑战和要求。在社交网络的传播分析中，文本分类研究是数据分析与挖掘的基础。社交网络中，人人都可以是信息的生产者、传播者和接收者。与传统的媒体相比，这种形式极大地加速了信息的传播速率。而人们很难及时处理扑面而来的海量信息，将会淹没在信息洪流之中，从而无法有效地获取自身所感兴趣的、对自身有用的信息。因此，在大数据时代，如何处理海量数据的文本分类问题是一个极具挑战性的任务。
+
+传统的数据挖掘对于分类问题已经进行了长期的研究，提出了许多实用的算法来解决分类问题。例如支撑向量机（Support Vector Machine）算法\upcite{cortes1995support}，该算法通过寻找一个超平面来分割不同类别的数据，从而进行分类。又例如k近邻（k-Nearest Neighbors）算法\upcite{hastie1996discriminant}，该算法的指导思想是“近朱者赤，近墨者黑”，一个待分类的样本将由特征空间中离它最近的k个样本的类别所决定。其余分类算法还包括朴素贝叶斯（Naive Bayes）算法、决策树（Decision Trees）算法以及神经网络（Neural Network）模型等等。这些算法在文本分类问题上都具有实用性，但是随着数据量的增长、类别的多样性、数据的稀疏性等问题的出现，算法的性能都有所下降。在信息量急剧增长的社交网络中，需要新的方法来解决文本的分类问题。
+
+随着深度学习技术的发展，各个领域都在利用深度学习来解决其领域内的问题。例如在语音识别方面，Graves等人\upcite{graves2013speech}提出了一种使用循环神经网络（Recurrent Neural Networks）的语音识别技术，该方法结合了多层表示以及长范围上下文的灵活使用来提高循环神经网络的性能。Sainath等人\upcite{sainath2015convolutional}整合卷积神经网络（Convolutional Neural Networks）、LSTM（Long Short-Term Memory）以及深度神经网络（Deep Neural Networks）到一个统一框架中，利用CNN能减少频率变化、LSTM对于时序建模以及DNN将特征映射到更可分空间的特性，提高了语音识别的性能。在目标检测与识别方面，Szegedy等人\upcite{szegedy2015going}针对大规模图像识别问题，通过增加神经网络的深度和宽度，同时保持计算量不变，实现了一个22层的深度神经网络GoogleNet。Erhan等人\upcite{erhan2014scalable}针对目标识别的问题，应用了深度神经网络来进行建模。在机器翻译方面，Sutskever等人\upcite{sutskever2014sequence}提出了一个多层的LSTM网络将输入序列映射为一个指定维度的向量，然后另外一个LSTM网络用来进行解码，实现不同语言之间的机器翻译。Bahdanau等人\upcite{bahdanau2014neural}猜想定长向量是使用深度学习实现机器翻译的瓶颈，基于编码器-解码器的基础架构，提出了一个对于目标词语自动搜索源语句的模型。在语言模型方面，Chelba等人\upcite{chelba2013one}给出了一个新的基础数据集，用于评测统计语言模型，并对几种流行的语言模型进行了评测，RNN相对于其余的语言模型取得了更好的表现。在语法分析方面，Vinyals等人\upcite{vinyals2015grammar}针对自然语言处理中的语法分析问题，提出了一个领域未知关注增强模型，能在人工干预很小的情况下，取得很好的效果。深度学习技术在众多领域都取得了不错的效果，因此，使用深度学习技术来解决文本分类问题是一个可行的方法。
 
 \section{相关定义}
 \label{sec3:definition}
@@ -117,11 +122,11 @@
 
 \subsection{实验设置}
 \label{subsec3:settings}
-为了验证与评估我们所提出的算法，我们使用不同领域和量级大小的数据集来进行实验。其中20 newsgroups文本数据集（\textit{newsgroups}\footnote{\url{http://scikit-learn.org/stable/datasets/twenty_newsgroups.html}})包含大约18,000篇20个主题的新闻报道。数据集分成两个子类，一类用于训练，一类用于实验测试。其中Large Movie Review数据集\upcite{maas2011learning}（\textit{LMR}\footnote{\url{http://ai.stanford.edu/~amaas/data/sentiment/}}）为大电影评论的数据集，为二元的情感分类数据集。其中包含约25,000篇情感鲜明的评论用于训练，还有25,000篇评论用于训练。Li等人\upcite{li2002learning}提供了一个问题分类的实验数据集（\textit{QC}\footnote{\url{http://cogcomp.cs.illinois.edu/Data/QA/QC/}}）。数据集包括5个训练集以及一个TREC中的真实测试集。数据集的一个简要说明如表\ref{tab:dataset}所示。
+为了验证与评估我们所提出的算法，我们使用不同领域和量级大小的数据集来进行实验。其中20 newsgroups文本数据集（\textit{newsgroups}\footnote{\url{http://scikit-learn.org/stable/datasets/twenty_newsgroups.html}})包含大约18,000篇20个主题的新闻报道。数据集分成两个子类，一类用于训练，一类用于实验测试。其中Large Movie Review数据集\upcite{maas2011learning}（\textit{LMR}\footnote{\url{http://ai.stanford.edu/~amaas/data/sentiment/}}）为大电影评论的数据集，为二元的情感分类数据集。其中包含约25,000篇情感鲜明的评论用于训练，还有25,000篇评论用于训练。Li等人\upcite{li2002learning}提供了一个问题分类的实验数据集（\textit{QC}\footnote{\url{http://cogcomp.cs.illinois.edu/Data/QA/QC/}}）。数据集包括5个训练集以及一个TREC中的真实测试集。数据集的一个简要说明如表\ref{tab:datasetCNN}所示。
 
 \begin{table}
     \centering
-    \caption{数据集特性}\label{tab:dataset}
+    \caption{数据集特性}\label{tab:datasetCNN}
     \begin{tabular}{ccc}
         \hline
          & \textit{size} & \textit{label}\\
@@ -237,13 +242,13 @@
 
 如图\ref{fig:barNGP}所示，\textit{VecCNN}算法的准确率在绝大多数类别中要优于支撑向量机算法，在所有的类别中都比朴素贝叶斯算法要好高。图\ref{fig:barNGR}表示，在绝大多数类别中，\textit{VecCNN}算法的召回率都要优于其他两种算法。图\ref{fig:barQCP}显示了在\textit{QC}数据集各类型的问题分类中，\textit{VecCNN}算法准确率相对于其他两种算法更高。图\ref{fig:barQCR}显示了\textit{VecCNN}算法在\textit{QC}数据集上各类别的召回率更高。由以上的实验，我们验证了所提出算法的有效性，\textit{VecCNN}算法在多元分类问题上相对于另外两种基准算法性能更好，在二元分类问题上同样也有效。
 
-为了验证\textit{VecCNN}算法的可扩展性，我们使用不同规模的数据集来运行实验，记录其运行时间。对于数据集，我们均匀随机地选取指定大小规模的子集，运行算法5次，计算其平均运行时间作为最终结果。实验结果如图\ref{fig:scalability}所示。
+为了验证\textit{VecCNN}算法的可扩展性，我们使用不同规模的数据集来运行实验，记录其运行时间。对于数据集，我们均匀随机地选取指定大小规模的子集，运行算法5次，计算其平均运行时间作为最终结果。实验结果如图\ref{fig:scalabilityCNN}所示。
 
 \begin{figure}[!htbp]
     \centering
     \includegraphics[width=0.55\textwidth]{scalability}
     \caption{算法的可扩展性}
-    \label{fig:scalability}
+    \label{fig:scalabilityCNN}
 \end{figure}
 
 图\ref{fig:scalability}中横坐标为数据集相对于原始数据集的比例，纵坐标为训练网络的运行时间。我们可以看出，运行时间的增长是近似线性的，因此所提出的算法具备可扩展性。
