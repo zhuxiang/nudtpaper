@@ -14,6 +14,22 @@
 
 随着深度学习技术的发展，各个领域都在利用深度学习来解决其领域内的问题。例如在语音识别方面，Graves等人\upcite{graves2013speech}提出了一种使用循环神经网络（Recurrent Neural Networks）的语音识别技术，该方法结合了多层表示以及长范围上下文的灵活使用来提高循环神经网络的性能。Sainath等人\upcite{sainath2015convolutional}整合卷积神经网络（Convolutional Neural Networks）、LSTM（Long Short-Term Memory）以及深度神经网络（Deep Neural Networks）到一个统一框架中，利用CNN能减少频率变化、LSTM对于时序建模以及DNN将特征映射到更可分空间的特性，提高了语音识别的性能。在目标检测与识别方面，Szegedy等人\upcite{szegedy2015going}针对大规模图像识别问题，通过增加神经网络的深度和宽度，同时保持计算量不变，实现了一个22层的深度神经网络GoogleNet。Erhan等人\upcite{erhan2014scalable}针对目标识别的问题，应用了深度神经网络来进行建模。在机器翻译方面，Sutskever等人\upcite{sutskever2014sequence}提出了一个多层的LSTM网络将输入序列映射为一个指定维度的向量，然后另外一个LSTM网络用来进行解码，实现不同语言之间的机器翻译。Bahdanau等人\upcite{bahdanau2014neural}猜想定长向量是使用深度学习实现机器翻译的瓶颈，基于编码器-解码器的基础架构，提出了一个对于目标词语自动搜索源语句的模型。在语言模型方面，Chelba等人\upcite{chelba2013one}给出了一个新的基础数据集，用于评测统计语言模型，并对几种流行的语言模型进行了评测，RNN相对于其余的语言模型取得了更好的表现。在语法分析方面，Vinyals等人\upcite{vinyals2015grammar}针对自然语言处理中的语法分析问题，提出了一个领域未知关注增强模型，能在人工干预很小的情况下，取得很好的效果。深度学习技术在众多领域都取得了不错的效果，因此，使用深度学习技术来解决文本分类问题是一个可行的方法。
 
+\begin{figure}[!htbp]
+  \centering
+  % Requires \usepackage{graphicx}
+  \includegraphics[width=\textwidth]{textClassification}
+  \caption{社交网络中文本分类任务示意图}
+  \label{fig:textClassification}
+\end{figure}
+
+图\ref{fig:textClassification}为社交网络中文本分类任务的示意图。首先，我们从社交媒体中得到文本信息，例如新闻、博客等等。然后，通过机器学习的方法，我们利用标注好的数据来训练模型，得到分类器的参数。最终，利用训练好的分类器对文本的分类进行预测。社交网络中的文本数据量大，话题种类较多，对文本分类突出了新的要求。问题主要集中在如下两方面：
+\begin{itemize}
+  \item \textbf{语言表示模型}，社交网络中的信息量随着时间而增加，不断地有新词产生，传统的词袋模型面临着维度爆炸的问题。维度的规模过大而且过于稀疏将限制模型的训练效率，使得难以得到好的效果。
+  \item \textbf{机器学习模型}，社交网络中的文本信息包含着上下文关系，而传统的朴素贝叶斯算法、SVM算法等都是基于统计的方法，丢失了文本的上下文关系，而这些特征对于文本分类问题是有意义的。
+\end{itemize}
+
+为了解决上述问题，本章提出了一种结合词向量模型和卷积神经网络的文本分类算法，该算法控制了文本表示的维度，保留了上下文关系的局部特征。首先，本章提出了一种快速的文本摘要提取方法，将长文本信息中的核心语句进行提取。而后，利用外部语料库训练得到的词向量模型，将语句中的词语转换成向量模型。最后，利用核心语句作为一个卷积神经网络的输入，对网络进行训练，最终得到神经网络的参数。真实数据对该算法进行了评估，验证了算法的正确性和有效性。
+
 \section{相关定义}
 \label{sec3:definition}
 
