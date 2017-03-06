@@ -1,291 +1,473 @@
-\chapter{基于卷积神经网络的文本分类研究}
-近年来，深度学习（Deep Learning）在计算机视觉\upcite{krizhevsky2012imagenet}以及语音识别\upcite{graves2013speech}等方面取得了显著的成果。在自然语言处理领域，深度学习方法对于语义理解以及文本表示等方面也进行了技术的革新，相关的工作包含基于神经语言模型进行词向量表示的学习\upcite{bengio2003neural,yih2011learning,mikolov2013distributed}以及基于已学习的词向量模型进行文本分类\upcite{collobert2011natural}等。在社交网络信息传播分析中，文本分类的研究一直是社交网络数据分析与挖掘的基础和热点。社交网络中海量的用户生成数据（User-Generated Content）提供了话题种类繁多的信息。如何实现社交网络中的文本自动分类是一个极具挑战的任务。
+\chapter{基于语义扩展和文本质量的实时个性化搜索}
+\label{chap2:main}
+随着社交网络中信息爆炸式的增长，用户越来越难以从海量的信息中获取到自身所需的信息，用户所需的信息往往淹没在其中，这种现象可称之为信息洪流（Information Flood）现象。在社交网络、电子商务网站、即时通信等应用中，信息产生的速率以及数量都是过去无法比拟的，如在推特（Twitter）、脸书（Facebook）、新浪微博等社交媒体中，每天都会产生海量的文本信息。根据用户输入的查询，在海量的信息流中实时地检索出高质量的、相关的信息是一个极具挑战性的问题。社交网络中的信息流实时个性化搜索相对于传统的信息检索提出了以下挑战：（1）社交网络中充斥着各种各样话题的信息，而且信息大多数都是以短文本表示，相对于传统的新闻等长文本信息，难以进行语义理解；（2）社交网络中的信息质量参差不齐，难以从中遴选出高质量的信息；（3）社交网络中的信息产生速率快，如何能够实时地检索出用户所需要的信息，将其推送给用户也是一大难点。因此，由于社交网络中数据的信息海量性、主题多样性、数据稀疏性以及社交互动性等特性，传统的个性化检索方法不足以解决社交网络中的信息实时个性化搜索问题。
 
-由于社交网络中文本的数据海量性、话题多样性以及数据稀疏性等特点，传统的文本分类技术的效率将变低，无法很好的解决文本自动分类任务。例如词袋模型（Bag of Words Model）的词向量维度将随着社交网络中的词组数量增加而增加，词向量的稀疏性将给语义模型的训练带来精确性上的降低，并且使得模型训练的时间开销增加。卷积神经网络（Convolutional Neural Networks）将卷积核应用到局部特征上来进行语义的处理\upcite{lecun1998gradient}。该技术首先是用于计算机视觉领域，同时CNN模型近年来在自然语言处理领域上也取得了很好的效果，例如语义分析\upcite{yih2014semantic}、查询检索\upcite{shen2014learning}、语句建模\upcite{kalchbrenner2014convolutional}以及其他的自然语言处理任务\upcite{collobert2011natural}。本章针对传统文本分类方法的不足，利用深度学习的方法对文本分类问题进行处理，对文本中语句的重要性进行排序，提取核心语句集合作为文本的语义表示，训练设计的CNN模型参数，实现文本的自动分类。
+本章针对社交网络中信息的特性，提出了一个面向推特信息流的实时个性化搜索框架来实现用户的信息实时推荐，并在TREC 2015 Microblog Track\upcite{lin2015overview} 测评中验证了系统的性能。首先，我们构造了一个逻辑规则过滤器来选择核心关键词，提高检索的准确率。其次，我们对文本质量进行建模，利用的标注的数据进行训练，以此来对文本的质量的进行打分。训练好的文本质量模型提高了检索的排序性能。然后，我们使用外部语料库来实现语义扩展，例如搜索引擎，知识库等。语义扩展能够使得我们更好地理解用户的偏好和兴趣。最后，我们采用了一个动态的推送策略来自动地推送高质量且相关的信息给特定的用户，这能够避免信息过载。本章中的算法结合了社交网络文本的语义特征和社交属性，针对不同的用户搜索，做了综合性地排序。我们使用TREC 2015 Microblog Track中的真实数据流进行了实验，实验结果显示了本章提出的算法在不同测评指标下，与其他算法相比的优越性。
 
-本章主要的工作可以总结如下。首先，结合卷积神经网络的特性，本章提出了一个面向社交网络的文本自动分类框架。其次，本章提出了一个核心语句提取的算法，在保证文本语义的同时降低了计算的复杂度，而且保留了文本语句中的词序。然后，本章利用外部语料库训练好的词向量模型对文本进行表示，将文本转换成一个语义矩阵，利用社交网络中标注好的预料对CNN模型参数进行训练，实现文本自动分类。最后，本章在真实数据集上进行了实验，与传统的方法进行对比，验证了算法的有效性。
+本章的内容组织如下：第\ref{sec2:motivation} 节介绍了研究动机，讨论了在社交网络环境下进行实时个性化搜索的必要性。第\ref{sec2:definition}节介绍了相关定义，对本章中涉及的相关概念和知识进行了符号化的定义。第\ref{sec2:method} 节介绍了方法描述，详细地阐述了本章提出的系统框架和算法。第\ref{sec2:experiment}节进行了实验分析，验证了本章提出的方法，并且分析了实验结果。最后，第\ref{sec2:conclusion}对本章的内容进行了总结。
 
-本章的内容组织如下：第\ref{sec3:motivation}节介绍了研究动机，讨论了传统的文本分类方法的不足以及深度学习方法对于文本分类的帮助。第\ref{sec3:definition}节介绍了相关定义，对本章中相关概念和所提出的问题进行了符号化的定义。第\ref{sec3:method}介绍了方法描述，详细地阐述了本章所提出的框架以及相关算法的详细过程。第\ref{sec3:experiment}节进行了实验分析，设计了一系列的实验，验证了本章所提出的方法，并对实验结果进行了分析。最后，第\ref{sec3:conclusion}对本章的内容进行了总结。
 \section{研究动机}
-\label{sec3:motivation}
-随着各类社交媒体的蓬勃发展，人们所需要面对的信息量呈指数式爆炸增长。信息中包含各种各样的内容和话题，信息的呈现方式多样，包括文字、图片、视频以及音频等等。这对人们处理信息的能力提出了新的挑战和要求。在社交网络的传播分析中，文本分类研究是数据分析与挖掘的基础。社交网络中，人人都可以是信息的生产者、传播者和接收者。与传统的媒体相比，这种形式极大地加速了信息的传播速率。而人们很难及时处理扑面而来的海量信息，将会淹没在信息洪流之中，从而无法有效地获取自身所感兴趣的、对自身有用的信息。因此，在大数据时代，如何处理海量数据的文本分类问题是一个极具挑战性的任务。
+\label{sec2:motivation}
+随着大数据时代的到来，诸如推特（Twitter）、脸书（Facebook）、新浪微博等的社交网络平台逐渐取代传统的媒体平台，成为新时代的实时信息交互平台。以推特平外为例，据统计，每天平均约有58,000,000条推文（tweet）发布，每天平均处理约2,100,000,000次搜索查询，每月约有115,000,000个活跃的用户\footnote{\url{http://www.statisticbrain.com/twitter-statistics/}}。 在大数据时代，人人都可以是信息的生产者、传播者和接收者，这在一定程度上加速了信息的传播速率。然而，如此庞大的数据量使得用户在社交网络平台中搜索查询时面临了信息过载的问题，用户很难检索到自己需要的信息，亦或用户所需的信息淹没在了众多的信息之中。尤其是社交网络平台中的信息内容囊括了众多领域，其中的话题种类繁多，这使得用户难以搜索到相关性强而且高质量的文本信息。在社交网络平台中，传统的信息检索方法变得耗时长而且信息检索方式难以适用。因此，在大数据时代，为了满足用户实时获取相关信息的需求，需要一种面向社交网络的新的信息检索方法。
 
-传统的数据挖掘对于分类问题已经进行了长期的研究，提出了许多实用的算法来解决分类问题。例如支撑向量机（Support Vector Machine）算法\upcite{cortes1995support}，该算法通过寻找一个超平面来分割不同类别的数据，从而进行分类。又例如k近邻（k-Nearest Neighbors）算法\upcite{hastie1996discriminant}，该算法的指导思想是“近朱者赤，近墨者黑”，一个待分类的样本将由特征空间中离它最近的k个样本的类别所决定。其余分类算法还包括朴素贝叶斯（Naive Bayes）算法、决策树（Decision Trees）算法以及神经网络（Neural Network）模型等等。这些算法在文本分类问题上都具有实用性，但是随着数据量的增长、类别的多样性、数据的稀疏性等问题的出现，算法的性能都有所下降。在信息量急剧增长的社交网络中，需要新的方法来解决文本的分类问题。
+在传统的信息检索流程中，往往是用户根据自己所需，输入关键字进行查询，系统根据用户的查询，搜索到相关的结果，并进行排序，返回给用户。而在社交网络平台中，信息产生速率快，信息以数据流的形式给出，同时用户希望系统能够自动地推送相关的信息，而不是用户通过查询来获取信息。因此，在社交网络中的信息实时个性化搜索的流程与传统的信息检索流程不尽相同。在社交网络中，信息的实时个性化搜索流程一般是用户将查询搜索以关键词的形式给出，然后系统根据用户的查询在信息流中实时地处理文本信息，将相关的信息自动地推送给用户。
 
-随着深度学习技术的发展，各个领域都在利用深度学习来解决其领域内的问题。例如在语音识别方面，Graves等人\upcite{graves2013speech}提出了一种使用循环神经网络（Recurrent Neural Networks）的语音识别技术，该方法结合了多层表示以及长范围上下文的灵活使用来提高循环神经网络的性能。Sainath等人\upcite{sainath2015convolutional}整合卷积神经网络（Convolutional Neural Networks）、LSTM（Long Short-Term Memory）以及深度神经网络（Deep Neural Networks）到一个统一框架中，利用CNN能减少频率变化、LSTM对于时序建模以及DNN将特征映射到更可分空间的特性，提高了语音识别的性能。在目标检测与识别方面，Szegedy等人\upcite{szegedy2015going}针对大规模图像识别问题，通过增加神经网络的深度和宽度，同时保持计算量不变，实现了一个22层的深度神经网络GoogleNet。Erhan等人\upcite{erhan2014scalable}针对目标识别的问题，应用了深度神经网络来进行建模。在机器翻译方面，Sutskever等人\upcite{sutskever2014sequence}提出了一个多层的LSTM网络将输入序列映射为一个指定维度的向量，然后另外一个LSTM网络用来进行解码，实现不同语言之间的机器翻译。Bahdanau等人\upcite{bahdanau2014neural}猜想定长向量是使用深度学习实现机器翻译的瓶颈，基于编码器-解码器的基础架构，提出了一个对于目标词语自动搜索源语句的模型。在语言模型方面，Chelba等人\upcite{chelba2013one}给出了一个新的基础数据集，用于评测统计语言模型，并对几种流行的语言模型进行了评测，RNN相对于其余的语言模型取得了更好的表现。在语法分析方面，Vinyals等人\upcite{vinyals2015grammar}针对自然语言处理中的语法分析问题，提出了一个领域未知关注增强模型，能在人工干预很小的情况下，取得很好的效果。深度学习技术在众多领域都取得了不错的效果，因此，使用深度学习技术来解决文本分类问题是一个可行的方法。
-
-\begin{figure}[!htbp]
-  \centering
-  % Requires \usepackage{graphicx}
-  \includegraphics[width=\textwidth]{textClassification}
-  \caption{社交网络中文本分类任务示意图}
-  \label{fig:textClassification}
-\end{figure}
-
-图\ref{fig:textClassification}为社交网络中文本分类任务的示意图。首先，我们从社交媒体中得到文本信息，例如新闻、博客等等。然后，通过机器学习的方法，我们利用标注好的数据来训练模型，得到分类器的参数。最终，利用训练好的分类器对文本的分类进行预测。社交网络中的文本数据量大，话题种类较多，对文本分类突出了新的要求。问题主要集中在如下两方面：
-\begin{itemize}
-  \item 语言表示模型。社交网络中的信息量随着时间而增加，不断地有新词产生，传统的词袋模型面临着维度爆炸的问题。维度的规模过大而且过于稀疏将限制模型的训练效率，使得难以得到好的效果。
-  \item 分类训练模型。社交网络中的文本信息包含着上下文关系，而传统的朴素贝叶斯算法、SVM算法等都是基于统计的方法，丢失了文本的上下文关系，而这些特征对于文本分类问题是有意义的。
-\end{itemize}
-
-为了解决上述问题，本章提出了一种结合词向量模型和卷积神经网络的文本分类算法，该算法控制了文本表示的维度，保留了上下文关系的局部特征。首先，本章提出了一种快速的文本摘要提取方法，将长文本信息中的核心语句进行提取。而后，利用外部语料库训练得到的词向量模型，将语句中的词语转换成向量模型。最后，利用核心语句作为一个卷积神经网络的输入，对网络进行训练，最终得到神经网络的参数。真实数据对该算法进行了评估，验证了算法的正确性和有效性。
-
-\section{相关定义}
-\label{sec3:definition}
-本节首先对社交网络中的文本信息分类问题进行定义，并形式化的将其表述。然后对其中涉及到的概念进行具体的描述。
-社交网络中的文本信息分类问题可以描述如下。在社交网络平台中，令$\mathbf{D}$表示信息集合，可以看作为一个文档集合，其中的一条信息定义为$\mathbf{d} \in \mathbf{D}$。社交网络的文本信息属于不同的类别$c \in \mathbf{C}$，其中$c$为某一个主题，$\mathbf{C}$为主题集合。基于以上的描述，社交网络中的文本分类问题可以定义如下，
-\begin{defn}[文本分类问题]\label{def:textClassification}
-在社交网络中，给定主题类别集合$\mathbf{C}$以及信息集合$\mathbf{D}$，文本分类问题是要解决如何将信息分类到正确的类别中，即将$\mathbf{d} \in \mathbf{D}$自动地分类到正确的$c \in \mathbf{C}$。
-\end{defn}
-
-根据定义\ref{def:textClassification}可知，社交网络中的文本分类问题需要解决的两个关键问题如下。首先是语言表示模型，即如何将文本信息进行表示，映射到一个可以用于计算相似度的空间。其次是分类训练模型，即如何设计分类器，利用训练数据集对分类模型进行训练，得到分类器的参数。社交网络平台中文本分类问题可以通过图\ref{fig:textClassificationProblem}来表示。
+由美国国家标准与技术研究院（NIST）主办的文本检索会议（TREC）是由多个测评项目组成的一个致力于解决新时代信息检索问题的测评大会，涉及智能问答、医疗诊断、实体识别、信息推荐等领域。TREC自2011年起设立了微博实时推荐（Microblog Track）\upcite{ounis2011overview,soboroff2012overview,lin2013overview,lin2014overview,lin2015overview} 这一个子任务，目标是解决在社交网络中信息的实时个性化搜索问题。从设立后，TREC Microblog Track便吸引了全世界的参赛者参加，与智能实时问答（TREC LiveQA Track）成为了TREC中最火热的两个子任务。Microblog Track 的任务是针对不同用户，智能地分析用户的兴趣爱好，自动地、实时地为用户推送相关的、高质量的信息，涉及到众多科学领域，包括机器学习、自然语言处理、信息检索、人工智能等。如图\ref{fig:twitter_search}所示，在社交网络平台中，用户是信息的生产者，用户将源源不断地发布信息，其中包括有趣的信息和一些无用的信息。同时，用户又是信息的接收者，用户通过定制自身感兴趣的话题和内容，系统智能地分析其兴趣爱好，针对不同的用户，在推特信息流中自动地、实时地为用户推荐相关的、高质量的信息。例如将饮食信息推荐给美食家、将财经信息推送给金融家、将商旅信息推送给旅行者等，同时将一些低质量无意义或者无人关注的信息丢弃。
 
 \begin{figure}[!htbp] % use float package if you want it here
   \centering
-  \includegraphics[width=0.5\textwidth]{textClassificationProblem}
-  \caption{社交网络平台中文本分类问题}
-  \label{fig:textClassificationProblem}
+  \includegraphics[width=0.8\textwidth]{twitter_search}
+  \caption{社交网络平台中信息的实时个性化搜索示意图}
+  \label{fig:twitter_search}
 \end{figure}
 
-图中的文档代表着一条信息，每一条信息$\mathbf{d}$都是由语句组成，语句以$\mathbf{s}$表示。一条语句$\mathbf{s}$由词语表示，一个词语可表示为$\mathbf{t}$。词语与词语之间存在着上下文关系，即词序关系。语言表示模型是将文本信息映射到一个可计算的空间的操作，方便文本之间进行相似度的计算。文本信息通过语言表示模型后，作为分类训练模型的输入。分类训练模型通过标注的训练数据集来进行参数的训练，得出分类器，最终对未知数据的类别进行预测。
+为了解决针对不同用户，为其实时地搜索出相关性强、高质量的信息，许多已有的个性化推荐\upcite{Xie2015Personalized,sontag2012probabilistic,wang2013personalized,tang2015personalized} 以及协同搜索\upcite{liang2014Collaborative,vosecky2014collaborative,xue2009user,yang2014survey} 的工作对这个问题进行了一定的研究。但是很少有面向社交网络个性化搜索的研究，特别是对于实时搜索推荐技术的研究。目前已有的机器学习、自然语言处理、信息检索、人工智能等研究对于社交网络中的实时个性化搜索问题提供了许多帮助。文本分类以及排序的研究\upcite{canuto2015efficient,severyn2015learning,ren2014hierarchical,paik2013novel} 能够为了社交网络中的信息检索提供支持。同时，查询分析以及优化技术\upcite{gao2013query,Letelier2012Static,si2014users} 能够使得信息检索有着显著的提升。
+
+然而，社交网络的环境与传统的新闻、论坛等Web环境有着较大的区别。因此，为了满足社交网络中用户获取信息的需求，这将需要建立新的模型、研究新的方法来解决这一问题。在社交网络中，实现信息的个性化实时推荐面临的主要挑战可以总结如下：
+\begin{itemize}
+  \item 信息海量性。在社交网络中，信息产生的速率快，网络中的每一个用户同时扮演着信息生产者、信息传播者和信息接收者的角色。如此高容量的信息流需要一个新的模型来适应持续不断变化的语义特征。
+  \item 主题多样性。社交网络中的信息内容包罗万象，覆盖了许许多多的领域和话题。如果主题模型不能区分众多的话题，这将导致噪声的引入以及不准确的话题模型以及用户模型。
+  \item 数据稀疏性。在社交网络中，信息在不同的主题上的分布是不均匀的，在某些主题上信息量大，而在某些主题上信息是稀疏的。有效的主题模型需要解决数据稀疏性所带来了的影响。
+  \item 社交互动性。社交网络中的用户之间有着丰富的互动信息，与传统的文本信息不同，社交网络中的信息包含了许多有价值的结构化的社交属性。适当地利用这些社交属性能够提高搜索的性能，但是这需要对这些社交属性进行相关性的选择。
+\end{itemize}
+
+为了解决上述面临的挑战，本章提出了一种基于语义扩展和文本质量的实时个性化搜索框架，该框架综合考虑了用户的偏好、语义特征和社交属性。首先，本章基于语义扩展提出了一种布尔逻辑关键词过滤（Boolean Logic Keyword Filter）的用户模型。该模型依靠外部搜索引擎提供的知识进行建立，建立的用户模型充分利用了查询扩展以及检索结果的重排序来提高推荐结果的相关性。最终的实验评估证明该模型显著地提高了检索的召回率。此外，本章还基于逻辑回归提出了一种文本质量模型，该模型利用推文的社交属性来评估其文本的质量。该模型能够对推文的文本内容，是否受到大众的认可等进行评估，因此它能帮助系统返回高质量的推文。最终的实验评估证明该模型显著地提高了检索结果的排序性能。
+
+\section{相关定义}
+\label{sec2:definition}
+本节首先将对社交网络中的实时个性化搜索的任务进行定义，并将其形式化，然后对TREC 2015 Microblog Track的具体任务进行描述。
+
+社交网络中的实时个性化搜索任务可以描述如下。在社交网络平台中，令信息流表示为$\mathbf{T}$，其中的一条信息表示为$ts \in \mathbf{T}$。信息流在社交网络中随着时间不断地产生，信息流$\mathbf{T}$中包含许多种类的话题。令$\mathbf{P}$表示用户集合，每一个用户$p_i \in \mathbf{P}$表示着用户感兴趣的一个话题，用户的兴趣爱好可以通过文本等形式来表示。基于以上的描述，社交网络中的实时个性化搜索任务可以定义如下，
+\begin{defn}[实时个性化搜索]\label{def:realPrnzdSearch}
+在社交网络中，给定信息流$\mathbf{T}$以及用户集合$\mathbf{P}$，实时个性化搜索的目的是针对不同的用户兴趣爱好$p_i \in \mathbf{P}$，自动地实时地为其推荐高质量的、相关的信息，即将信息流中的信息$ts \in \mathbf{T}$推送给语义上最相关的用户$p_i \in \mathbf{P}$。
+\end{defn}
+
+根据定义\ref{def:realPrnzdSearch}可知，社交网络中的实时个性化搜索需要解决的几个核心关键问题如下。首先是如何表示信息流与用户，其次是如何实现实时推荐，以及如何保证信息的高质量和高相关性。社交网络平台中信息的实时个性化搜索任务可以通过图\ref{fig:real-timeSearch}来表示。
+\begin{figure}[!htbp] % use float package if you want it here
+  \centering
+  \includegraphics[width=\textwidth]{real-timeSearch}
+  \caption{社交网络平台中信息的实时个性化搜索任务图}
+  \label{fig:real-timeSearch}
+\end{figure}
+
+任务首先要求系统能够实时地监测社交网络中的信息流，然后对不同的用户建立兴趣模型，分析信息与用户之间的相关性。同时任务还要求系统能够对信息的质量做出评估，包括真实性、内容丰富性等。最后，系统需要采取一个良好的推送策略，使得用户不至于淹没在信息中。
+
+TREC 2015 Microblog Track的任务目标是实时信息流过滤，实质上也是实时个性化搜索的一种形式。在Microblog Track中，实时信息流过滤的任务目标是根据不同用户的兴趣模型来监测社交媒体中的信息流。值得注意的是，上述的兴趣模型的概念是不同于传统的临时查询。该场景中，交互流程不是用户输入一次查询，然后系统返回结果给用户。该场景不存在实际的查询，取而代之的是系统根据用户的兴趣模型主动地推送有趣的信息给用户。
+
+什么样的信息是有趣的可以考虑如下两个实际的任务模型来帮助更好地理解。
+\begin{itemize}
+  \item 场景A：即时性信息推送。在场景A中，用户是定位在使用移动设备的场景，用户可以即时地查看消息。系统基于用户的兴趣模型来判别消息之于用户是否是有趣的，被系统判别为有趣的信息将实时地推送到用户的移动设备（例如手机、平板等）。场景A中的任务目的是上述的推送需要在消息产生的相对较短的时间内完成，该场景中的信息假设是相对较短的。
+  \item 场景B：周期性邮件摘要。在场景B中，用户是定位在使用固定设备的场景，用户周期性的查看消息。与场景A相同，统基于用户的兴趣模型来判别消息之于用户是否是有趣的。但是被系统判别为有趣的信息将被聚集成一个邮件摘要，并且周期性的推送给用户。该场景中的每一个单一信息假设是相对较短的，聚集成的邮件摘要可能很长，我们可以认为这是个性化头条新闻。
+\end{itemize}
+
+两个场景都假设推送给用户的消息相对较短，是短消息。因此，推送的消息是否有趣可以根据用户阅读消息的长度或者条数来进行衡量。可以看出，TREC 2015 Microblog Track的任务目标是在两种不同的场景中来考虑社交网络平台中信息的实时个性化搜索问题。
+
+任务中的推文信息（即定义\ref{def:realPrnzdSearch}中的$\mathbf{T}$）一条推文以JSON格式保存，字段信息如表\ref{tab:tweetJSON}所示。
+\begin{table}[!htbp]
+\centering
+\caption{推文JSON数据的部分字段信息}
+\begin{tabular}{|p{4cm}|p{7cm}|}
+\hline
+\textbf{字段} & \textbf{描述} \\
+\hline
+$created\_at$ & 推文发布的时间戳\\
+\hline
+$id$ & 推文的ID\\
+\hline
+$text$ & 推文的文本信息\\
+\hline
+$source$ & 推文的发布终端\\
+\hline
+$in\_reply\_to\_status\_id$ & 回复的推文的ID\\
+\hline
+$user$ & 发布推文的用户信息\\
+\hline
+\end{tabular}
+\label{tab:tweetJSON}
+\end{table}
+
+表\ref{tab:tweetJSON}中$created\_at$是推文创建的时间，即发布时间。$id$是推文的ID，是唯一的。$text$是推文的文本信息，为短文本，不超过140个字符，可能存在超链接。$source$是推文的发布平台，例如推特Web端，推特手机端，或者通过其他的平台转发至推特等。$in\_reply\_to\_status\_id$是指该推文是否为转发回复其他的推文，如果不是则字段为$null$，如果是则为转发的推文的ID。$user$是指发布推文的用户，也是一个JSON格式的数据，其字段内容在表\ref{tab:userJSON}中给出。
+\begin{table}[!htbp]
+\centering
+\caption{用户JSON数据的部分字段信息}
+\begin{tabular}{|p{4cm}|p{7cm}|}
+\hline
+\textbf{字段} & \textbf{描述} \\
+\hline
+$created\_at$ & 用户创建的时间戳\\
+\hline
+$id$ & 用户的ID\\
+\hline
+$screen\_name$ & 用户的名称\\
+\hline
+$location$ & 用户的地理信息\\
+\hline
+$description$ & 用户的自我描述\\
+\hline
+$followers\_count$ & 用户的粉丝数\\
+\hline
+$friends\_count$ & 用户的好友数\\
+\hline
+$favourites\_count$ & 用户收藏推文的数目\\
+\hline
+$statuses\_count$ & 用户发布推文的数目\\
+\hline
+$utc\_offset$ & 用户所在时区\\
+\hline
+$profile\_image\_url$ & 用户的头像\\
+\hline
+$lang$ & 用户的语种\\
+\hline
+\end{tabular}
+\label{tab:userJSON}
+\end{table}
+
+表\ref{tab:userJSON}中$created\_at$为用户账号建立的时间。$id$为用户的ID，是唯一的。$screen\_name$为用户的名字。$location$为用户的地理位置，由用户自己填写。$description$为用户对自己的描述，为一段文本信息。$followers\_count$为用户的粉丝数，即关注该用户的用户数。$friends\_count$为用户的好友数，即用户关注的用户数目。$favourites\_count$为用户收藏的推文的数目。$statuses\_count$为用户历史上发布推文的数目。$utc\_offset$为用户所在的时区的偏差值，单位为秒。$profile\_image\_url$为用户的头像，如果用户没有自定义头像，则为系统默认头像。$lang$为用户的常用语言。
+
+任务中的用户查询（即定义\ref{def:realPrnzdSearch}中的$\mathbf{P}$）也是按照JSON格式保存，字段信息如表\ref{tab:queryJSON}所示。
+\begin{table}[!htbp]
+\centering
+\caption{用户查询JSON数据的部分字段信息}
+\begin{tabular}{|p{4cm}|p{7cm}|}
+\hline
+\textbf{字段} & \textbf{描述} \\
+\hline
+$topic\_id$ & 用户查询的ID\\
+\hline
+$title$ & 用户查询的标题\\
+\hline
+$desc$ & 用户查询的描述\\
+\hline
+$narr$ & 用户查询的详情\\
+\hline
+\end{tabular}
+\label{tab:queryJSON}
+\end{table}
+
+其中$topic\_id$为用户查询的ID，即用来标志一个用户感兴趣的话题。$topic\_id$为用户查询的标题，为一个简短的句子。$desc$是用户查询的描述，为文本信息，描述用户所需要的信息。$narr$是用户查询的详情，详细地介绍了用户对于信息需求的细节。
+
+本节介绍了任务的定义以及相关的背景知识，包括推文信息的格式，用户的格式以及用户查询的格式等信息。
+%在实时信息流过滤任务中，信息即为推文。在测评阶段，进行测评的系统将监测推特的实时样本信息流并根据用户的兴趣模型（相当于特定的话题）来识别有趣的信息。为了描述的简洁性，我们将上述过程称之为\textbf{兴趣用户的追踪}。
 
 \section{方法描述}
-\label{sec3:method}
-在本节中，我们借鉴了Kim的思想\upcite{kim2014convolutional}，并且做出了改进，实现了一个基于卷积神经网络的文本分类器。针对社交网络中的长文本信息（例如新闻、长微博等）的话题分类问题，我们设计了一个基于深度学习的框架来解决文本的分类问题。详细的算法将在本节中进行阐述。首先，我们介绍文本摘要算法，该算法用于长文本信息中的关键语句的提取。相对于Mihalcea所提出的基于图排序算法的语句提取算法，我们所提出的文本摘要算法更加的简洁。算法基于词语的tf-idf值来计算语句的重要性，该算法相对耗时短，更加适用于社交网络中长文本的关键语句提取。其次，我们选取top-\textit{k}个语句来作为长文本信息的摘要。这个过程减少了长文本信息的规模，并且消除了其中的大量的噪声语句。然后，基于外部语料库（例如维基百科等），我们建立了一个词向量模型（Word Vector Model）。该模型将关键语句中的词语转换成向量。在这一步骤中，我们仍然保留了语句中的词序顺序关系，即上下文关系。最终，我们利用标注好的数据集来训练所设计的三层卷积神经网络。各个步骤的详细描述在下面的各个小节中进行描述。
+\label{sec2:method}
+在本节中，我们设计了一个面向社交网络的实时信息流推荐的系统框架。首先，与传统的信息检索系统相似，推文信息以及用户查询的语义特征被提取出来，数据的预处理用于过滤掉此阶段中无用的信息。其次，为了计算推文信息与用户查询之间的相似度（即相关性），基于外部语料库训练得到的词向量模型来表述提取的特征。除此之外，系统将文本的质量也考虑在内。高质量的文本往往包含高质量的信息，本节提出了一个基于逻辑回归模型的文本质量评估算法来对文本的质量进行衡量。然后，基于得出的相关性与质量，系统针对不同的用户查询对推文信息进行评估。一条相关的、有意思的信息将被归类到最相关的类别中，即归类到最相关的用户查询。最后，为了避免信息洪流、保持消息推送的实时性，本节提出了一个动态的推送策略。因此，用户将实时地收到相关性强、质量高的信息，并且能够避免淹没在信息中。
 
-\subsection{文本摘要提取}
-\label{subsec3:abstactExtract}
-对于文本摘要提取，其核心的思想是对文本信息中的语句进行排序，遴选出其中最能代表文本主题的语句。这个步骤在整个文本分类中是比较重要的，它能够降低文本信息的规模，消除噪声语句，减少文本分类器的训练时间。社交网络中的长文本信息包含的语句可能会比较多，为了保证文本分类的效率，我们利用文本摘要算法来降低文本中语句的规模。在本小节中，基于词语的tf-idf值，我们实现了一种文本摘要算法来提取长本文信息中的关键语句。语句按照其中词语的tf-idf值进行排序，排序靠前的top-\textit{k}个语句被选择作为该信息的摘要，用来代表信息的核心语义。
-
-我们将社交网络中的长文本信息看作一篇文档$\mathbf{d}$，用$\mathbf{t}$表示文档中的词语。对于某一篇文档$\mathbf{d}_j$中的一个词语$\mathbf{t}_i$，我们定义词语$\mathbf{t}_i$在文档$\mathbf{d}_j$中的词频（Term Frequency）为${\textit{tf}}_{ij}$。词语$\mathbf{t}_i$的逆向文件频率 (Inverse Document Frequency）可以表示成${idf}_i = \log \frac{\vert \mathbf{D} \vert}{1 + \vert \{\mathbf{d} \in \mathbf{D} : \mathbf{t}_i \in \mathbf{d}\}\vert}$，其中$\mathbf{D}$表示整个文档集合，即所有的长文本信息集合。通过这种方法，我们可以得到不同文档中所有词语的tf-idf值。众所周知，词语的tf-idf值能够反映出词语在文档中的重要性。许多已有的工作利用这一特性来进行文本处理，例如词袋模型使用一定数量的具有高tf-idf值的词语来表示整篇文档的语义。但是，词袋模型破坏了语句中的词序，词语的上下文关系在处理过程中没有得到保留，这会造成部分语义信息的丢失。为了解决这个问题，我们期望得到能够代表文档的关键语句，然后以语句的集合来表示文档的语义，这样能够保留文档中的词序关系，即上下文关系。我们进行如下的假设，如果语句中所包含的词语的tf-idf值较高，那么该语句更有可能表示这篇文档的主题思想，即更可能为关键语句。因此，我们选择若干个关键语句来表示整篇文档的语义，从而不破坏文档中的词序关系，保留上下文关系。
-
-本小节中的文本摘要提取方法可以描述为如下。首先，我们定义$\mathbf{s}$为文档中的的一个语句。语句$\mathbf{s}$可以形式为公式（\ref{eq:sentence}）所示，
-\begin{equation}
-\label{eq:sentence}
-	\mathbf{s}=\mathbf{t}_1 \oplus \mathbf{t}_2 \oplus \cdots \oplus \mathbf{t}_K
-\end{equation}
-其中符号$\oplus$为连接符号，表示词语间的词序关系，$K$表示语句$\mathbf{s}$的长度。然后，我们按照语句$\mathbf{s}$中词语的tf-idf值来对语句进行语义重要性的排序。直观地说，如果语句$\mathbf{s}$中所包含的词语的tf-idf值较高，那么语句的排序应当更靠前。值得注意的是，一个长语句所包含的词语将会更多，包含高tf-idf值词语的概率将更大。因此，为了避免长语句的排名更加靠前，引入一个归一化因子来处理语句的长度问题是非常有必要的。定义$I(\mathbf{s}, \mathbf{d}_j)$为语句$\mathbf{s}$在文档$\mathbf{d}_j$中的语义重要性，$I(\mathbf{s}, \mathbf{d}_j)$可以形式化为公式（\ref{eq:importance}）所示，
-\begin{equation}
-\label{eq:importance}
-	I(\mathbf{s}, \mathbf{d}_j)=\frac{\sum \nolimits_{\mathbf{t}_i \in \mathbf{s}} {tf}_{ij}\cdot{idf}_i }{\log \left(\vert\mathbf{s}\vert\right)}
-\end{equation}
-其中$\log \left(\vert\mathbf{s}\vert\right)$为处理语句长度的归一化因子。在处理完一篇文档中的所有语句后，我们选择top-$k$的语句来表示该文档。参数$k$为一个经验性的参数，与文档的大小相关。相对于基于图的排序算法，本小节提出的算法忽略了语句之间的相似性，主要是基于语句中的关键词来进行语句的排序。基于图的排序算法是一个迭代算法，耗时相对较长。在本章中，我们采取较为简洁的方法来实现文本摘要提取。最终，算法将文档中的语句进行排序，得到文档的摘要，即主题思想。
-
-\subsection{词向量模型}
-\label{subsec3:word2vec}
-为了解决文本的表示问题，本小节中使用词向量模型来对文档中的词语进行向量化处理。我们使用外部的语料库来训练词向量模型，例如维基百科等知识库包含了用来训练词向量模型的信息。相对于词袋模型，词向量模型用来表示词语的维度可以自己设定，可以避免维度爆炸的问题。在提取了文档中所有关键语句后，语句中的词语都可以根据训练好的词向量模型转换成向量形式。为了实现\textit{word2vec}算法，本节使用了已有的工具\textit{gensim}\footnote{\url{http://radimrehurek.com/gensim/index.html}}来进行词向量模型的训练。在进行词向量化后，对于每一个词语$\mathbf{t}$，它都能被表示成一个向量$\mathbf{t}=\left(w_1, w_2, \cdots, w_m\right)$，其中$m$表示训练词向量模型时所设定的维度，$w_i$表示在第$i$维上的分量。因此，一个语句$\mathbf{s}$可以被表示成矩阵形式，类似一张二维的图片。我们使用一个例子来进行说明这个过程，如图\ref{fig:senVec}所示。
-
-\begin{figure}[!htbp]
+\subsection{系统框架}
+\label{subsec2:systemOverview}
+目前在社交网络中，用户只能接收到其关注用户的信息推送，而且这些信息只是简单的按照时间进行排序。理想的搜索系统应当能够分析用户的兴趣爱好，并且自动地推送相关的、高质量的信息给用户。为了满足这一需求，一个面向推特的实时个性化搜索系统的框架设计如图\ref{fig:systemFramework}所示。
+\begin{figure}[!htbp] % use float package if you want it here
   \centering
-  % Requires \usepackage{graphicx}
-  \includegraphics[width=0.55\textwidth]{sentenceMatrix}
-  \caption{语句向量化的示意图}
-  \label{fig:senVec}
+  \includegraphics[width=0.7\textwidth]{systemFramework}
+  \caption{实时个性化搜索系统框架图}
+  \label{fig:systemFramework}
 \end{figure}
 
-图\ref{fig:senVec}中每一行表示一个词语向量化得到的一个向量，所有行组成一个语句。在例子中，语句$\mathbf{s}=$\textit{cavs}$\oplus$\textit{will}$\oplus$\textit{win}$\oplus$\textit{the}$\oplus$\textit{NBA}$\oplus$\textit{finals}。语句$\mathbf{s}$中的每一个词语都将根据词向量模型转换成一个向量。这一步骤将语句$\mathbf{s}$转换成一个矩阵$\mathbf{B} \in \mathbb{R}^{Km}$，其中$K$为语句$\mathbf{s}$的长度，$m$为词向量模型设定的维度。对于任意一篇文档$\mathbf{d}_j$，我们能够将其文本摘要，即排序后的语句集合$\mathbf{S}_j = \left\{\mathbf{s}'_1, \mathbf{s}'_2, \cdots, \mathbf{s}'_k\right\}$转换成另一个矩阵$\mathbf{A}_j \in \mathbb{R}^{nm}$，其中$n$为文档长度的截断长度，即允许容纳的最大词语量。我们以图\ref{fig:docVec}为例进行说明。
+如图所示，系统主要包括四个主要的模块，分别如下所示。
+\begin{itemize}
+  \item 特征提取模块。该模块监测推特信息流，并且接收用户的搜索请求。值得注意的是，在实时个性化搜索任务中，用户的搜索请求相当于某个话题内容的订阅。用户事先输入搜索后，在相关的信息发布时实时推送给用户。推特信息流通过TREC-API\footnote{\url{https://github.com/lintool/twitter-tools}}工具监测。用户的搜索由官方提供，以$p_i \in \textbf{P}$表示。在特征提取之前，数据的预处理将用来过滤掉无用的信息。对于推特信息流，系统提取其语义特征以及社交属性；对于用户查询，系统提取搜索中的关键词作为基础特征。
+  \item 特征表征模块。该模块通过几种技术来扩展及表征所提取的语义特征。推文信息以及用户查询通过该模块进行了语义增强，该模块使得推文以及用户之间的相关度计算更加的方便。
+  \item 候选生成模块。该模块通过语义特征以及社交属性将推文分类到与之最相关的用户。这一过程同时考虑了相关性以及推文的质量，因此用户收到的信息不仅是有趣的而且是高质量的。
+  \item 排序推送模块。该模块通过最终的得分来对每个用户的推文候选队列进行排序，并且利用历史数据进行阈值的动态调整。该模块能够保证用户不错过重要的高质量的信息，又不至于淹没在过多的信息中。
+\end{itemize}
 
-\begin{figure}[!htbp]
+在之后的小节中，我们将详细地介绍每一个模块应用的算法以及实现。
+
+\subsection{特征提取模块}
+\label{subsec2:feaureExtraction}
+推文信息依靠监测推特的抽样信息流来获取\upcite{wang2015assessor}。在获取到推文后，数据的实时预处理用来过滤掉此阶段内无效的信息，减少无意义的以及冗余的信息。推特数据流上的相关数据预处理方法包含如下一些技术，
+\begin{itemize}
+  \item 语言识别。根据任务要求，非英文的推文将被直接过滤掉来简化问题的复杂度。本系统中使用的工具为\textbf{无限元模型语言识别}（\textit{Language Detection with Infinity Gram}），简称为ldig\footnote{\url{https://github.com/shuyo/ldig}}。ldig工具是一个针对短文本消息（例如推特）的语言识别器，能够支持对于17种语言的识别，准确率达到了99.1\%。除此之外，系统还使用了基于字符编码集的语言识别方法来区分英文句子和非英文句子。通过训练得出一个阈值，包含英文字符多的推文将被保留，其余的将被过滤掉。
+  \item 冗余过滤。社交网络中由于复制，转发等行为使得相同信息的推文存在着很多的冗余，如果不进行冗余过滤，那么将会有很多相同的内容推送给用户，使得用户淹没在重复的信息中。因此，对于内容相同或者相似的推文，系统只保存一个副本。为了实现该目标，一种方法是利用表\ref{tab:tweetJSON}中提到的推文$id$字段和$in\_reply\_to\_status\_id$字段来识别冗余信息。如果推文是原创信息，则我们记录其$id$值；如果推文是转发信息，则可以检查该推文转发推文的$id$是否已经存在来判别是否是冗余信息。每当一条新的推文被爬取时，首先来检查推文的$id$来做冗余消除。该方法简单有效，能够迅速滤除掉大部分的冗余信息。但是当推文是复制其他推文的信息或者做出微小的改动，则该方法无法识别。因此，另外一种冗余消除技术，$simhash$技术被应用。$simhash$技术是用于处理网页冗余的技术，该方法将一个文档转换成一个数字指纹（即一串定长的0-1编码），被称为哈希相似码。两个文档的哈希相似码之间的汉明距离（\textit{hamming distance}）越短，则说明两个文档之间的相似度越大。哈希相似码的计算公式如下所示，
+  \begin{equation}
+  \label{simhash}
+    {\mathbf{s}_{hash}} = sign(\sum\nolimits_{i = 1}^n {{w_i} \cdot {\mathbf{c}_i}} )
+  \end{equation}
+其中$\mathbf{c}_i$是第$i$个词的哈希码，为一个定长的向量，$w_i$是该词的权重，为标量，$sign$是是一个符号函数，让结果向量中的每一个比特的正数位变成1，负数位变成0。simhash算法的过程大概如下。首先，对文档进行关键词抽取，得到特征$\mathbf{c}_i$和权重$w_i$。然后，对所有特征进行加权的位计算。最后，对得到的结果进行哈希码的生成，这个产生值和具体采用的算法有关，这里采用的一个简单的符号函数。将推文转换成哈希相似码后，我们就可以利用推文之间的汉明距离来判别推文间的相似性，来进行冗余消除。基于推文的$id$进行冗余消除是一种高效的方法，能够解决大多数情况下的问题，但是对于复制或者修改的内容无法识别。simhash算法是基于推文的内容进行冗余消除，能够有效地解决内容相似的推文冗余，但是相比于基于推文$id$的方法耗时会长一些，因为计算哈希相似码的过程将会有额外的计算量。在本章提出的系统中，两种算法被结合起来完成冗余消除。首先利用基于推文$id$的方法进行粗的冗余消除，如果无法判别则计算推文的哈希相似码后，根据汉明距离进行判别。
+\end{itemize}
+
+在数据的预处理后，我们将推文信息和用户查询的语义特征和社交属性抽取出来。对于推文，名词以及动词是句子中最重要的部分。因此，退文中的名词以及动词（除去停用词）被抽取出来作为语义特征，并且每一个词都根据其在句子中的重要性得到一个不同的权重。一条推文的语义特征可以表示成$\mathbf{ts} = \{ {w_1}{\mathbf{t}_1},{w_2}{\mathbf{t}_2},\cdots,{w_n}{\mathbf{t}_n}\}$，其中$\mathbf{ts}$表示一条推文，$\mathbf{t}_i$表示一个词语，$w_i$为该词语的权重。词语的权重与该词语在句子中的位置、出现的频率等有关。
+
+由于社交网络信息提供了丰富的社交行为属性，社交属性可以被用于评估推文的真实性和质量。推文是按照JSON格式存储的，因此获取系统所需的社交属性是非常便捷的，例如发布推文的用户、推文的转发量、推文的评论数、推文的URL数、推文的标签、推文中有意义的词数、推文的长度等等。这些信息都可用于进行训练，来评估推文的质量。
+
+\begin{figure}[!htbp] % use float package if you want it here
   \centering
-  % Requires \usepackage{graphicx}
-  \includegraphics[width=0.65\textwidth]{documentMatrix}
-  \caption{文档向量化的示意图}
-  \label{fig:docVec}
+  \includegraphics[width=0.9\textwidth]{semanticExp}
+  \caption{用户查询的语义扩展示意图}
+  \label{fig:semanticExp}
 \end{figure}
 
-图\ref{fig:docVec}为词向量模型将一篇文档$\mathbf{d}_j$转换成矩阵$\mathbf{A}_j$的示意图。如果文档中的长度超过了阈值$n$，则进行截断；如果文档的长度不足$n$，则用零向量进行补全。本小节中的处理过程使得每一篇文档都能转换成一个固定大小的矩阵。但是，在截断或者补全零向量的操作会丢失部分信息或者引用无效的信息，这一问题还是有待今后的工作进行研究。
+对于用户查询，对用户的兴趣爱好描述被当成一个查询，如表\ref{tab:queryJSON}所示。系统对查询进行分析，计算用户所感兴趣的推文。首先，用户查询中的关键词如同推文一样的被提取出来。但是，用户查询往往比较简短，表述能力是有限的。短文本的检索面临着词语失配的问题，即用户查询与推文信息的词语重叠相对较少，这将导致很多描述着同一事件的文本因为使用了不同的词汇而检索失败。为了解决该问题，语义扩展方法往往被用于增强检索的性能。语义扩展方法主要分成两大类，基于搜索引擎的语义扩展和基于知识库的语义扩展。本节中系统使用的是基于搜索引擎的语义扩展技术来丰富查询的信息，大致流程如图\ref{fig:semanticExp}所示。在第一步中提取出来的关键词被当做搜索引擎的输入。返回的top-k个结果的摘要文本部分被收集用来做下一步的计算，每一个返回的结果都包含若干个词语。在整个结果集中可以使用tf-idf算法可以被用来计算每一个词语的权重。针对每一个用户查询，一个带有tf-idf值的词语列表被计算返回。语义增强后的用户查询可被写作$\mathbf{q} = \{ {\mathbf{k}_1}:{v_1},{\mathbf{k}_2}:{v_2},...,{\mathbf{k}_n}:{v_n}\}$，其中$\mathbf{k}_i$表示关键词，$v_i$表示词语$\mathbf{k}_i$的tf-idf值。
 
-\subsection{卷积神经网络的训练}
-\label{subsec3:cnnTraining}
-在上一小节中，我们得到了表示文档的矩阵，我们将此当作输入来训练卷积神经网络。卷积神经网络的框架图如图\ref{fig:cnn}所示。
+\subsection{特征提取模块}
+\label{subsec2:featureRep}
+已有的工作对语义特征的表示模型有着很多的研究，例如词袋模型（Bag of Words Model）等。词袋模型忽略了文本的语法和词序，仅仅将文本当作词语的聚集。该模型假设每一个词是独立的，即文本中词的概率与上下文是无关的，它简化了表示方法，但是忽略了语法和词序，在某些情况下带来了一些缺陷。基于此的一些改进算法，例如二元词袋模型、三元词袋模型等在一定程度上解决了这些缺陷。然而，词语失配问题仍然是词袋模型无法解决的问题。
+
+为了解决词语失配问题，词向量模型（Word Vector Model）被提出来表示语义特征。使用\textit{word2vec}技术来对词语进行向量化，\textit{gensim}\footnote{\url{http://radimrehurek.com/gensim/index.html}}是一个比较方便的工具来处理该问题。为了训练词向量模型，维基百科的英文预料库被用于训练\footnote{\url{https://dumps.wikimedia.org/enwiki/20160113/}}。图\ref{fig:real-timeSearch}中的知识库基于维基百科英文语料库使用\textit{gensim}工具训练得到。推文$\mathbf{ts}$中的每一个词语$\mathbf{t}_i$，可被表示成一个向量$\mathbf{t}_i=\left(\alpha_1,\alpha_2,\cdots,\alpha_m\right)^T$，其中$m$为词向量模型设置的维度（例如200、400等），参数$\alpha_j$表示词向量第$j$维的值。因此，一条推文$\mathbf{ts}$可向量化为$\mathbf{ts}= \sum w_i \mathbf{t}_i$，其中$w_i$为词语$\mathbf{t}_i$的权重。与处理推文的方式相似，语义增强后的用户查询$q$中的每一个关键词$\mathbf{k}_i$可以表示成$\mathbf{k}_i = \left(\beta_1,\beta_2,\cdots,\beta_m\right)^T$，其中参数$\beta_j$为关键词$\mathbf{k}_i$第$j$维的值。而且语义增强后的用户查询$\mathbf{q} = \sum v_i \mathbf{k}_i$，$v_i$为词语$\mathbf{k}_i$的权重。按照上述流程，推文信息以及用户查询通过词向量模型转化成了向量形式。
+
+\subsection{候选生成模块}
+\label{subsec2:candidate}
+依靠词向量模型，词语的失配问题得到了比较好的解决。但是该方法也是一把双刃剑，词向量模型在获取更多相关的信息的时候也会带来许多低相关的信息给用户，即词向量模型在提高召回率的时候降低了准确率。为了解决该问题，系统使用了一个规则过滤器布尔逻辑关键词过滤（Boolean Logic Keyword Filter）来提高准确率。布尔逻辑关键词模型将用户查询表示成如下形式，
+\begin{equation}
+\label{eq:blkm}
+  p = \{1:\left(\mathbf{t}_1 || \mathbf{t}_2\right) \& \& \left(\mathbf{t}_3 || \mathbf{t}_4\right),~~0:\mathbf{t}_5 || \mathbf{t}_6\}
+\end{equation}
+其中$p$代表一个用户查询，其中包含两个域1和0。值为1的域代表着该用户查询检索到的结果中必须出现的词，值为0的域代表着该用户查询检索到的结果中不一定须要出现的词，但是命中会增加推文信息和用户查询之间的相关性。符号$||$表示逻辑上的“或”关系，代表多个词出现某一个即可；符号$\&\&$表示逻辑上的“与”关系，代表多个词须要同时出现才满足。例如公式（\ref{eq:blkm}）表示能够通过过滤器的推文中必须包含词语$t_1$或者$t_2$，并且包含$t_3$或者$t_4$。如果推文中包含$t_5$或者$t_6$，则会增加推文信息与用户查询之间的相关性。系统根据语义扩展后的用户查询中的词语的tf-idf值来生成规则过滤器。我们为规则过滤器设置两个参数阈值$\eta$和$\gamma$（$\eta < \gamma$）。假设tf-idf$_{max}$表示一个用户查询$p$中的最大tf-idf值。则阈值$\gamma$设置为0.7$\cdot$tf-idf$_{max}$，阈值$\eta$设置为0.9$\cdot$tf-idf$_{max}$，这是一个经验性的参数设置。对于tf-idf值大于$\eta$的词语将被加入到$p$中域为1的列表中，对于tf-idf值大于$\gamma$又小于$\eta$的词语将被加入到$p$中域为0的列表中，对于tf-idf值小于$\gamma$的词语将不作处理。
+
+所有从推特信息流中监测到的推文首先都会经过根据布尔逻辑关键词模型生成的规则过滤器。如果推文不与任何规则过滤器匹配，则该条推文将被直接丢弃。如果推文通过了某个规则过滤器，则推文信息与该用户查询之间的语义得分讲根据它们之间的相似度计算得出。然后推文将根据公式（\ref{eq:blkm}）以及语义得分分类到某一个用户查询中。已有的研究主要有两类计算语义得分的方法来评估推文信息与用户查询之间的相关性。
+\begin{itemize}
+  \item 基于tf-idf的相似度。根据推文信息和用户查询生成的向量以及tf-idf权重进行相似度计算，计算公式如下所示，
+  \begin{equation}
+  \label{eq:tf-idf}
+  sim = \frac{\mathbf{ts}^T \cdot \mathbf{q}}{\|\mathbf{ts}\| \cdot \|\mathbf{q}\|} = \frac{\left(\sum \limits_{i=1}^m {w_i \mathbf{t}_i}\right)^T \cdot \sum \limits_{j=1}^m {v_j \mathbf{k}_j}}{\sqrt{\left(\sum \limits_{i=1}^m {w_i \mathbf{t}_i}\right)^T \left(\sum \limits_{i=1}^m {w_i \mathbf{t}_i}\right)}\sqrt{\left(\sum \limits_{j=1}^m {v_j \mathbf{k}_j}\right)^T \left(\sum \limits_{j=1}^m {v_j \mathbf{k}_j}\right)}}
+  \end{equation}
+  其中$\mathbf{ts}$表示推文信息的向量，$\mathbf{q}$表示用户查询的向量。$w_i$为词向量$\mathbf{t}_i$的权重，$v_j$为词向量$\mathbf{k}_j$的权重。
+  \item 基于BM25的相似度。利用算法Okapi BM25的权重函数来评估推文信息和用户查询之间的相似度。算法Okapi BM25是一个基于词袋模型的算法，根据文档中出现的查询词的频率进行权重计算。推文信息与用户查询之间的相似度计算如下，
+  \begin{equation}
+  \label{eq:bm25}
+  sim = \sum \limits_{q_i \in Q} {idf\left(q_i\right) \cdot \frac{ f\left(q_i,D\right) \cdot \left(k_1 + 1\right)}{f\left(q_i,D\right) + k_1 \cdot \left(1-b+b\cdot\frac{|D|}{avgdl}\right)}}
+  \end{equation}
+  其中$D$表示一个文档，即一条推文信息，$Q$表示用户查询。函数$f\left(q_i,D\right)$表示查询词$q_i$在文档$D$中的词频，$|D|$表示文档$D$的长度，$avgdl$表示文档集中文档的平均长度，$k_1$以及$b$为调整参数。系统一般经验性的设置$k_1=2$，$b=0.75$。
+\end{itemize}
+
+以上是系统对推文信息和用户查询之间相关性的处理，下面介绍系统对于推文的质量的评估。在特征提取模块中抽取的社交属性可被用来训练推文的质量模型（Quality Model）。我们首先人工地标注推文的质量得分，标注不依据推文的类别，单纯考虑推文是否能够带来信息量。质量高的推文标注1，质量低的推文标注0。如果推文能提供更多的信息，并且撰写得更完整，则推文会获得高的得分。我们使用逻辑回归模型（Logistic Regression Model）来对文本的质量模型进行建模，模型如下所示，
+\begin{equation}
+\label{eq:lr}
+  h_ {\bm{\theta}} \left(\mathbf{x}\right) = \frac{1}{1 + e^{-{{\bm{\theta}}^T}\mathbf{x}}}
+\end{equation}
+其中$\mathbf{x}=\left({x_1},{x_2},\cdots,{x_n}\right)$是抽取的社交属性，$\bm{\theta}=\left({\theta _1},{\theta _2},\cdots,{\theta _n}\right)$为待训练的参数。实现一般来说，用户更倾向于接受文本质量高的、由权威发布的信息，基于以上假设，我们选取如下的社交属性作为特征。
+\begin{itemize}
+  \item 用户粉丝数（\textit{FollowerCnt}），表示发布推文信息的用户的粉丝数。粉丝数高的用户表示该用户在社交网络中是受欢迎的，因此该用户发布的推文信息很大概率上是高质量的信息。
+  \item 用户推文数（\textit{StatusCnt}），表示发布推文信息的用户历史上发布的推文数。用户发布推文的数目预示着用户的活跃度，而一个活跃的用户更可能发布高质量的信息。
+  \item 推文转发数（\textit{RetweetCnt}），表示推文的转发数。一条推文的转发数越大说明这一条推文越受人欢迎，质量越高。
+  \item 推文转发等级（\textit{RetweetLvl}），表示对转发数使用对数函数后的转发等级。
+  \item 推文点赞数（\textit{CollectCnt}），表示推文的点赞数。用户如果认为一条推文是吸引人的，信息丰富的，则可以点赞或者收藏。
+  \item 推文词语数（\textit{WordCnt}），表示推文中除去停用词的文本长度，即词语数。一般来说，长的文本相对于短的文本的信息量会大一些。
+  \item 推文字符数（\textit{CharCnt}），表示推文中除去停用词的文本的字符数。
+  \item 短链接数（\textit{UrlCnt}），表示推文中短链接的数目。信息量丰富的文本往往会在推文末尾给出一个短链接。
+\end{itemize}
 
 \begin{figure}[!htbp]
-  \centering
-  % Requires \usepackage{graphicx}
-  \includegraphics[width=0.85\textwidth]{cnn}
-  \caption{三层卷积神经网络结构图}
-  \label{fig:cnn}
+   \begin{minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{wordCntCDF}
+     \caption{\textit{WordCnt}的累积分布函数}
+     \label{fig:wordCntCDF}
+   \end{minipage}
+   \hfill
+   \begin {minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{charCntCDF}
+     \caption{\textit{CharCnt}的累积分布函数}
+     \label{fig:charCntCDF}
+   \end{minipage}
+   \\
+   \begin{minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{followerCntCDF}
+     \caption{\textit{FollowerCnt}的累积分布函数}
+     \label{fig:followerCntCDF}
+   \end{minipage}
+   \hfill
+   \begin {minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{followeeCntCDF}
+     \caption{\textit{FolloweeCnt}的累积分布函数}
+     \label{fig:followeeCntCDF}
+   \end{minipage}
+   \\
+   \begin{minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{FFRCDF}
+     \caption{\textit{FFR}的累积分布函数}
+     \label{fig:FFRCDF}
+   \end{minipage}
+   \hfill
+   \begin {minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{statusCntCDF}
+     \caption{\textit{StatusCnt}的累积分布函数}
+     \label{fig:StatusCnt}
+   \end{minipage}
 \end{figure}
 
-图\ref{fig:cnn}中的第一层为卷积层，包含多个宽度的滤波器。我们定义$\mathbf{w} \in \mathbb{R}^{hm}$为卷积层中的一个滤波器，其中$h$为滤波器的窗口大小，即一次性处理词语的窗口大小，$m$为滤波器的宽度，令其等于第\ref{subsec3:word2vec}小节中词向量模型设定的维度。该滤波器作用到一个窗口大小为$h$的文本上，文本中的词语表示成维度为$m$的向量。为了方便起见，我们使用$\mathbf{t}_{i:i+h}$来表示词语$\mathbf{t}_i, \mathbf{t}_{i+1}, \cdots, \mathbf{t}_{i+h}$的连接。一个滤波器$\mathbf{w}$作用到词语连接$\mathbf{t}_{i:i+h}$，将产生一个新的特征$c_i$，可表示成公式（\ref{eq:feature}）所示，
-\begin{equation}
-\label{eq:feature}
-	c_i=f(\mathbf{w} \otimes \mathbf{t}_{i:i+h} + b)
-\end{equation}
-其中$b \in \mathbb{R}$为偏置参数，$f$为一个非线性的函数，例如sigmoid函数等。值得注意的是，在本章中，我们令滤波器$\mathbf{w} \in \mathbb{R}^{hm}$的宽度等于词向量模型的维度。这个步骤与图像处理中的设置不同，这是由于设置一个宽度小于$m$的滤波器在文本处理中是没有意义的。文本中的词语被表示成$m$维的向量，因此截取其中的某些维度是无意义的。对于一篇文档，我们从上至下滑动滤波器，$\mathbf{w} \in \mathbb{R}^{hm}$将作用在不同的词语连接$(\mathbf{t}_{1:h}, \mathbf{t}_{2:h + 1}, \cdots, \mathbf{t}_{N - h + 1:N})$上，从而得到一个新的特征向量$\mathbf{c}$，其可表示为公式（\ref{eq:featureMap}）所示，
-\begin{equation}
-\label{eq:featureMap}
-	\mathbf{c}  = ({c_1},{c_2},...,{c_{N - h + 1}})^T
-\end{equation}
-其中$\mathbf{c} \in \mathbb{R}^{N-h+1}$。在经过卷积层后，得到的特征维数仍然很高，很容易出现过拟合的现象。为了解决这个问题，我们在卷积层后加上一个池化（Pooling）操作，也就是子采样（Subsampling），构成子采样层。子采样层能够大大降低特征的维数，避免过拟合。池化操作作用在特征向量$\mathbf{c}$将得到$\mathbf{c}$中的最大值$c_{\max} = \max\limits_{c_i \in \mathbf{c}} c_i$。子采样层的目的是为了得到特征向量中最为重要的特征值，即具有最大的特征值。为了得到更多的特征值，我们可以调整窗口的大小来产生不同的特征向量。最后，子采样层得到的特征作为最后分类器的输入，该层为一个softmax函数的全连接层，输出层为文档在各个类别上的概率分布。
+为了检验抽取出来的社交属性的有效性，我们计算了人工标注数据集中的各个社交属性中的累计分布函数（Cumulative Distribution Function）来进行观察。推文根据其文本质量被标记成1或者0，其中1表示这是一条质量高的推文，反之则表示这是一条质量不高的推文。社交属性的累计分布函数结果如图\ref{fig:wordCntCDF}至图\ref{fig:StatusCnt}所示，两个分类的累计分布函数曲线显示了特征的区分能力。从结果图可知，\textit{CharCnt}、textit{FolloweeCnt}、\textit{FFR}以及\textit{StatusCnt}是区分推文是否高质量的有效的特征。由图\ref{fig:charCntCDF}可知，超过95\%的低质量的推文的字符数都小于100，而超过50\%的高质量的推文的字符数都大于100。由图\ref{fig:followerCntCDF}和图\ref{fig:FFRCDF}可知，拥有高粉丝数和高粉丝-好友比的用户更可能发布高质量的推文。由图\ref{fig:StatusCnt}可知，活跃用户更有可能发布高质量的推文。因此，抽取的社交属性能够被用于训练评估推文质量的分类器。
 
-此外，我们使用了两个通道\upcite{kim2014convolutional}的词向量作为输入。其中一个通道在训练过程中保持不变，另一个通道通过反向传播进行微调。每一个滤波器都会作用于这两个通道来产生不同的特征。
+在计算得到推文信息和用户查询之间的语义相似度和推文的质量得分后，二者被综合起来用来评估推文的最终得分，详细流程在下一个小节中介绍。
 
+\subsection{排序推送模块}
+\label{subsec2:scorePush}
+基于语义特征和社交属性，我们得到了推文信息和用户查询的语义相似度以及推文的质量得分。以上两种得分的值域为[0,1]。对于一个用户查询，一条推文的最终得分考虑了以上的两个方面，形式化为如下所示，
+\begin{equation}\label{fs}
+  f\left( \mathbf{ts}, \mathbf{q} \right) = sim \cdot {h_ {\bm{\theta}}} \left(x\right)
+\end{equation}
+其中$sim$为语义相似度得分，参见公式（\ref{eq:tf-idf}）和公式（\ref{eq:bm25}）。基于tf-idf和基于BM25算法的语义相似度得分在系统中是可选的。$h_ {\bm{\theta}}$为推文的质量得分，参见公式（\ref{eq:lr}）。
+
+当计算完一条推文和各个用户查询之间的分数后，推文将分类到得分最高的用户查询作为候选。候选队列中的推文按照得分$f\left( \mathbf{ts}, \mathbf{q} \right)$进行排序。按照任务需求，如果推文对于一个用户查询是相关的且高质量的，那么系统将把该推文推送给感兴趣的用户。但是如果一直推送给用户信息，那么将导致信息淹没。任务要求系统在保证用户不被信息淹没的情况下，同时实时地推送给用户消息，这是一个约束满足问题。问题可形式化为，用户每天接受信息的数量是一定的，系统需要根据当前队列中的信息来决策何时推送给用户。系统提出了一种动态阈值调整算法来保证相关的高质量的推文及时的推送，且在时间上是均匀分布的。算法根据候一个用户查询的选集队列的历史数据，可以得到一个最高得分$f_{max}$，设计一个梯度阈值函数$\zeta\left(f_{max},t\right)$如下所示，
+\begin{equation}
+\label{eq:thresholdDynamic}
+  \zeta\left(f_{max},t\right) = \left\{ {\begin{array}{*{20}{c}}
+{(0.9 - d) \cdot {f_{\max }}}&{d < 0.4}\\
+{0.5 \cdot {f_{\max }}}&{d \ge 0.4}
+\end{array}} \right.
+\end{equation}
+其中$d$表示衰减值，且$d = c \cdot floor(t/2)$。式中的$c$表示衰减系数，$floor$为向下取整函数，$t$为一天中的时间，$t \in [0,24]$。观察公式（\ref{eq:thresholdDynamic}）可知，阈值的变化与队列中的最高得分$f_{max}$和时间$t$相关。为了得到相关性强、质量高的推文，阈值在一开始时相对较高。在$t=0$时刻，阈值为$0.9 \cdot f_{max}$。为了给用户带来更多更全面的信息，阈值随着时间的变化不断减小。为了避免推送不相关或者低质量的信息，阈值在降低一定程度后不再变化，最终保持在$0.5 \cdot f_{max}$。例如，经验性地设置衰减系数$c=0.05$，当$t=16$时，阈值衰减为$0.5 \cdot f_{max}$后不再变化。动态阈值调整算法的思想是在一开始设置一个相对较高的阈值来获取高质量的推文，然后降低阈值来保证信息的数量。当推文的最终得分超过当时的阈值，则系统将立即推送该信息给相应的用户。由上述的各个模块描述可知，实时个性化搜索算法如算法\ref{alg:livePush}所示，且阈值将随时间动态变化。
 \begin{algorithm}[!ht]
-    \caption{\textit{VecCNN}($\mathbf{D}$)}\label{alg:cnn}
-    \begin{algorithmic}[1]
-    \REQUIRE $\mathbf{D}$
-    \ENSURE \textit{CNN}
-    \FOR{each $\mathbf{d}_j$ in $\mathbf{D}$}
-        \FOR{each $t_i$ in $\mathbf{d}_j$}
-            \STATE{${tf}_{ij} = \frac{p_{ij}}{\sum_{tl \in \mathbf{d}_j}{p_{lj}}}$}
-            \STATE{${idf}_i = \log \frac{\vert \mathbf{D} \vert}{1 + \vert \{\mathbf{d} \in \mathbf{D} : \mathbf{t}_i \in \mathbf{d}\}\vert}$}
-        \ENDFOR
-    \ENDFOR
-    \FOR{each $\mathbf{d}_j$ in $\mathbf{D}$}
-        \FOR{each $\mathbf{s}_i$ in $\mathbf{d}_j$}
-            \STATE{$I(\mathbf{s}_i, \mathbf{d}_j)=\frac{\sum \nolimits_{\mathbf{t}_i \in \mathbf{s}_i} {tf}_{ij}\cdot{idf}_i }{\log \left(\vert\mathbf{s}_i\vert\right)}$}
-        \ENDFOR
-        \STATE{$\mathbf{S}_j = \left\{\mathbf{s}'_1, \mathbf{s}'_2, \cdots, \mathbf{s}'_k\right\}$}
-    \ENDFOR
-    \FOR{each $\mathbf{S}_j$ in $\mathbf{D}$}
-        \STATE{generate text matrix $\mathbf{A}_j$ based on $\mathbf{S}_j$}
-    \ENDFOR
-    \STATE{train \textit{CNN} based on the matrix set}
-    \STATE {return \textit{CNN}}
-    \end{algorithmic}
+\caption{实时个性化搜索算法}
+\label{alg:livePush}
+\begin{algorithmic}[1]
+  \REQUIRE $\mathbf{T} = \{ \mathbf{ts}_1, \mathbf{ts}_2, \cdots, \mathbf{ts}_N \}$, $\mathbf{P} = \{ p_1, p_2, \cdots, p_M \}$, $Z$
+  \ENSURE $\mathbf{R} = \{ \mathbf{R}_1, \mathbf{R}_2, \cdots, \mathbf{R}_M \}$
+  \FORALL {$p_i \in \mathbf{P}$}
+    \STATE $\mathbf{q}_i = \{ {\mathbf{k}_1}:{v_1},{\mathbf{k}_2}:{v_2},...,{\mathbf{k}_n}:{v_n}\}$
+    \STATE $p_i = \{1:\left(\mathbf{t}_1 || \mathbf{t}_2\right) \& \& \left(\mathbf{t}_3 || \mathbf{t}_4\right),~~0:\mathbf{t}_5 || \mathbf{t}_6\}$
+  \ENDFOR
+  \FORALL {$\mathbf{k}_j$}
+    \STATE $\mathbf{k}_j = \left(\beta_1,\beta_2,\cdots,\beta_m\right)^T$
+    \STATE $\mathbf{q}_i = \sum v_i \mathbf{k}_i$
+  \ENDFOR
+  \WHILE {$\left| \mathbf{R}_i \right| < Z$ $\& \& \mathbf{T} = \emptyset$}
+    \STATE $\mathbf{ts}_i = pop\left(\mathbf{T}\right)$
+    \STATE $\mathbf{ts}_i = \{ {w_1}{\mathbf{t}_1},{w_2}{\mathbf{t}_2},\cdots,{w_n}{\mathbf{t}_n}\}$
+    \IF {$\mathbf{ts}_i$ matches $p_j$}
+     \FORALL {$\mathbf{t}_k \in \mathbf{ts}_i$}
+       \STATE $\mathbf{t}_k=\left(\alpha_1,\alpha_2,\cdots,\alpha_m\right)^T$
+     \ENDFOR
+     \STATE $\mathbf{ts}_k = \sum w_i \mathbf{t}_i$
+     \STATE $f\left( \mathbf{ts}_i, \mathbf{q}_j \right) = sim \cdot {h_ {\bm{\theta}}}\left(x\right)$
+    \ENDIF
+    \IF {$f\left( \mathbf{ts}_i, \mathbf{q}_j \right) \geq \zeta$}
+      \STATE $\mathbf{R}_j = \mathbf{R}_j \cup \mathbf{ts}_i$
+    \ENDIF
+  \ENDWHILE
+\end{algorithmic}
 \end{algorithm}
 
-本节中的算法步骤可以概括为算法\ref{alg:cnn}所示。如\textit{VecCNN}算法所示，输入为已标注的长文本信息集合，即文档集合$\mathbf{D}$，输出为所设计的卷积神经网络各层的参数。算法中的第1行至第6行为词语的tf-idf值计算。在这个步骤中，我们计算了每一个文档中各个词语的tf-idf值，为之后的文本摘要提取做准备。算法中的第7行至第12行，我们根据语句中词语的tf-idf值来对文档中的语句进行排序，从而挑选出关键语句代表文档的主题。这个过程减少了输入文本信息的规模，方便了之后卷积神经网络的训练。算法的第13行至第17行是卷积神经网络的训练。我们选择top-$k$的语句构建矩阵，作为卷积神经网络的输入，计算各个神经元中参数的梯度，通过迭代的方法求得极值，训练得到网络各层的参数。
-
 \section{实验分析}
-\label{sec3:experiment}
-在本节中，我们进行了几组实验来验证所提出的方法。首先，我们介绍本节中实验所使用的实验数据集以及实验设置。然后，我们将展示实验结果并详细地分析实验结果。本节中所有的实验都在4 CPU、32 GB内存的服务器运行，操作系统为Ubuntu 14.04 x64。文章的算法基于Python实现，在python 3.4的环境下运行。
+\label{sec2:experiment}
+本节中，我们通过TREC 2015 Microblog Track的实时测评对系统进行了多方面的验证。并对实验结果进行了分析。首先，本节介绍了实验的设置，其次介绍了评测标准，最后对实验结果进行了分析。本节中的实验基于八核、16GB内存、SSD硬盘的机器上运行，操作系统为Ubuntu 14.04 64位系统。系统主要基于Python和Java语言实现，Python版本为2.7，JDK版本为1.8版本。
 
-\subsection{实验设置}
-\label{subsec3:settings}
-为了验证与评估我们所提出的算法，我们使用不同领域和量级大小的数据集来进行实验。其中20 newsgroups文本数据集（\textit{newsgroups}\footnote{\url{http://scikit-learn.org/stable/datasets/twenty_newsgroups.html}})包含大约18,000篇20个主题的新闻报道。数据集分成两个子类，一类用于训练，一类用于实验测试。其中Large Movie Review数据集\upcite{maas2011learning}（\textit{LMR}\footnote{\url{http://ai.stanford.edu/~amaas/data/sentiment/}}）为大电影评论的数据集，为二元的情感分类数据集。其中包含约25,000篇情感鲜明的评论用于训练，还有25,000篇评论用于训练。Li等人\upcite{li2002learning}提供了一个问题分类的实验数据集（\textit{QC}\footnote{\url{http://cogcomp.cs.illinois.edu/Data/QA/QC/}}）。数据集包括5个训练集以及一个TREC中的真实测试集。数据集的一个简要说明如表\ref{tab:datasetCNN}所示。
-
-\begin{table}
-    \centering
-    \caption{数据集特性}\label{tab:datasetCNN}
-    \begin{tabular}{ccc}
-        \hline
-         & \textit{size} & \textit{label}\\
-        \hline
-        \textit{newsgroups} & 18000 & 20\\
-        \hline
-        \textit{LMR} & 50000 & 2\\
-        \hline
-        \textit{QC} & 15500 & 6\\
-        \hline
-    \end{tabular}
-\end{table}
-
-在算法的比较方面，我们将所提出的\textit{VecCNN}算法与两个基准算法朴素贝叶斯（\textit{Naive Bayes}）和支撑向量机（\textit{Support Vector Machine}）进行比较。我们选取了几个评判准则来评估算法的性能，包括准确率、召回率、$F_1$值。为了测试\textit{VecCNN}算法的可扩展性，我们在不同量级大小的数据集中进行实验，记录其运行时间。此外，实验中，词向量模型的维度设置为$m=200$，文档长度的截断阈值设置为$n=300$。
-
-\subsection{结果分析}
-\label{subsec3:analysis}
-为了验证算法的准确性，我们在数据集\textit{newsgroups}、\textit{LMR}和\textit{QC}上运行了朴素贝叶斯算法、支撑向量机算法以及\textit{VecCNN}算法，进行对比分析。对于每一个数据集，实验运行算法5次，取平均值作为最后的结果。准确率的实验结果如表\ref{tab:avgPrecision}所示。
-
-\begin{table}[!ht]
-    \centering
-    \caption{算法在各数据集上的平均准确率}\label{tab:avgPrecision}
-    \begin{tabular}{cccc}
-        \hline
-         & \textit{newsgroups} & \textit{LMR} & \textit{QC} \\
-        \hline
-        \textit{Bayes} & 0.36 & 0.66 & 0.51\\
-        \hline
-        \textit{SVM} & 0.47 & 0.80 & 0.52\\
-        \hline
-        \textit{VecCNN} & \textbf{0.72} & \textbf{0.88} & \textbf{0.99}\\
-        \hline
-    \end{tabular}
-\end{table}
-
-从表\ref{tab:avgPrecision}可以看出\textit{VecCNN}算法与朴素贝叶斯算法、支撑向量机算法相比，在\textit{newsgroups}数据集上的分类准确率相对较高。在\textit{LMR}数据集上，\textit{VecCNN}算法与支撑向量机算法的准确率相近，而朴素贝叶斯算法准确率较低。在\textit{QC}数据集上，\textit{VecCNN}算法的准确率远好于其余两个算法。由此可以看出，在多元分类问题中，\textit{VecCNN}相对其他两种算法准确率更高，而在二元分类问题中，\textit{VecCNN}与支撑向量机算法的准确率相近。表\ref{tab:avgRecall}为各个算法在数据集上的召回率结果，表\ref{tab:avgF1}为各个算法在数据集上的$F_1$值结果。结果都显示了\textit{VecCNN}算法的性能。
-
-\begin{table}[!ht]
-    \centering
-    \caption{算法在各数据集上的平均召回率}\label{tab:avgRecall}
-    \begin{tabular}{cccc}
-        \hline
-         & \textit{newsgroups} & \textit{LMR} & \textit{QC} \\
-        \hline
-        \textit{Bayes} & 0.18 & 0.66 & 0.51\\
-        \hline
-        \textit{SVM} & 0.46 & 0.80 & 0.52\\
-        \hline
-        \textit{VecCNN} & \textbf{0.69} & \textbf{0.93} & \textbf{0.99}\\
-        \hline
-    \end{tabular}
-\end{table}
-
-\begin{table}[!ht]
-    \centering
-    \caption{算法在各数据集上的平均$F_1$值}\label{tab:avgF1}
-    \begin{tabular}{cccc}
-        \hline
-         & \textit{newsgroups} & \textit{LMR} & \textit{QC} \\
-        \hline
-        \textit{Bayes} & 0.18 & 0.66 & 0.51\\
-        \hline
-        \textit{SVM} & 0.45 & 0.80 & 0.51\\
-        \hline
-        \textit{VecCNN} & \textbf{0.70} & \textbf{0.88} & \textbf{0.99}\\
-        \hline
-    \end{tabular}
-\end{table}
-
-对于\textit{LMR}数据集，我们计算了各个算法的roc曲线，如图\ref{fig:roc}所示。图中的roc曲线描述了各个算法训练出的二元分类器在判别阈值变化时，性能的变化。曲线下的面积越大说明算法的性能越好。
-
+\subsection{数据集及实验环境}
+\label{subsec2:dataset}
 \begin{figure}[!htbp]
   \centering
   % Requires \usepackage{graphicx}
-  \includegraphics[width=0.55\textwidth]{roc}
-  \caption{算法在\textit{LMR}数据集上的roc曲线}
-  \label{fig:roc}
+  \includegraphics[width=\textwidth]{stream}
+  \caption{推特数据流的分布}
+  \label{fig:twitterDis}
 \end{figure}
 
-图\ref{fig:roc}的横坐标\textit{fpr}为假阳性率（false positive rate），表示被预测为正样本的负样本比例；纵坐标\textit{tpr}为假阳性率（true positive rate），表示被预测为正样本的正样本比例。由图可以看出，\textit{VecCNN}算法的roc曲线下面积相对较大，说明\textit{VecCNN}算法相对于其他两个算法更加的有效。
+为了评估系统的稳定性和算法的有效性，TREC 2015 Microblog Track的实时测评采用了10天的推特信息流数据，时间从2015年07月20日00:00:00 UTC至2015年07月29日23:59:59 UTC，时区为世界标准时间。数据集总共包含51,770,318条真实推文，共有225个用户查询由官方提供。推文的时间分布如图\ref{fig:twitterDis}所示，横轴代表时间，纵轴代表推文的数量。从图中可知，推文的分布具有一定的周期性，周期大约为12个小时。
 
-\textit{newsgroups}和\textit{QC}数据集为多标签数据集，我们给出了算法在各个类别的准确率和召回率，如图\ref{fig:barNGP}至\ref{fig:barQCR}所示。
+在评测的时间段内，系统需要保持持续运行来接收推特信息流。系统通过设计的算法，将有趣的、高质量的推文实时地推送给官方设计的用户。在评测结束后，将最终的结果上传至NIST的服务器。为了简化任务，对于两个场景，系统只要求处理英文的推文。在场景A和场景B中的具体的要求如下所示。
+\begin{itemize}
+  \item 场景A：即时性信息推送。在场景A中，系统允许每天推送给一个用户查询至多10条推文。如果对于某个用户查询，系统推送超过10条推文，则NIST只会保存前10条推文。对于每条推文，系统需要记录推文的ID以及系统的推送时间戳。评测标准基于系统的推送时间戳和推文的创建时间戳之间的时间间隔会有惩罚机制。每一个用户查询至多10条的推送是为了适应在移动场景下用户的真实需求，用户每天接收即时信息的推送过于频繁会使得用户淹没在信息中。但是场景A不要求完全按照现实生活中来模拟用户需求，例如用户不希望在半夜接收到推送等等。
+  \item 场景B：周期性邮件摘要。在场景B中，系统需要针对一个用户查询聚合前100的相关的、高质量的信息。场景B要求系统在一天结束后的相对较短的一段时间内将结果返回给用户，保证用户能够很快地收到结果。
+\end{itemize}
 
+场景A中返回结果形式为$(topic\_id,tweet\_id,delivery\_time,runtag)$的四元组，其中$topic\_id$为官方给出的用户查询ID（即话题），$tweet\_id$是推送的推文的ID，$delivery\_time$为系统的推送时间戳，$runtag$为系统的运行标志。场景B中返回结果形式为$(YYYYMMDD, topic\_id, Q0, tweet\_id, rank, score, runtag)$的七元组，其中$YYYYMMDD$为日期，$topic\_id$为官方给出的用户查询ID，$Q0$为TREC默认的一个字符（对系统无影响），$tweet\_id$为推文的ID，$rank$为改推文的排序，$score$为推文的得分，$runtag$为系统的运行标志。
+\subsection{评测标准}
+\label{subsec2:evalMetrics}
+在两个场景中，系统提交的所有结果都会由NIST的评测员独立的进行结果评估。每一条推文都会被评论员按照四挡进行打分，分别为垃圾信息，不相关，相关，高相关。为了简化任务，非英文的推文将直接标记为垃圾信息。如果一条推文中既包含英文信息又包含非英文信息，则由评测员来决定。值得注意的是，评测员会检查推文中的短链接里的内容，除此之外不会再有更多的评判依据。对于冗余的处理如下所示，对于所有相同内容的推文将被分到同一个组，系统只被允许提交一条谈论该话题的推文，多余的推文将是无效推文\upcite{lin2014overview,wang2015assessor}。针对场景A和场景B的评测指标具体如下所示。
+\begin{itemize}
+  \item 场景A：即时性信息推送。在场景A中对于某一天中的某一个用户查询（即话题）的评测由两个时间衰减的度量来表示，详见公式（\ref{eq:ELG}）和公式（\ref{eq:nCG}）。某一个话题的指标由评测期（10天）内的该话题的平均指标来度量。系统的指标由所有话题的平均指标来度量。第一个度量指标为期望时延得分（Expected Latency-discounted Gain），借鉴Temporal Summarization track中的度量\upcite{aslam2014trec}，如公式（\ref{eq:ELG}）所示,
+  \begin{equation}
+  \label{eq:ELG}
+    ELG = \frac{1}{N}\sum {G\left( {\mathbf{ts}} \right)}
+  \end{equation}
+  其中$N$表示针对于一个话题一天内返回的推文数目，$G\left( {\mathbf{ts}} \right)$为每一条推文的得分。垃圾信息和不相关的推文得分为0，相关的推文得分为0.5，高相关的推文得分为1。相同内容的推文只有一条推文能够得分，不会重复计算得分。同时，一个时延惩罚将用于检查系统推送的实时性，即检查系统的推送时间戳和推文的创建时间戳之间的时间间隔。得分的时延衰减系数应用于所有推文的得分计算，衰减系数为$MAX\left( {0,\left( {100 - delay} \right)/100} \right)$，$delay$为时间间隔，以分钟为单位。有上述可知，如果系统的推送时间和推文的创建时间间隔小于1分钟，则系统将不会受到时延惩罚；如果系统的推送时间和推文的创建时间间隔大于100分钟，则得分将被惩罚为0。度量指标$ELG$将作为主要的度量，第二个指标为标准累计得分（normalized Cumulative Gain），如公式（\ref{eq:nCG}）所示，
+  \begin{equation}
+  \label{eq:nCG}
+    nCG = \frac{1}{Z}\sum {G\left( {\mathbf{ts}} \right)}
+  \end{equation}
+  其中$Z$为最大的允许推送的推文数（测评中设置为10），$G\left( {\mathbf{ts}} \right)$的计算与$ELG$中相同。按照如上定义，则在评判的时候将会出现一些边缘情况。例如在某一天中的某一个话题没有出现相关的推文信息，则系统当天应当是“安静的”，即不推送任何信息给对该话题感兴趣的用户。为了处理没有某个话题出现相关的信息和系统没有推送信息给某个话题这两种情况的评测，可以分成如下两种情况。第一种情况是该天有某话题的相关推文信息，如果系统没有推送推文，则系统得零分，如果系统推送了推文，则按照公式计算；第二种情况是该天没有某话题的相关推文信息，如果系统没有推送推文，则系统得满分，如果系统推送了推文，则按照公式计算。
+  \item 场景B：周期性邮件摘要。在场景B中的度量标准如下，对于每一个话题，返回的推文将被当做一个有序的列表，然后计算该返回列表的归一化衰减累计得分（normalized Discounted Cumulative Gain）\footnote{\url{https://en.wikipedia.org/wiki/Discounted_cumulative_gain}}，即nDCG@k。其中k根据返回的信息池的深度决定，相对较小（评测中取k=10）。某一个话题的度量标准为评测时间内的NDCG@k平均得分，系统的度量标准为所有话题的NDCG@k平均得分。
+\end{itemize}
+
+\subsection{结果分析}
+\label{subsec2:res}
+系统在TREC 2015 Microblog Track的评测结果如表\ref{tab:trecRes}所示\upcite{lin2015overview}，我们将系统与参与测评的其他好的系统进行对比，其他系统使用的算法主要有基于K-L散度的语言模型的检索方法（KL+LM）\upcite{lvpkuicst}，K-L散度结合动态推送策略的方法（KL+DE）\upcite{tanuniversity}，tf-idf和BM25算法的混合模型集合质量模型的方法（tf-idf+BM25+QM）\upcite{bagdouri2015clip}。
+\begin{table}[!htbp]
+  \centering
+  \caption{Metrics performance comparison with other methods}
+  \label{tab:trecRes}
+  \begin{tabular}{cccc}
+  \hline
+   &ELG&nCG&nDCG@10\\
+  \hline
+  \textbf{BLKF+tf-idf+QM}&0.3086&\textbf{0.3349}&0.3345\\
+  \hline
+  \textbf{BLKF+BM25+QM}&0.2863&0.2974&\textbf{0.3670}\\
+  \hline
+  \textbf{KL+LM}&\textbf{0.3175}& 0.3127&0.2228\\
+  \hline
+  \textbf{KL+DE}&0.3150&0.2679&0.2200\\
+  \hline
+  \textbf{tf-idf+BM25+QM}&0.1753&0.2426&0.2420\\
+  \hline
+  \textbf{the optimal}&0.4623&0.4846&0.5014\\
+  \hline
+  \end{tabular}
+\end{table}
+
+Fan等人\upcite{lvpkuicst}提出了一种时间自适应的话题相关过滤框架来评估推文与用户查询之间的相关性，即KL+LM。基于Web的查询扩展技术用于解决词语失配的问题。系统使用K-L散度算法来度量推文和用户查询之间的相关性。在推送方面，系统使用一种时间自适应的方法来估测相关性的阈值和创新性的阈值。Tan等人\upcite{tanuniversity}提出了一种基于K-L散度和动态推送策略的框架。该框架中，模拟相关反馈技术用于估测话题中词语的概率分布。然后，用户查询作为基准模型，来计算每一个用户查询中的词语的K-L散度值。然后排名前10的词语被加入到用户查询中的特征向量中。在这些词语组成的特征空间中，经典的向量模型用于计算推文和用户查询间的相似度。最后，动态推送策略被利用来处理推送问题，这是一个多目标的秘书问题\footnote{\url{https://en.wikipedia.org/wiki/Secretary_problem}}。动态推送策略维护一个低阈值和一个高阈值来决定是否推送还是等待。Bagdouri等人\upcite{bagdouri2015clip}提出了一个框架，使用词向量模型以及查询扩展来表示用查询，采取tf-idf和BM25的混合算法计算推文和用户查询之间的相似度，Jaccard相似度算法用来做冗余性消除。如表\ref{tab:trecRes}所示，使用布尔逻辑关键词过滤、tf-idf相关性和质量模型（BLKF+tf-idf+QM）的nCG的性能最佳，使用布尔逻辑关键词过滤、BM25以及质量模型（BLKF+BM25+QM）的nDCG@10的性能最佳，KL+LM的ELG的性能最佳，KL+DE、BLKF+tf-idf+QM与KL+LM有着相似的ELG性能。根据结果可知，我们的系统在nCG的性能比其他系统好，说明我们的系统能够检索到更多的相关推文，相当于系统的召回率较高。这个结果是由于系统使用了词向量模型以及基于搜索引擎的扩展。此外，系统的nDCG@10的性能远超了其他系统，这是因为系统使用了质量模型，使得结果的排序更加合理。换言之，系统将推文的质量考虑在内，对场景B中的结果进行了排序。最后一栏的最优解（the optimal）是理论上的最优解，是选取TREC 2015 Microblog Track中每一个话题中最好的结果进行平均得到的理论最优解，作为一个上限参照标准。
+
+系统的两种算法的ELG性能指标在话题上的分布如图如图\ref{fig:elg1}和\ref{fig:elg2}所示，
 \begin{figure}[!htbp]
-   \begin{minipage}{0.48\textwidth}
-     \centering
-     \includegraphics[width=\linewidth]{barNGP}
-     \caption{算法在\textit{newsgroups}数据集上各类别的准确率}
-     \label{fig:barNGP}
-   \end{minipage}
-   \hfill
-   \begin{minipage}{0.48\textwidth}
-     \centering
-     \includegraphics[width=\linewidth]{barNGR}
-     \caption{算法在\textit{newsgroups}数据集上各类别的召回率}
-     \label{fig:barNGR}
-   \end{minipage}
-   \\ 
-   \begin {minipage}{0.48\textwidth}
-     \centering
-     \includegraphics[width=\linewidth]{barQCP}
-     \caption{算法在\textit{QC}数据集上各类别的准确率}
-     \label{fig:barQCP}
-   \end{minipage}
-   \hfill
-   \begin {minipage}{0.48\textwidth}
-     \centering
-     \includegraphics[width=\linewidth]{barQCR}
-     \caption{算法在\textit{QC}数据集上各类别的召回率}
-     \label{fig:barQCR}
-   \end{minipage}
+  \centering
+  % Requires \usepackage{graphicx}
+  \includegraphics[width=0.85\textwidth]{ELG-1}
+  \caption{话题MB226至MB344上的ELG性能分布}
+  \label{fig:elg1}
 \end{figure}
-
-如图\ref{fig:barNGP}所示，\textit{VecCNN}算法的准确率在绝大多数类别中要优于支撑向量机算法，在所有的类别中都比朴素贝叶斯算法要好高。图\ref{fig:barNGR}表示，在绝大多数类别中，\textit{VecCNN}算法的召回率都要优于其他两种算法。图\ref{fig:barQCP}显示了在\textit{QC}数据集各类型的问题分类中，\textit{VecCNN}算法准确率相对于其他两种算法更高。图\ref{fig:barQCR}显示了\textit{VecCNN}算法在\textit{QC}数据集上各类别的召回率更高。由以上的实验，我们验证了所提出算法的有效性，\textit{VecCNN}算法在多元分类问题上相对于另外两种基准算法性能更好，在二元分类问题上同样也有效。
-
-为了验证\textit{VecCNN}算法的可扩展性，我们使用不同规模的数据集来运行实验，记录其运行时间。对于数据集，我们均匀随机地选取指定大小规模的子集，运行算法5次，计算其平均运行时间作为最终结果。实验结果如图\ref{fig:scalabilityCNN}所示。
-
 \begin{figure}[!htbp]
-    \centering
-    \includegraphics[width=0.55\textwidth]{scalability}
-    \caption{算法的可扩展性}
-    \label{fig:scalabilityCNN}
+  \centering
+  % Requires \usepackage{graphicx}
+  \includegraphics[width=0.85\textwidth]{ELG-2}
+  \caption{话题MB348至MB448上的ELG性能分布}
+  \label{fig:elg2}
 \end{figure}
+图中的横轴为用户查询的ID，纵轴为ELG的性能，用户查询为官方随机从225个用处查询中抽取。由系统的ELG性能在话题上的分布图可知，我们系统中算法的性能与理论最优解在大多数情况下是相同的。但是，在一些话题上算法的得分为0，这是由于推特信息流中没有出现该话题的信息，而系统推送了推文。这也是查询扩展在提高nCG性能的同时，对ELG的性能有所降低。
 
-图\ref{fig:scalability}中横坐标为数据集相对于原始数据集的比例，纵坐标为训练网络的运行时间。我们可以看出，运行时间的增长是近似线性的，因此所提出的算法具备可扩展性。
+系统的两种算法的nCG性能指标在话题上的分布如图如图\ref{fig:ncg1}和\ref{fig:ncg2}所示，
+\begin{figure}[!htbp]
+  \centering
+  % Requires \usepackage{graphicx}
+  \includegraphics[width=0.85\textwidth]{nCG-1}
+  \caption{话题MB226至MB344上的nCG性能分布}
+  \label{fig:ncg1}
+\end{figure}
+\begin{figure}[!htbp]
+  \centering
+  % Requires \usepackage{graphicx}
+  \includegraphics[width=0.85\textwidth]{nCG-2}
+  \caption{话题MB348至MB448上的nCG性能分布}
+  \label{fig:ncg2}
+\end{figure}
+图中的横轴为用户查询的ID，纵轴为nCG的性能。由于nCG的计算方式与ELG相似，因此可以看出我们系统的nCG的性能与ELG的性能相似。
+
+系统的两种算法的nCG性能指标在话题上的分布如图如图\ref{fig:ndcg1}和\ref{fig:ndcg2}所示，
+\begin{figure}[!htbp]
+  \centering
+  % Requires \usepackage{graphicx}
+  \includegraphics[width=0.85\textwidth]{nDCG-1}
+  \caption{话题MB226至MB344上的nDCG性能分布}
+  \label{fig:ndcg1}
+\end{figure}
+\begin{figure}[!htbp]
+  \centering
+  % Requires \usepackage{graphicx}
+  \includegraphics[width=0.85\textwidth]{nDCG-2}
+  \caption{话题MB348至MB448上的nDCG性能分布}
+  \label{fig:ndcg2}
+\end{figure}
+图中的横轴为用户查询的ID，纵轴为nDCG的性能。由图可知，我们系统的算法的nDCG性能在大多数话题上都是最优解，性能远超其他的系统。但是在一些话题上我们系统的算法没有得分，这也是由于推特信息流中没有出现该话题的信息，而系统推送了信息，这与ELG性能中出现的边缘情况相似。
+
+由上述全面的实验，我们对系统的ELG、nCG以及nDCG@10等性能进行了度量和分析，实验结果验证了所提出的系统的正确性和有效性。
 \section{本章小结}
-\label{sec3:conclusion}
-本章提出了一个结合文本摘要提取、词向量模型以及卷积神经网络的长文本信息分类算法。首先，算法通过文本中词语的tf-idf值来对关键语句进行排序，提取文本核心语句，得到文本摘要。然后，所得到的文本摘要通过词向量模型转换为向量形式。最后，文本转换成的向量作为神经网络的输入用于训练网络参数，从而得到分类器。其中，算法提出了一种基于词语tf-idf值的语句排序方法，能够快速的提取文本的摘要。同时，算法将词向量模型与卷积神经网络结合来实现文本分类。实验验证了所提出算法的正确性和有效性，在多个评判准则中，所提出的算法都优于基准算法。
+\label{sec2:conclusion}
+本章提出了一种基于语义扩展和文本质量的实时个性化搜索算法系统框架并进行了实现。系统框架综合了用户发布推文信息的语义特征和用户在网络中的社交属性。此外，系统设计了一种布尔逻辑关键词过滤的用户模型来提高相似度的准确性。然后，系统基于外部的搜索引擎来进行查询扩展，这使得系统能够更好地理解用户的需求。基于TREC 2015 Microblog Track的真实数据评测对系统进行了全面的验证，测评结果显示了系统相对于其他算法的有效性和优越性。
 
-下一步工作中，训练更加准确的词向量模型以及根据不同的数据调整神经网络的结构是提高文本分类性能的途径。
+下一步工作，我们希望能够实现布尔逻辑关键词过滤的全自动生成，对质量模型进行优化。除此之外，我们计划加入更多有效的特征，例如地理位置、时间特性等，来对用户的偏好进行全方位的理解。
+
+
