@@ -4,7 +4,7 @@
 
 在信息传播过程中，一个被激活的节点将会尝试在下一个时刻激活它的邻居节点。所以，除去种子节点外，每一个被激活的节点在被激活之前都会有一个时间延迟，我们称之为传播时延（\textit{propagation time delay}）。如果一个节点在信息传播结束时，仍然未被激活，则该节点的传播时延可以看作无穷大。在传统的影响力最大化问题中，传播时延没有被考虑在内，而研究整个网络的传播时延是非常有意义的，它可以度量选择的种子节点集合的传播效率。出于这种需求，本章提出了一个新的问题，传播效率最大化问题。该问题将传播时延考虑在内，在给定网络和传播模型的条件下，研究如何选择种子节点集合使得传播效率最大化。传播效率最大化问题与影响力最大化问题虽然相似，但是两个问题的侧重点不尽相同。传统的影响力最大化问题研究的是如何使得传播的范围最广，不考虑节点的传播时延。而本章提出的传播效率最大化问题将传播时延考虑在内，研究如何使得传播效率最大化。
 
-本章主要的工作可以总结如下。首先，基于传统的影响力最大化问题，我们将传播时延考虑在内了来探究传播效率，提出了传播效率最大化问题，研究给定网络和传播模型的条件下，研究如何选择种子节点集合使得传播效率最大化。其次，本章证明了传播效率最大化问题是一个NP-hard问题，而且在独立级联模型下计算传播效率的过程是一个\#P-hard的问题。然后，我们证明了传播效率函数在独立级联模型下是具有子模性（\textit{submodular}）的。最后，本章设计了三个算法来解决提出的传播效率最大化问题，并且在真实数据集上验证了这些算法。实验结果展示了所提出的算法的性能。
+本章主要的工作可以总结如下。首先，基于传统的影响力最大化问题，我们将传播时延考虑在内了来探究传播效率，提出了传播效率最大化问题，研究给定网络和传播模型的条件下，研究如何选择种子节点集合使得传播效率最大化。其次，本章证明了传播效率最大化问题是一个NP-难问题，而且在独立级联模型下计算传播效率的过程是一个\#P-难的问题。然后，我们证明了传播效率函数在独立级联模型下是具有子模性（\textit{submodular}）的。最后，本章设计了三个算法来解决提出的传播效率最大化问题，并且在真实数据集上验证了这些算法。实验结果展示了所提出的算法的性能。
 
 本章的内容组织如下：第\ref{sec4:motivation}节介绍了研究动机，讨论了传统的影响力最大化问题的不足和考虑了传播时延的传播效率最大化问题的意义。第\ref{sec4:definition}节介绍了相关定义，对本章中相关概念和所提出的问题进行了符号化的定义。第\ref{sec4:method}介绍了方法描述，详细地阐述了本章解决问题的方法以及相关证明过程。第\ref{sec4:experiment}节进行了实验分析，设计了一系列的实验，验证了本章所提出的方法，并对实验结果进行了分析。最后，第\ref{sec4:conclusion}对本章的内容进行了总结。
 
@@ -87,27 +87,20 @@ $T'\left(S\right)$ & 种子节点集合$S$在超图$\mathcal{H}$中的传播效�
 
 以图\ref{fig:tinyGraph}中的社交网络$\mathcal{G}$为例，考虑种子节点集合$S=\left\{v_1\right\}$的信息传播过程。图\ref{fig:tinyGraph}中边上的数值代表着节点之间的传播概率$p^\mathcal{G}_{u,v}$。整个信息传播的过程可以描述如下。在$t=0$时刻，由于节点$v_1$是种子节点集合中唯一的节点，因此节点$v_1$被激活。在$t=1$时刻，因为节点$v_1$在$t=0$时刻被激活，而且图$\mathcal{G}$中存在一条从$v_1$到$v_2$概率为1的边，节点$v_1$将依概率1去激活节点$v_2$。因此，节点$v_2$将在$t=1$时刻被激活，$S_1=\left\{v_2\right\}$。此后，在$t=2$时刻，节点$v_2$将尝试去激活节点$v_3$、$v_4$、$v_5$以及$v_6$。假设这一次信息传播过程如图\ref{fig:tinyRandomGraph}所示，节点$v_3$和$v_5$被激活，则$S_2=\left\{v_3, v_5\right\}$。然后，在$t=3$时刻，由于被激活的节点没有后继节点可被激活，整个信息传播过程在此时刻停止。定义$I\left(S\right)$为在种子节点集合是$S$的条件下，整个信息传播过程中激活的节点数目，代表信息传播过程中的影响力。在上述的图$\mathcal{G}$的一次信息传播过程中，影响力$I\left(S\right)=4$。
 
-给定一个种子节点集合$S$，定义$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$表示种子节点集合在图$\mathcal{G}$中影响力的期望，它等于以种子节点集合为传播源，在图$\mathcal{G}$中信息传播结束时激活节点数目的期望值。在独立级联模型下，影响力最大化问题的目标是寻找一个大小至多为$k$的种子节点集合，使得影响力函数的期望值$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$最大化。给定一个输入$k$，影响力最大化问题可以形式化为如下，
-\begin{equation}
-\label{eq:imProblem}
-    \begin{split}
-        &S^{\ast} = \arg\max{\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]}\\
-        &s.t.~~S \subseteq \mathcal{V},\left\vert{S}\right\vert = k
-    \end{split}
-\end{equation}
+给定一个种子节点集合$S$，定义$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$表示种子节点集合在图$\mathcal{G}$中影响力的期望，它等于以种子节点集合为传播源，在图$\mathcal{G}$中信息传播结束时激活节点数目的期望值。在独立级联模型下，影响力最大化问题的目标是寻找一个大小至多为$k$的种子节点集合，使得影响力函数的期望值$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$最大化。给定一个输入$k$，影响力最大化问题可以形式化为如公式（\ref{eq:imProblem}）所示。
 
-以图\ref{fig:tinyGraph}的社交网络$\mathcal{G}$为例，给定输入$k=1$来考虑影响力最大化问题。为了解决例子中的影响力最大化问题，根据公式\ref{eq:imProblem}所示，我们需要计算所有$k=1$的种子节点集合的影响力期望值，即每个节点的影响力期望值。对于节点$v_1$组成的种子节点集合，其影响力期望值$\mathbb{E}_\mathcal{G}\left[I\left(\{v_1\}\right)\right]=1+1+4\times0.8=5.2$。对于种子节点集合$\{v_2\}$，影响力期望值$\mathbb{E}_\mathcal{G}\left[I\left(\{v_2\}\right)\right]=1+4\times0.8=4.2$。对于其他的种子节点集合，$\mathbb{E}_\mathcal{G}\left[I\left(\{v_3\}\right)\right]=
+以图\ref{fig:tinyGraph}的社交网络$\mathcal{G}$为例，给定输入$k=1$来考虑影响力最大化问题。为了解决例子中的影响力最大化问题，根据公式（\ref{eq:imProblem}）所示，我们需要计算所有$k=1$的种子节点集合的影响力期望值，即每个节点的影响力期望值。对于节点$v_1$组成的种子节点集合，其影响力期望值$\mathbb{E}_\mathcal{G}\left[I\left(\{v_1\}\right)\right]=1+1+4\times0.8=5.2$。对于种子节点集合$\{v_2\}$，影响力期望值$\mathbb{E}_\mathcal{G}\left[I\left(\{v_2\}\right)\right]=1+4\times0.8=4.2$。对于其他的种子节点集合，$\mathbb{E}_\mathcal{G}\left[I\left(\{v_3\}\right)\right]=
 \mathbb{E}_\mathcal{G}\left[I\left(\{v_4\}\right)\right]=
 \mathbb{E}_\mathcal{G}\left[I\left(\{v_5\}\right)\right]=
 \mathbb{E}_\mathcal{G}\left[I\left(\{v_6\}\right)\right]=1$。由此，我们可以得出，在给定图$\mathcal{G}$以及$k=1$的条件下，影响力最大化问题的最优解为$S^\ast=\left\{v_1\right\}$。
 
-在上述的例子中，因为图$\mathcal{G}$的结构简单，并且种子节点集合的大小$k=1$，所以能够直接计算得出种子节点集合的影响力期望值，从而选择得出最优解。而在实际情况下，图$\mathcal{G}$的结构往往会复杂得多，而且$k>1$，很难直接计算种子节点集合的影响力期望值。Kempe等人\upcite{kempe2003maximizing}首先证明了在独立级联模型下，影响力最大化问题是一个NP-hard问题。因此，直接计算出有影响力的节点是十分困难的。为了解决此问题，Kempe等人又证明了在独立级联模型下，影响力函数的期望$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$是单调的以及子模的。这两个性质为求解影响力最大化问题的近似算法提供了理论保证。形式上，一个单调的函数对于任意的节点$u$和任意集合$S$，都满足$f\left(S\cup\left\{u\right\}\right) \geq f\left(S\right)$。而一个子模的函数对于任意的节点$u$以及任意的两个集合$S \subseteq W$，都满足$f\left(S\cup\left\{u\right\}\right) - f\left(S\right) \geq f\left(W\cup\left\{u\right\}\right) - f\left(W\right)$。针对具有单调性以及子模性的函数，Nemhauser等人\upcite{nemhauser1978analysis}提出了一种朴素的贪心算法来解决此类问题。算法的核心思想是首先从一个空的种子节点集合$S=\emptyset$开始，重复地选择当前边际收益（即$f\left(S\cup\left\{u\right\}\right) - f\left(S\right)$）最大的节点$u$加入到种子节点集合$S$中，直到满足种子节点集合的大小为$k$时结束迭代。选择节点$u$的准则可以形式化如下，
+在上述的例子中，因为图$\mathcal{G}$的结构简单，并且种子节点集合的大小$k=1$，所以能够直接计算得出种子节点集合的影响力期望值，从而选择得出最优解。而在实际情况下，图$\mathcal{G}$的结构往往会复杂得多，而且$k>1$，很难直接计算种子节点集合的影响力期望值。Kempe等人\upcite{kempe2003maximizing}首先证明了在独立级联模型下，影响力最大化问题是一个NP-难问题。因此，直接计算出有影响力的节点是十分困难的。为了解决此问题，Kempe等人又证明了在独立级联模型下，影响力函数的期望$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$是单调的以及子模的。这两个性质为求解影响力最大化问题的近似算法提供了理论保证。形式上，一个单调的函数对于任意的节点$u$和任意集合$S$，都满足$f\left(S\cup\left\{u\right\}\right) \geq f\left(S\right)$。而一个子模的函数对于任意的节点$u$以及任意的两个集合$S \subseteq W$，都满足$f\left(S\cup\left\{u\right\}\right) - f\left(S\right) \geq f\left(W\cup\left\{u\right\}\right) - f\left(W\right)$。针对具有单调性以及子模性的函数，Nemhauser等人\upcite{nemhauser1978analysis}提出了一种朴素的贪心算法来解决此类问题。算法的核心思想是首先从一个空的种子节点集合$S=\emptyset$开始，重复地选择当前边际收益（即$f\left(S\cup\left\{u\right\}\right) - f\left(S\right)$）最大的节点$u$加入到种子节点集合$S$中，直到满足种子节点集合的大小为$k$时结束迭代。选择节点$u$的准则可以形式化如下，
 \begin{equation}
 \label{eq:greedyIM}
     u=\arg\max\limits_{w \in V \setminus S}\left({\mathbb{E}_\mathcal{G}\left[I\left(S\cup w\right)\right]-\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]}\right)
 \end{equation}
 
-Nemhauser等人证明了朴素的贪心算法得出解以$1-1/\mathsf{e}$的因子近似于最优解，即任意一个由贪心算法的出来的解$S$都满足$I\left(S\right) \geq (1-1/\mathsf{e}) I\left(S^{\ast}\right)$，其中$S^{\ast}$代表最优解，$\mathsf{e}$为自然常数。虽然贪心算法的核心思想比较简单，但是由于计算影响力期望值的过程是\#P-hard\upcite{Chen2010Scalable}的问题，因此实现该算法并不是简单的。为了解决该问题，Kempe等人\upcite{kempe2003maximizing}提出了使用蒙特卡罗方法（Monte Carlo method）来对$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$在一定精度内进行估计。蒙特卡罗方法的步骤如下。假设我们对图$\mathcal{G}=\left(\mathcal{V},\mathcal{E}\right)$中的所有的边$e\in\mathcal{E}$都进行抛硬币实验，图$\mathcal{G}$中边的连接的概率为$p\left(e\right)$，我们以$1-p\left(e\right)$的概率移除掉边$e$。定义$g$为得到的结果图，$R_g\left(S\right)$为在图$g$中从种子节点集合$S$出发可达的节点集合。我们需要注意的是，图$g$中的边不再是概率性连接的边，而是确定性的边。对于任意节点$v\in g$，如果在图$g$中存在一条路径从节点集合$S$出发到达节点$v$，那么称节点$v$是从节点集合$S$可达的。Kempe等人\upcite{kempe2003maximizing}证明了$R_g\left(S\right)$的期望值与$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$是相等的，即可表示为如下，
+Nemhauser等人证明了朴素的贪心算法得出解以$1-1/\mathsf{e}$的因子近似于最优解，即任意一个由贪心算法的出来的解$S$都满足$I\left(S\right) \geq (1-1/\mathsf{e}) I\left(S^{\ast}\right)$，其中$S^{\ast}$代表最优解，$\mathsf{e}$为自然常数。虽然贪心算法的核心思想比较简单，但是由于计算影响力期望值的过程是\#P-难\upcite{chen2010scalable}的问题，因此实现该算法并不是简单的。为了解决该问题，Kempe等人\upcite{kempe2003maximizing}提出了使用蒙特卡罗方法（Monte Carlo method）来对$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$在一定精度内进行估计。蒙特卡罗方法的步骤如下。假设我们对图$\mathcal{G}=\left(\mathcal{V},\mathcal{E}\right)$中的所有的边$e\in\mathcal{E}$都进行抛硬币实验，图$\mathcal{G}$中边的连接的概率为$p\left(e\right)$，我们以$1-p\left(e\right)$的概率移除掉边$e$。定义$g$为得到的结果图，$R_g\left(S\right)$为在图$g$中从种子节点集合$S$出发可达的节点集合。我们需要注意的是，图$g$中的边不再是概率性连接的边，而是确定性的边。对于任意节点$v\in g$，如果在图$g$中存在一条路径从节点集合$S$出发到达节点$v$，那么称节点$v$是从节点集合$S$可达的。Kempe等人\upcite{kempe2003maximizing}证明了$R_g\left(S\right)$的期望值与$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$是相等的，即可表示为如下，
 \begin{equation}
 \label{eq:influenceSpread}
     \mathbb{E}_\mathcal{G}\left[I\left(S\right)\right] = \mathbb{E}_{g\sim\mathcal{G}}\left[I_g\left(S\right)\right]
@@ -186,27 +179,27 @@ Nemhauser等人证明了朴素的贪心算法得出解以$1-1/\mathsf{e}$的因�
 \label{sec4:method}
 本节首先对传播效率最大化问题的复杂度，其次证明了近似最优解算法的保证，最后提出了反向效率采样（Reverse Efficiency Sampling）算法来解决传播效率最大化问题。
 
-众所周知，影响力最大化问题在独立级联模型下是一个NP-hard的问题。本节首先对传播效率最大化问题的复杂度进行分析。
+众所周知，影响力最大化问题在独立级联模型下是一个NP-难的问题。本节首先对传播效率最大化问题的复杂度进行分析。
 
 \begin{theorem}\label{theo:npHard}
-传播效率最大化问题在独立级联模型下是一个NP-hard的问题。
+传播效率最大化问题在独立级联模型下是一个NP-难的问题。
 \end{theorem}
 
 \begin{proof}\label{pro:npHard}
-考虑一个NP-complete的问题实例，集合覆盖（\textit{Set Cover}）问题。问题的定义如下，给定一个集合$U=\left\{u_1, u_2, \cdots, u_n\right\}$的若干个子集$S_1, S_2, \cdots, S_m$，我们需要求解是否存在$k$个子集的并集与集合$U$相等。下面我们证明集合覆盖问题可以看作是传播效率最大化问题的一个特例。
+考虑一个NP-完全的问题实例，集合覆盖（\textit{Set Cover}）问题。问题的定义如下，给定一个集合$U=\left\{u_1, u_2, \cdots, u_n\right\}$的若干个子集$S_1, S_2, \cdots, S_m$，我们需要求解是否存在$k$个子集的并集与集合$U$相等。下面我们证明集合覆盖问题可以看作是传播效率最大化问题的一个特例。
 
 给定任意一个集合覆盖问题的实例，可以定义一个与之相对应的二部图$\mathcal{G}$，节点数目等于$n+m$。图中的节点$i$对应于子集$S_i$，节点$j$对应于集合中的每一个元素$u_j \in U$。对于每一个节点$u_j \in S_i$，图中都有一条从节点$i$到节点$j$的边$\left(i,j\right)$，且边的传播概率为$p_{i,j}=1$。集合覆盖问题等同于判断在构造的二部图$\mathcal{G}$中，是否存在一个$k$个节点的集合$A$使得传播效率期望值$\mathbb{E}_\mathcal{G}\left[T\left(A\right)\right] \geq k+\frac{n}{2}$。因为二部图$\mathcal{G}$中边的传播概率非0即1，对应的信息传播是一个确定性的过程。初始化的$k$个种子节点等同于在集合覆盖问题中选择$k$个子集，而激活其余的$n$个节点相当于覆盖集合$U$。因此，如果存在$k$个节点的集合$A$满足$\mathbb{E}_\mathcal{G}\left[T\left(A\right)\right] \geq k+\frac{n}{2}$，则集合覆盖问题能够被解决。
 \end{proof}
 
-此外，另一个重要的问题是计算一个种子节点集合的传播效率期望值是非常耗时的，时间复杂度为$O\left(mr\right)$。给定一个种子节点集合$S$，没有一个高效的方法直接计算传播效率期望值$\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]$。本节将这个问题规约到$s$-$t$连通性问题，证明了在独立级联模型下计算传播效率期望值是一个\#P-hard的问题。
+此外，另一个重要的问题是计算一个种子节点集合的传播效率期望值是非常耗时的，时间复杂度为$O\left(mr\right)$。给定一个种子节点集合$S$，没有一个高效的方法直接计算传播效率期望值$\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]$。本节将这个问题规约到$s$-$t$连通性问题\upcite{valiant1979complexity}，证明了在独立级联模型下计算传播效率期望值是一个\#P-难的问题。
 
 \begin{theorem}
 \label{theo:sharpHard}
-在独立级联模型下，给定一个种子节点集合$S$，计算其传播效率期望值$\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]$是一个\#P-hard的问题。
+在独立级联模型下，给定一个种子节点集合$S$，传播效率期望值计算问题$\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]$是一个\#P-难的问题。
 \end{theorem}
 
 \begin{proof}
-我们通过将这个问题规约到$s$-$t$连通性问题来证明定理。给定一个有向图$\mathcal{G}=\left( \mathcal{V}, \mathcal{E} \right)$以及两个节点$s$和$t$，$s$-$t$连通性问题是来计算图$\mathcal{G}$中能够连通节点$s$和节点$t$的子图数。定义$p^\mathcal{G}_{s,t}$为图$\mathcal{G}$中节点$s$与节点$t$连通的概率。当使得图$\mathcal{G}$的每一条边有$1/2$的概率连通，$1/2$的概率不连通时，我们可以直观地观察到，$s$-$t$连通性问题等同于求解$p^\mathcal{G}_{s,t}$。下一步，我们将传播效率最大化问题归约到$s$-$t$连通性问题。首先，令种子节点集合$S=\{s\}$，且图$\mathcal{G}$中的每一条边$\left(u,v\right) \in \mathcal{E}$的传播概率$p^\mathcal{G}_{u,v}=1/2$。此时，图$\mathcal{G}$中，以$S$为种子节点集合的传播效率期望值定义为$\mathbb{E}_\mathcal{G}\left[T_0\left(S\right)\right]$。下一步，我们在图$\mathcal{G}$增加一个节点$t_1$以及一条从节点$t$到节点$t_1$的边。我们称得到的新的图为$\mathcal{G}_1$，以及新增的边的传播概率为$p^{\mathcal{G}_1}_{t,t_1}=1$。在图$\mathcal{G}_1$中，以$S$为种子节点集合的传播效率期望值定义为$\mathbb{E}_\mathcal{G}\left[T_1\left(S\right)\right]$。而且我们可计算得知，$\mathbb{E}_\mathcal{G}\left[T_1\left(S\right)\right]=\mathbb{E}_\mathcal{G} \left[T_0\left(S\right)\right] + p^{\mathcal{G}_1}_{t,t_1}\cdot \sum_{i=1}^n{p^\mathcal{G}_{s,t,d=i}\cdot \frac{1}{d+1}}=\mathbb{E}_\mathcal{G} \left[T_0\left(S\right) \right] + \sum_{i=1}^n{p^\mathcal{G}_{s,t,d=i}\cdot \frac{1}{d+1}}$，其中$p^\mathcal{G}_{s,t,d=i}$表示在图$\mathcal{G}$中，从节点$s$到节点$t$且距离为$d$的概率（从$s$达到$t$经过通过$d$次传播），$n=\left\vert\mathcal{V}\right\vert$。下一步，我们继续在图$\mathcal{G}_1$中，添加节点$t_2$以及一条从$t_1$到$t_2$的边，得到新的图$\mathcal{G}_2$，且令$p^{\mathcal{G}_2}_{t_1,t_2}=1$。在图$\mathcal{G}_2$中，以$S$为种子节点集合的传播效率期望值定义为$\mathbb{E}_\mathcal{G}\left[T_2\left(S\right)\right]$。可以计算得知，$\mathbb{E}_\mathcal{G}\left[T_2\left(S\right)\right]=\mathbb{E}_\mathcal{G} \left[T_1\left(S\right)\right] + p^{\mathcal{G}_1}_{t_1,t_2}\cdot p^{\mathcal{G}_1}_{t,t_1}\cdot \sum_{i=1}^n{p^\mathcal{G}_{s,t,d=i}\cdot \frac{1}{d+2}}=\mathbb{E}_\mathcal{G} \left[T_1\left(S\right)\right] + \sum_{i=1}^n{p^\mathcal{G}_{s,t,d=i}\cdot \frac{1}{d+2}}$。我们可以重复上述步骤，得到$n$个以$S$为种子节点集合的传播效率期望值$T_1\left(S\right),\cdots,T_n\left(S\right)$。且递推公式为$\mathbb{E}_\mathcal{G}\left[T_j\left(S\right)\right]=\mathbb{E}_\mathcal{G} \left[T_{j-1}\left(S\right)\right] + \sum_{i=1}^n{p^\mathcal{G}_{s,t,d=i}\cdot \frac{1}{d+j}}$。这些传播效率期望值方程可以表示如下，
+我们通过将这个问题规约到$s$-$t$连通性问题来证明定理。给定一个有向图$\mathcal{G}=\left( \mathcal{V}, \mathcal{E} \right)$以及两个节点$s$和$t$，$s$-$t$连通性问题是来计算图$\mathcal{G}$中能够连通节点$s$和节点$t$的子图数。定义$p^\mathcal{G}_{s,t}$为图$\mathcal{G}$中节点$s$与节点$t$连通的概率。当使得图$\mathcal{G}$的每一条边有$1/2$的概率连通，$1/2$的概率不连通时，我们可以直观地观察到，$s$-$t$连通性问题等同于求解$p^\mathcal{G}_{s,t}$。下一步，我们将$s$-$t$连通性问题归约到传播效率期望值计算问题。首先，令种子节点集合$S=\{s\}$，且图$\mathcal{G}$中的每一条边$\left(u,v\right) \in \mathcal{E}$的传播概率$p^\mathcal{G}_{u,v}=1/2$。此时，图$\mathcal{G}$中，以$S$为种子节点集合的传播效率期望值定义为$\mathbb{E}_\mathcal{G}\left[T_0\left(S\right)\right]$。下一步，我们在图$\mathcal{G}$增加一个节点$t_1$以及一条从节点$t$到节点$t_1$的边。我们称得到的新的图为$\mathcal{G}_1$，以及新增的边的传播概率为$p^{\mathcal{G}_1}_{t,t_1}=1$。在图$\mathcal{G}_1$中，以$S$为种子节点集合的传播效率期望值定义为$\mathbb{E}_\mathcal{G}\left[T_1\left(S\right)\right]$。而且我们可计算得知，$\mathbb{E}_\mathcal{G}\left[T_1\left(S\right)\right]=\mathbb{E}_\mathcal{G} \left[T_0\left(S\right)\right] + p^{\mathcal{G}_1}_{t,t_1}\cdot \sum_{i=1}^n{p^\mathcal{G}_{s,t,d=i}\cdot \frac{1}{d+1}}=\mathbb{E}_\mathcal{G} \left[T_0\left(S\right) \right] + \sum_{i=1}^n{p^\mathcal{G}_{s,t,d=i}\cdot \frac{1}{d+1}}$，其中$p^\mathcal{G}_{s,t,d=i}$表示在图$\mathcal{G}$中，从节点$s$到节点$t$且距离为$d$的概率（从$s$达到$t$经过通过$d$次传播），$n=\left\vert\mathcal{V}\right\vert$。下一步，我们继续在图$\mathcal{G}_1$中，添加节点$t_2$以及一条从$t_1$到$t_2$的边，得到新的图$\mathcal{G}_2$，且令$p^{\mathcal{G}_2}_{t_1,t_2}=1$。在图$\mathcal{G}_2$中，以$S$为种子节点集合的传播效率期望值定义为$\mathbb{E}_\mathcal{G}\left[T_2\left(S\right)\right]$。可以计算得知，$\mathbb{E}_\mathcal{G}\left[T_2\left(S\right)\right]=\mathbb{E}_\mathcal{G} \left[T_1\left(S\right)\right] + p^{\mathcal{G}_1}_{t_1,t_2}\cdot p^{\mathcal{G}_1}_{t,t_1}\cdot \sum_{i=1}^n{p^\mathcal{G}_{s,t,d=i}\cdot \frac{1}{d+2}}=\mathbb{E}_\mathcal{G} \left[T_1\left(S\right)\right] + \sum_{i=1}^n{p^\mathcal{G}_{s,t,d=i}\cdot \frac{1}{d+2}}$。我们可以重复上述步骤，得到$n$个以$S$为种子节点集合的传播效率期望值$T_1\left(S\right),\cdots,T_n\left(S\right)$。且递推公式为$\mathbb{E}_\mathcal{G}\left[T_j\left(S\right)\right]=\mathbb{E}_\mathcal{G} \left[T_{j-1}\left(S\right)\right] + \sum_{i=1}^n{p^\mathcal{G}_{s,t,d=i}\cdot \frac{1}{d+j}}$。这些传播效率期望值方程可以表示如下，
 \begin{equation}\label{eq:sharpHard}
     \begin{bmatrix}
     \frac{1}{1+1} & \frac{1}{1+2} & \cdots & \frac{1}{1+n} \\
@@ -231,7 +224,7 @@ Nemhauser等人证明了朴素的贪心算法得出解以$1-1/\mathsf{e}$的因�
     \mathbb{E}_\mathcal{G}\left[T_n\left(S\right)\right] - \mathbb{E}_\mathcal{G}\left[T_{n-1}\left(S\right)\right]\\
     \end{bmatrix}
 \end{equation}
-根据上述过程，可令$A$表示方程组（\ref{eq:sharpHard}）中的矩阵，$\mathbf{x} = \left(p^\mathcal{G}_{s,t,d=1},p^\mathcal{G}_{s,t,d=2},\cdots,p^\mathcal{G}_{s,t,d=n}\right)^T$，$\mathbf{b}=\left(\mathbb{E}_\mathcal{G} \left[T_1\left(S\right)\right] - \mathbb{E}_\mathcal{G}\left[T_0\left(S\right)\right],\cdots,\mathbb{E}_\mathcal{G}\left[T_n\left(S\right)\right] - \mathbb{E}_\mathcal{G}\left[T_{n-1}\left(S\right)\right]\right)^T$。方程组（\ref{eq:sharpHard}）可表示为$A\mathbf{x}=\mathbf{b}$。根据引理\ref{lem:nonsingular}可知矩阵$A$是一个非奇异的矩阵，因此线性方程组（\ref{eq:sharpHard}）可以通过高斯-赛德尔方法在多项式时间内解决，而且构造这一个线性方程组是在线性时间内可完成的。我们可以直观地计算出图$\mathcal{G}$中节点$s$到$t$的连通概率$p^\mathcal{G}_{s,t}=\sum_{i=1}^n{p^\mathcal{G}_{s,t,d=i}}$，这也就是说节点$s$到节点$t$的概率在线性时间内可以计算。因此，$s$-$t$连通性问题是可解决的。而我们已知$s$-$t$连通性问题是一个\#P-complete的问题。因此，计算传播效率期望值是一个\#P-hard的问题。
+根据上述过程，可令$A$表示方程组（\ref{eq:sharpHard}）中的矩阵，$\mathbf{x} = \left(p^\mathcal{G}_{s,t,d=1},p^\mathcal{G}_{s,t,d=2},\cdots,p^\mathcal{G}_{s,t,d=n}\right)^T$，$\mathbf{b}=\left(\mathbb{E}_\mathcal{G} \left[T_1\left(S\right)\right] - \mathbb{E}_\mathcal{G}\left[T_0\left(S\right)\right],\cdots,\mathbb{E}_\mathcal{G}\left[T_n\left(S\right)\right] - \mathbb{E}_\mathcal{G}\left[T_{n-1}\left(S\right)\right]\right)^T$。方程组（\ref{eq:sharpHard}）可表示为$A\mathbf{x}=\mathbf{b}$。根据引理\ref{lem:nonsingular}可知矩阵$A$是一个非奇异的矩阵，因此线性方程组（\ref{eq:sharpHard}）可以通过高斯-赛德尔方法在多项式时间内解决，而且构造这一个线性方程组是在线性时间内可完成的。我们可以直观地计算出图$\mathcal{G}$中节点$s$到$t$的连通概率$p^\mathcal{G}_{s,t}=\sum_{i=1}^n{p^\mathcal{G}_{s,t,d=i}}$，这也就是说节点$s$到节点$t$的概率在线性时间内可以计算。因此，$s$-$t$连通性问题是可解决的。而我们已知$s$-$t$连通性问题是一个\#P-完全的问题。因此，计算传播效率期望值是一个\#P-难的问题。
 \end{proof}
 
 定理\ref{theo:sharpHard}证明中的矩阵$A$如公式（\ref{eq:matrixA}）所示，
@@ -247,7 +240,7 @@ Nemhauser等人证明了朴素的贪心算法得出解以$1-1/\mathsf{e}$的因�
     \end{bmatrix}
 \end{equation}
 
-上述过程将计算传播效率期望值$\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]$的问题规约到了$s$-$t$连通性问题，证明了计算传播效率期望值$\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]$的问题是一个\#P-hard的问题。其中引用了矩阵$A$为非奇异矩阵的事实，下面我们证明上述的矩阵$A$是非奇异的。首先，我们可以观察到矩阵$A$是一个对称矩阵，其次我们可以得到矩阵中通项$a_{ij}$。因此，我们考虑使用行列变换对矩阵$A$的行列式进行降维，发现行列式的递推公式，计算行列式的值。如果行列式不为零，则可证明矩阵$A$是非奇异的。引理以及其详细证明过程如下。
+上述过程将计算传播效率期望值$\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]$的问题规约到了$s$-$t$连通性问题，证明了计算传播效率期望值$\mathbb{E}_\mathcal{G}\left[T\left(S\right)\right]$的问题是一个\#P-难的问题。其中引用了矩阵$A$为非奇异矩阵的事实，下面我们证明上述的矩阵$A$是非奇异的。首先，我们可以观察到矩阵$A$是一个对称矩阵，其次我们可以得到矩阵中通项$a_{ij}$。因此，我们考虑使用行列变换对矩阵$A$的行列式进行降维，发现行列式的递推公式，计算行列式的值。如果行列式不为零，则可证明矩阵$A$是非奇异的。引理以及其详细证明过程如下。
 
 \begin{lemma}\label{lem:nonsingular}
 矩阵$A \in \mathbb{R}^{n \times n}$且$a_{ij} = \frac{1}{i+j}$，则矩阵$A$是非奇异的。
@@ -609,5 +602,5 @@ $\cdots$，50。对于惰性贪心算法，我们根据之前相关的工作，�
 本小节进行了反向效率采样算法的可扩展性实验。实验使用\textit{DBLP}网络来生成各种大小的子图。生成过程如下所示。首先，我们随机地选取图中的一个节点，然后做宽度优先搜索来添加边到子图中，该过程直到子图的大小满足要求时停止。如果宽度优先搜索过程在子图大小没有满足前就停止了，那么在重新随机地选择一个不在目前子图中的节点，继续进行宽度优先搜索，重复上述过程直到满足要求。利用该方法，我们可以得到各种大小的子图。本小节的实验中，我们令子图的边的大小从$m=1,000$到$m=1,000,000$变化，然后运行反向效率采样算法，记录运行的时间。在均匀独立级联模型以及加权独立级联模型下的实验结果如图\ref{fig:scalability}所示。由图可知，随着图大小的增长，运行时间的增长是线性的。因此，反向效率采样算法是可扩展的。
 \section{本章小结}
 \label{sec4:conclusion}
-为了更好地理解网络中的传播效率，本章将信息传播过程中的传播时延考虑在内，提出了一个新的问题，传播效率最大化问题。该问题的目的在于最大化网络中的传播效率期望值。然后，我们证明了在独立级联模型下，传播效率最大化问题是一个NP-hard的问题，而且计算传播效率的过程是一个\#P-hard的问题。为了解决该问题，我们证明了在独立级联模型下，传播效率函数的期望值是单调且子模性的。基于上述的性质，我们设计了三种算法来解决该问题。最后，我们在真实的数据集上进行了一系列的实验来验证所提出的算法。实验结果表明了传播效率最大化问题与影响力最大化问题的不同，证明了提出的算法的正确性和有效性。本章所研究的内容对充分理解信息传播过程有着一定的帮助。
+为了更好地理解网络中的传播效率，本章将信息传播过程中的传播时延考虑在内，提出了一个新的问题，传播效率最大化问题。该问题的目的在于最大化网络中的传播效率期望值。然后，我们证明了在独立级联模型下，传播效率最大化问题是一个NP-难的问题，而且计算传播效率的过程是一个\#P-难的问题。为了解决该问题，我们证明了在独立级联模型下，传播效率函数的期望值是单调且子模性的。基于上述的性质，我们设计了三种算法来解决该问题。最后，我们在真实的数据集上进行了一系列的实验来验证所提出的算法。实验结果表明了传播效率最大化问题与影响力最大化问题的不同，证明了提出的算法的正确性和有效性。本章所研究的内容对充分理解信息传播过程有着一定的帮助。
 

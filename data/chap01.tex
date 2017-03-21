@@ -90,9 +90,30 @@
 	\item 结构的复杂性。社交网络中的用户数量庞大，而且不同社交媒体之间的用户存在着重叠现象。社交网络中的用户通过朋友、兴趣等多种关系聚合在一起，形成多种多样的复杂结构。计算信息传播的影响范围、信息的溯源以及如何选择节点使得影响力最大化这些问题在社交网络环境中都出现了新的挑战，传统的方法的性能在复杂的网络中效率明显下降。如何在复杂的网络中快速地、有效地对信息传播进行分析对抽样理论、算法设计等都提出了挑战。
 \end{itemize}
 
+由此可见，社交网络的发展对信息传播研究提出了多方面的挑战，同时，也为信息传播研究提供了丰富的数据和渠道，这也为信息传播的研究提供了一个虚拟的环境。
+
 \section{相关研究工作}
 \label{sec1:relatedWorks}
 
+\subsection{影响力最大化问题}
+\label{subsec1:influenceMax}
+影响力最大化问题最早是由Domingos和Richardson所提出，问题基于马尔科夫随机场（Markov Random Field）进行建模\upcite{domingos2001mining,richardson2002mining}。随后，Kempe等人将影响力最大化问题建模成一个离散的随机优化问题\upcite{kempe2003maximizing}。影响力最大化的问题可以定义为如下所示，
+
+\begin{defn}[影响力最大化问题]
+\label{def:imProblem}
+影响力最大化问题可以形式化为如下一个随机优化问题：给定一个图$\mathcal{G} = \left(\mathcal{V}, \mathcal{E}\right)$、图$\mathcal{G}$上的一个随机传播模型以及一个阈值$k$。给定一个种子节点集合$S \subseteq \mathcal{V}$且满足$\left\vert{S}\right\vert \leq k$，则集合$S$的影响力期望为$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$。则影响力最大化问题为寻找使得影响力期望最大的集合$S^{\ast}$。问题可表示为如下所示，
+\begin{equation}
+\label{eq:imProblem}
+    \begin{split}
+        &S^{\ast} = \arg\max{\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]}\\
+        &s.t.~~S \subseteq \mathcal{V},\left\vert{S}\right\vert \leq k
+    \end{split}
+\end{equation}
+\end{defn}
+
+在给定了一个传播模型后，例如独立级联模型（Independent Cascade Model）或者线性阈值模型（Linear Threshold Model），影响力最大化问题可以分解成两个问题。第一个问题称为影响力期望计算问题，即给定了一个种子节点集合$S$后计算其影响力期望$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$。第二个问题是如同定义\ref{def:imProblem}所示，找到使得影响力期望最大的种子节点集合。
+
+对于影响力期望计算问题，Wang等人\upcite{wang2012scalable}以及Chen等人\upcite{chen2010scalableLT}证明了其复杂度在独立级联模型和线性阈值模型下是\#P的。\#P问题是计数问题，与NP问题中决策问题相关。NP问题需要求解一个问题实例是否存在解，例如合取范式（Conjunctive Normal Form）方程是否存在可满足解，而\#P问题需要求解这个问题实例存在多少个解，例如合取范式方程存在多少个可满足解。如果一个问题是\#P的且每一个\#P的问题都可以在多项式时间内归约到它，那么这个问题是\#P-完全的。如果一个问题可以在多项式时间内从一个\#P-完全的问题归约到它，那么它是一个\#P-难的问题。对于独立级联模型或者线性阈值模型，上述的证明过程都可以由一个\#P-完全的问题，$s$-$t$连通性问题\upcite{valiant1979complexity}，来进行归约。
 \section{本文的工作与创新}
 \label{sec1:inovation}
 
