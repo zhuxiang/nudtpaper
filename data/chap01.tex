@@ -97,6 +97,10 @@
 
 \subsection{影响力最大化问题}
 \label{subsec1:influenceMax}
+影响力最大化问题的一个强有力的需求是通过信息传播来推广新产品、新理念以及新政策等。为了实现网络中的迅速传播，主要有研究分为两个方向。第一个方向为对传播模型进行建模，第二个方向为寻找一个快速有效的方法来找到具有影响力的个体。
+
+对于第一个方向，已有很多工作对传播模型进行了深入的研究。
+
 影响力最大化问题最早是由Domingos和Richardson所提出，问题基于马尔科夫随机场（Markov Random Field）进行建模\upcite{domingos2001mining,richardson2002mining}。随后，Kempe等人将影响力最大化问题建模成一个离散的随机优化问题\upcite{kempe2003maximizing}。影响力最大化的问题可以定义为如下所示，
 
 \begin{defn}[影响力最大化问题]
@@ -114,6 +118,34 @@
 在给定了一个传播模型后，例如独立级联模型（Independent Cascade Model）或者线性阈值模型（Linear Threshold Model），影响力最大化问题可以分解成两个问题。第一个问题称为影响力期望计算问题，即给定了一个种子节点集合$S$后计算其影响力期望$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$。第二个问题是如同定义\ref{def:imProblem}所示，找到使得影响力期望最大的种子节点集合。
 
 对于影响力期望计算问题，Wang等人\upcite{wang2012scalable}以及Chen等人\upcite{chen2010scalableLT}证明了其复杂度在独立级联模型和线性阈值模型下是\#P的。\#P问题是计数问题，与NP问题中决策问题相关。NP问题需要求解一个问题实例是否存在解，例如合取范式（Conjunctive Normal Form）方程是否存在可满足解，而\#P问题需要求解这个问题实例存在多少个解，例如合取范式方程存在多少个可满足解。如果一个问题是\#P的且每一个\#P的问题都可以在多项式时间内归约到它，那么这个问题是\#P-完全的。如果一个问题可以在多项式时间内从一个\#P-完全的问题归约到它，那么它是一个\#P-难的问题。对于独立级联模型或者线性阈值模型，上述的证明过程都可以由一个\#P-完全的问题，$s$-$t$连通性问题\upcite{valiant1979complexity}，来进行归约。
+
+对于寻找影响力期望最大的种子节点集合的问题，Kempe等人\upcite{kempe2003maximizing}给出了结论，问题的复杂性在独立级联模型和线性阈值模型下都是NP-难的。其证明思路将NP-完全的问题归约到影响力最大化问题。在独立级联模型中，证明将子集覆盖（Set Cover）问题归约到影响力最大化问题；而在线性阈值模型中，证明将节点覆盖（Vertex Cover）问题归约到影响力最大化问题。
+
+上述研究表明了影响力最大化问题是一个复杂性较高的问题。问题的难度来自于两方面，一方面是问题的组合性质，另一方面是计算影响力期望的难度（甚至是计算一个节点的影响力期望）。针对这两个问题，已有的研究主要应用贪心算法来解决组合问题，利用蒙特卡罗（Monte Carlo）模拟来解决影响力期望计算问题。对于影响力最大化问题使用贪心算法能够得到一个下界的保证，即运用贪心算法得到的解最差的结果有理论性的保证。这是由于影响力期望函数$\mathbb{E}_\mathcal{G}\left[I\left(\cdot\right)\right]$具有两个很重要的性质，即子模性（submodularity）和单调性（monotonicity）。子模性的定义如下所示，
+\begin{defn}[子模性]
+\label{def:submodularity}
+子模性的定义可以解释为往种子节点集合加入更多节点时，所造成的效果为边际收益递减（Diminishing Marginal Returns）。对于一个集合函数$f:2^{\mathcal{V}} \rightarrow \mathbb{R}$，如果对于任意的子集$S \subseteq W \subseteq \mathcal{V}$且任意的元素$v \in \mathcal{V} \setminus W$，将元素$v$加入到集合$W$中的边际收益不超过将元素$v$加入到集合$S$中的边际收益，那么函数$f\left( \cdot \right)$具有子模性，用公式表示如下，
+\begin{equation}
+\label{eq:submodularity}
+	f\left(S\cup\left\{u\right\}\right) - f\left(S\right) \geq f\left(W\cup\left\{u\right\}\right) - f\left(W\right)
+\end{equation}
+\end{defn}
+
+另一个重要的性质单调性定义如下，
+\begin{defn}[单调性]
+\label{def:monotonicity}
+单调性的定义可以解释为往集合中增加元素不会使得函数值变小。一个集合函数$f:2^{\mathcal{V}} \rightarrow \mathbb{R}$，如果对于任意的子集$S \subseteq W \subseteq \mathcal{V}$，都有$f\left(S\right) \leq f\left(W\right)$，则函数$f\left( \cdot \right)$具有单调性。
+\end{defn}
+
+对于具有子模性和单调性的函数$f\left( \cdot \right)$，Nemhauser等人\upcite{nemhauser1978analysis}证明了使用贪心算法得到的解的性能存在着下界。令$S^{\ast}$表示问题的最优解，函数$f\left( \cdot \right)$具有子模性和单调性且满足$f\left( \emptyset \right) = 0$，$S^g$为通过贪心算法得出的解，则可以用公式表示为如下所示，
+\begin{equation}
+\label{eq:lowerBound}
+	f\left( S^g \right) \geq \left( 1 - 1/\mathsf{e} \right) f\left( S^{\ast} \right)
+\end{equation}
+其中$\mathsf{e}$为自然对数的底。其证明过程利用了单调性和子模性以及递推方法得到公式（\ref{eq:lowerBound}）的结论。
+
+
+
 \section{本文的工作与创新}
 \label{sec1:inovation}
 

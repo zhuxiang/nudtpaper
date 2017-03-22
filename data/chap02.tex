@@ -100,7 +100,7 @@ $T'\left(S\right)$ & 种子节点集合$S$在超图$\mathcal{H}$中的传播效�
     u=\arg\max\limits_{w \in V \setminus S}\left({\mathbb{E}_\mathcal{G}\left[I\left(S\cup w\right)\right]-\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]}\right)
 \end{equation}
 
-Nemhauser等人证明了朴素的贪心算法得出解以$1-1/\mathsf{e}$的因子近似于最优解，即任意一个由贪心算法的出来的解$S$都满足$I\left(S\right) \geq (1-1/\mathsf{e}) I\left(S^{\ast}\right)$，其中$S^{\ast}$代表最优解，$\mathsf{e}$为自然常数。虽然贪心算法的核心思想比较简单，但是由于计算影响力期望值的过程是\#P-难\upcite{chen2010scalable}的问题，因此实现该算法并不是简单的。为了解决该问题，Kempe等人\upcite{kempe2003maximizing}提出了使用蒙特卡罗方法（Monte Carlo method）来对$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$在一定精度内进行估计。蒙特卡罗方法的步骤如下。假设我们对图$\mathcal{G}=\left(\mathcal{V},\mathcal{E}\right)$中的所有的边$e\in\mathcal{E}$都进行抛硬币实验，图$\mathcal{G}$中边的连接的概率为$p\left(e\right)$，我们以$1-p\left(e\right)$的概率移除掉边$e$。定义$g$为得到的结果图，$R_g\left(S\right)$为在图$g$中从种子节点集合$S$出发可达的节点集合。我们需要注意的是，图$g$中的边不再是概率性连接的边，而是确定性的边。对于任意节点$v\in g$，如果在图$g$中存在一条路径从节点集合$S$出发到达节点$v$，那么称节点$v$是从节点集合$S$可达的。Kempe等人\upcite{kempe2003maximizing}证明了$R_g\left(S\right)$的期望值与$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$是相等的，即可表示为如下，
+Nemhauser等人证明了朴素的贪心算法得出解以$1-1/\mathsf{e}$的因子近似于最优解，即任意一个由贪心算法的出来的解$S$都满足$I\left(S\right) \geq (1-1/\mathsf{e}) I\left(S^{\ast}\right)$，其中$S^{\ast}$代表最优解，$\mathsf{e}$为自然对数的底。虽然贪心算法的核心思想比较简单，但是由于计算影响力期望值的过程是\#P-难\upcite{chen2010scalable}的问题，因此实现该算法并不是简单的。为了解决该问题，Kempe等人\upcite{kempe2003maximizing}提出了使用蒙特卡罗（Monte Carlo）方法来对$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$在一定精度内进行估计。蒙特卡罗方法的步骤如下。假设我们对图$\mathcal{G}=\left(\mathcal{V},\mathcal{E}\right)$中的所有的边$e\in\mathcal{E}$都进行抛硬币实验，图$\mathcal{G}$中边的连接的概率为$p\left(e\right)$，我们以$1-p\left(e\right)$的概率移除掉边$e$。定义$g$为得到的结果图，$R_g\left(S\right)$为在图$g$中从种子节点集合$S$出发可达的节点集合。我们需要注意的是，图$g$中的边不再是概率性连接的边，而是确定性的边。对于任意节点$v\in g$，如果在图$g$中存在一条路径从节点集合$S$出发到达节点$v$，那么称节点$v$是从节点集合$S$可达的。Kempe等人\upcite{kempe2003maximizing}证明了$R_g\left(S\right)$的期望值与$\mathbb{E}_\mathcal{G}\left[I\left(S\right)\right]$是相等的，即可表示为如下，
 \begin{equation}
 \label{eq:influenceSpread}
     \mathbb{E}_\mathcal{G}\left[I\left(S\right)\right] = \mathbb{E}_{g\sim\mathcal{G}}\left[I_g\left(S\right)\right]
@@ -186,7 +186,7 @@ Nemhauser等人证明了朴素的贪心算法得出解以$1-1/\mathsf{e}$的因�
 \end{theorem}
 
 \begin{proof}\label{pro:npHard}
-考虑一个NP-完全的问题实例，集合覆盖（\textit{Set Cover}）问题。问题的定义如下，给定一个集合$U=\left\{u_1, u_2, \cdots, u_n\right\}$的若干个子集$S_1, S_2, \cdots, S_m$，我们需要求解是否存在$k$个子集的并集与集合$U$相等。下面我们证明集合覆盖问题可以看作是传播效率最大化问题的一个特例。
+考虑一个NP-完全的问题实例，子集覆盖（Set Cover）问题。问题的定义如下，给定一个集合$U=\left\{u_1, u_2, \cdots, u_n\right\}$的若干个子集$S_1, S_2, \cdots, S_m$，我们需要求解是否存在$k$个子集的并集与集合$U$相等。下面我们证明集合覆盖问题可以看作是传播效率最大化问题的一个特例。
 
 给定任意一个集合覆盖问题的实例，可以定义一个与之相对应的二部图$\mathcal{G}$，节点数目等于$n+m$。图中的节点$i$对应于子集$S_i$，节点$j$对应于集合中的每一个元素$u_j \in U$。对于每一个节点$u_j \in S_i$，图中都有一条从节点$i$到节点$j$的边$\left(i,j\right)$，且边的传播概率为$p_{i,j}=1$。集合覆盖问题等同于判断在构造的二部图$\mathcal{G}$中，是否存在一个$k$个节点的集合$A$使得传播效率期望值$\mathbb{E}_\mathcal{G}\left[T\left(A\right)\right] \geq k+\frac{n}{2}$。因为二部图$\mathcal{G}$中边的传播概率非0即1，对应的信息传播是一个确定性的过程。初始化的$k$个种子节点等同于在集合覆盖问题中选择$k$个子集，而激活其余的$n$个节点相当于覆盖集合$U$。因此，如果存在$k$个节点的集合$A$满足$\mathbb{E}_\mathcal{G}\left[T\left(A\right)\right] \geq k+\frac{n}{2}$，则集合覆盖问题能够被解决。
 \end{proof}
