@@ -95,13 +95,13 @@
 \section{相关研究工作}
 \label{sec1:relatedWorks}
 
-\subsection{影响力最大化问题}
+\subsection{影响力最大化}
 \label{subsec1:influenceMax}
 影响力最大化问题的一个强有力的需求是通过信息传播来推广新产品、新理念以及新政策等。为了实现网络中的迅速传播，主要有研究分为两个方向。第一个方向为对传播模型进行建模，第二个方向为寻找一个快速有效的方法来找到具有影响力的个体。
 
-对于第一个方向，已有很多工作对传播模型进行了深入的研究。
+对于第一个方向，已有很多工作对传播模型进行了深入的研究。均匀模型（Uniform Model）假设所有节点的影响概率为一个常数（例如0.01），该模型不区分节点之间的关系。首先，每一个节点都以相同的概率影响其邻居节点，模型未能区分节点对于其他节点的影响力。其次，每一个节点受到其邻居节点的概率也是相同的，模型未能区分不同邻居节点对该节点的影响力。显然，这样的假设是值得商榷的。三态模型（ Trivalency Model）在一定程度上解决了第一个问题，节点的影响概率为一个集合中的某一个元素，例如$\left\{ 0.001, 0.01, 0.1\right\}$。模型的思想是对不同影响力的节点赋予不同的影响概率值。上述的两个模型的影响概率与网络的结构无关。在加权级联模型（Weighted Cascade Model）中，模型定义影响概率与网络的边$\left(u,v\right)$相关，影响概率$p_{uv}=1/d_{in}v$，其中$d_{in}v$为节点$v$的入度。该模型比均匀模型和三态模型拥有更好的性质。首先，低入度的节点收到其入度邻居节点的影响要大于高入度的节点。这样影响概率不仅仅是从一组常数中进行选择。其次，一个节点对于出度节点的影响不再是相同的，这是由于这些出度节点的入度不同。然而，加权级联模型仍然无法解释节点之间的影响概率是如何计算得出的。Saito等人\upcite{saito2008prediction}研究了如何学习影响概率的问题，主要以独立几联模型为研究对象。通过观测信息传播过程中的每个片段，来求解设定影响概率为参数下的极大似然估计，从而求解影响概率。在线性阈值模型中，每个节点存在一个阈值$theta \in \left[ 0,1 \right]$，当累计影响超过阈值时，节点将被激活。Goyal等人\upcite{goyal2010learning}通过社交网络中的信息传播轨迹来学习节点之间的影响概率。
 
-影响力最大化问题最早是由Domingos和Richardson所提出，问题基于马尔科夫随机场（Markov Random Field）进行建模\upcite{domingos2001mining,richardson2002mining}。随后，Kempe等人将影响力最大化问题建模成一个离散的随机优化问题\upcite{kempe2003maximizing}。影响力最大化的问题可以定义为如下所示，
+对于第二个方向，影响力最大化问题最早是由Domingos和Richardson所提出，问题基于马尔科夫随机场（Markov Random Field）进行建模\upcite{domingos2001mining,richardson2002mining}。随后，Kempe等人将影响力最大化问题建模成一个离散的随机优化问题\upcite{kempe2003maximizing}。影响力最大化的问题可以定义为如下所示，
 
 \begin{defn}[影响力最大化问题]
 \label{def:imProblem}
@@ -144,7 +144,18 @@
 \end{equation}
 其中$\mathsf{e}$为自然对数的底。其证明过程利用了单调性和子模性以及递推方法得到公式（\ref{eq:lowerBound}）的结论。
 
+对于影响力最大化的求解，Kempe等人\upcite{kempe2003maximizing}的研究是最早将影响力最大化问题当做优化问题来求解的，并且给出了贪心算法的求解。Leskovec等人\upcite{leskovec2007cost}提出了一种改进算法，CELF算法。算法利用函数的子模性来对于不必要的模拟进行剪枝，使用一个优先队列实现，在不改变输出的情况下提高了算法的性能。Goyal等人\upcite{goyal2011celf++}基于上述的工作进行了改进，提出了CELF++算法。Cheng等人为了解决可扩展性和准确度之间的矛盾，提出了一个静态的贪心算法，为StaticGreedy算法。该算法保证了信息传播过程中影响函数的子模性，在准确度不损失的情况下，极大地降低了运算量。Borgs等人提出了一种不同于贪心算法的新型框架，利用了反向传播抽样方法，极大地加速了算法的效率，同时保证了算法的性能。
 
+基于影响力最大化问题，许多研究提出了基于此之上的衍生问题。传统的影响力最大化问题是种子节点集合的大小进行限制，阈值为$k$。Leskovec等人\upcite{leskovec2007cost}假设选择每一个节点都会产生开销，每一个节点的开销不尽相同，而总开销的大小固定作为限制，问题是在不超过总的预算下来产生最大的影响。在某些情况下，网络可能是动态的网络，在动态网络中研究影响力最大化问题\upcite{chen2015influential,zhuang2013influence}也是一个十分有意义的方向。Yang等人\upcite{yang2016continuous}对动态的影响力最大化问题进行研究，提出了一种通用的坐标下降算法来解决该问题。Wang等人\upcite{wang2015maximizing}在原问题的基础上，考虑了激活的节点以及最终传播到单未激活的节点（称之为已通知的节点）两类节点，提出了信息覆盖最大化问题（Information Coverage Maximization），并对该问题进行了求解。Liu等人\upcite{liu2012time}将传播时间纳入了考虑，提出了一种时间约束的影响力最大化问题。Shishir等人\upcite{bharathi2007competitive}考虑到了信息传播中多个传播源博弈游戏，对多源情况下的信息竞争传播问题进行了分析，对先手情况给出了求解方法。
+
+\subsection{实时个性化搜索}
+\label{subsec1:realTimeSearch}
+
+\subsection{语言模型与文本分类}
+\label{subsec1:textClassification}
+
+\subsection{传播模型的学习}
+\label{subsec1:textClassification}
 
 \section{本文的工作与创新}
 \label{sec1:inovation}
