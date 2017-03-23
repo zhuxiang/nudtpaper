@@ -160,9 +160,32 @@
 
 \subsection{语言模型与文本分类}
 \label{subsec1:textClassification}
-语言模型是研究文本的基础，包括特征提取、特征权重以及语义相似度计算等。特征提取研究的是选取哪些特征来表示文本的问题，特征权重以及语义相似度计算则是计算问题。
+语言模型是研究文本的基础，包括特征提取、特征权重以及语义相似度计算等。特征提取研究的是选取哪些特征来表示文本的问题，特征权重以及语义相似度计算则是计算问题。特征选择存在许多不同的方法，可以采用词语、短语等作为特征，也可以采用n-gram模型选择特征项，也可以采用知识库中的概念作为特征项。
+
+布尔模型\upcite{salton1975vector}是在文本信息检索中的一种简单的模式，该模型是特征项的严格匹配。每一个特征项的取值都有True和False两种取值，其中True表示文本中存在该特征，False表示不存在。用户的查询采用逻辑运算来表示特征项之间的关系，文本的匹配查询过程则是布尔逻辑运算。该模型的优点是运算速度快，可以表示一定的逻辑关系。但是该模型也存在明显的缺陷，首先是无法对特征值的重要性进行赋值，且缺乏定量的分析。用户在进行查询的时候需要自己构建复杂的查询表达式。查询的结果仅有命中和不命中两种结果，适用范围较小。
+
+向量空间模型（Vector Space Model）是另一种类型的模型。在这个模型中，特征项是代表着向量空间中的维度，文本则可表示为该空间中的一个向量，向量中每一个维度的分量可以使用词频、tf-idf值等。例如选择tf-idf值作为分量时，一篇文档$\mathbf{d} \in \mathbf{D}$可以表示为如下，
+\begin{equation}
+\label{eq:documentVec}
+	\mathbf{d} = \left({tfidf}_{1,\mathbf{d}}, {tfidf}_{2,\mathbf{d}}, \cdots, {tfidf}_{N,\mathbf{d}}\right)
+\end{equation}
+其中${tfidf}_{i,\mathbf{d}}$表示特征项$i$的tf-idf值，$N$为特征的总数。tf-idf值的计算公式如下所示，
+\begin{equation}
+\label{eq:tfidfFormula}
+	{tfidf}_{i,\mathbf{d}} = {tf}_{i,\mathbf{d}} \cdot {idf}_i = \frac{n_{i,\mathbf{d}}}{\sum_j n_{j,\mathbf{d}}} \cdot \log{\frac{|D|}{1 + \vert \{\mathbf{d} \in \mathbf{D} : i \in \mathbf{d}\}\vert}} 
+\end{equation}
+其中${tf}_{i,\mathbf{d}}$表示特征$i$在文档$\mathbf{d}$中的频率，${idf}_i$表示特征$i$的逆向文件频率，$n_{i,\mathbf{d}}$表示特征$i$在文档$\mathbf{d}$中出现的频数。给定一个文档集合后，每一个文档都可表示成一个向量，则两个文档的相似度计算可以计算向量的余弦相似度，如下所示，
+\begin{equation}
+\label{eq:cosSim}
+	\cos \left( \mathbf{d_1}, \mathbf{d_2} \right) = \frac{\mathbf{d_1} \cdot \mathbf{d_2}}{\| \mathbf{d_1} \| \cdot \| \mathbf{d_2} \|}
+\end{equation}
+其中$\| \mathbf{d_1} \|$表示文档向量的长度。基于向量空间，还有很多相似度计算方式，包括欧氏距离、曼哈顿距离以及杰卡德相似度等。
+
+自然语言处理中最直观的词表示模型为独热码表示（One-hot Representation）模型，这种方法把每一个词语表示成一个长向量。向量的维度为词语的总数大小，其中只有一个维度的值为1，其余的维度的分量为0。很显然，这种表示模型存在着不足，任意的两个不同的词语之间都是孤立的。为了解决该问题，最早由Hinton\upcite{hinton1986learning}提出分布式表示（Distributed Representation）模型。其基本思想是通过训练将每一个词语映射成一个N维的实数向量（N一般为指定的一个常数）。经过映射后，我们可以通过词语之间的距离（例如余弦相似度、欧氏距离）来判断词语之间的语义相似度。该研究使得语义上相关或者相似的词语，在距离上更加接近。Bengio等人\upcite{bengio2003neural}使用了一个三层的神经网络来构造语言模型来进行语言模型的训练。
+
+为了解决文本的表示问题，已有许多研究对该领域进行了深入的研究。
 \subsection{传播模型的学习}
-\label{subsec1:textClassification}
+\label{subsec1:diffusionModel}
 
 \section{本文的工作与创新}
 \label{sec1:inovation}
