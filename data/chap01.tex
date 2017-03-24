@@ -181,9 +181,14 @@
 \end{equation}
 其中$\| \mathbf{d_1} \|$表示文档向量的长度。基于向量空间，还有很多相似度计算方式，包括欧氏距离、曼哈顿距离以及杰卡德相似度等。
 
-自然语言处理中最直观的词表示模型为独热码表示（One-hot Representation）模型，这种方法把每一个词语表示成一个长向量。向量的维度为词语的总数大小，其中只有一个维度的值为1，其余的维度的分量为0。很显然，这种表示模型存在着不足，任意的两个不同的词语之间都是孤立的。为了解决该问题，最早由Hinton\upcite{hinton1986learning}提出分布式表示（Distributed Representation）模型。其基本思想是通过训练将每一个词语映射成一个N维的实数向量（N一般为指定的一个常数）。经过映射后，我们可以通过词语之间的距离（例如余弦相似度、欧氏距离）来判断词语之间的语义相似度。该研究使得语义上相关或者相似的词语，在距离上更加接近。Bengio等人\upcite{bengio2003neural}使用了一个三层的神经网络来构造语言模型来进行语言模型的训练。
+自然语言处理中最直观的词表示模型为独热码表示（One-hot Representation）模型，这种方法把每一个词语表示成一个长向量。向量的维度为词语的总数大小，其中只有一个维度的值为1，其余的维度的分量为0。很显然，这种表示模型存在着不足，任意的两个不同的词语之间都是孤立的。为了解决该问题，最早由Hinton\upcite{hinton1986learning}提出分布式表示（Distributed Representation）模型。其基本思想是通过训练将每一个词语映射成一个N维的实数向量（N一般为指定的一个常数）。经过映射后，我们可以通过词语之间的距离（例如余弦相似度、欧氏距离）来判断词语之间的语义相似度。该研究使得语义上相关或者相似的词语，在距离上更加接近。Bengio等人\upcite{bengio2003neural}使用了一个三层的神经网络来构造语言模型来进行语言模型的训练，通过求解带参数的极大似然估计得到一个好的模型。Bengio在APNews数据集上做的对比实验表明了他的模型效果，相比与普通的n-gram算法提升了10\%-20\%。由Michael Collins提出的Log-Linear模型是word2vec所用模型的前身，基于此之上，Mnih和Hinton\upcite{mnih2007three}提出了Log-Bilinear模型，与Log-Linear模型的不同之处在于映射函数部分。同时，Mnih和Hinton\upcite{mnih2007three}进一步结合Morin和Bengio所提出的层次化概率语言模型\upcite{morin2005hierarchical}，提出了层次化的Log-Bilinear模型。Mikolov等人\upcite{mikolov2013distributed}基于之前的工作实现了word2vec工具，所提出新的Log-Bilinear模型包括连续词袋模型（Continuous	Bag-of-Words	Model）和skip-gram两种。
 
-为了解决文本的表示问题，已有许多研究对该领域进行了深入的研究。
+为了解决文本的表示问题，已有许多研究对该领域进行了深入的研究。字符串匹配、n-gram模型以及深度学习技术都被用来增强分词的性能。基于n-gram模型的字符串匹配是比较常见的方法，而基于深度学习的方法取得了更好的效果。Zheng等人\upcite{zheng2013deep}针对中文分词问题，使用大规模无标签的数据来增强中文字符的内部表示，然后用来提高表示能力，增强有监督学习中的中文分词性能。Pei\upcite{pei2014max}等人提出了一个神经网络模型，最大边际张量神经网络（Max-Margin Tensor Neural Network）来解决中文分词问题，模型能够处理标签与文本字符间复杂的内在联系。基于循环神经网络（Recurrent Neural Network）的语言模型\upcite{mikolov2010recurrent}有着不错的性能，但是由于反向传播问题而难以进行训练。LSTM（Long Short-Term Memory）是一种特殊的循环神经网络来避免训练过程中的梯度消失问题。由于短文本提供的词语量较少，传统的词袋模型的实用性下降，Sriram等人\upcite{sriram2010short}提出了使用从用户信息中提取出的领域相关的特征，来将文本分类到预定义的类别中。
+
+在文本的多标签分类问题也存在很多已有的研究。Hong等人\upcite{hong2014mixtures}提出了一种基于混合专家框架的概率模型来解决多标签分类问题，该模型结合了条件树结构的贝叶斯网络。Ai等人\upcite{ai2015best}提出了多标签最佳初次过采样（MultiLabel Best First
+Over-sampling）的方法来提高多标签分类的性能，方法基于不平衡的最小化求解。为了解决文本分类中测试数据集与训练数据集生成时间不同的问题，Fukumoto等人\upcite{fukumoto2013timeline}提出了一种时间轴自适应的方法。Xu等人\upcite{xu2013uncovering}提出了一种基于KNN和图结构的分类方法来判别电影评论网站中的垃圾用户。
+
+在应用神经网络进行文本分类的工作方面，深度学习在文本分类方面取得了很多成果。Kim\upcite{kim2014convolutional}使用卷积神经网络对语句进行分类，使用预先训练好的词向量作为输入，与多个基准算法进行了对比，取得了很好的效果。Graves等人\upcite{graves2013speech}利用LSTM对语音识别进行了应用，结合了多层次的语音表示进行模型训练，在TIMIT数据集上实现了一个错误率为17.7\%的效果。Iyyer等人\upcite{iyyer2014political}使用了一个循环神经网络结构来对文本中的政治倾向性做判别，算法不仅考虑语义内容而且考虑了句法结构。Kalchbrenner等人\upcite{kalchbrenner2013recurrent}介绍了一个同时面向语句和段落的分类算法，算法结合了卷积神经网络和循环神经网络。同时Kalchbrenner等人\upcite{kalchbrenner2014convolutional}提出了动态卷积神经网络（Dynamic Convolutional Neural Network）的思想，网络采用一个动态的池化层，在智能问答方面的取得了较好的效果。
 \subsection{传播模型的学习}
 \label{subsec1:diffusionModel}
 
