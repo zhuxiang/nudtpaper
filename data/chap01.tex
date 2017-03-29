@@ -191,11 +191,24 @@ Over-sampling）的方法来提高多标签分类的性能，方法基于不平�
 在应用神经网络进行文本分类的工作方面，深度学习在文本分类方面取得了很多成果。Kim\upcite{kim2014convolutional}使用卷积神经网络对语句进行分类，使用预先训练好的词向量作为输入，与多个基准算法进行了对比，取得了很好的效果。Graves等人\upcite{graves2013speech}利用LSTM对语音识别进行了应用，结合了多层次的语音表示进行模型训练，在TIMIT数据集上实现了一个错误率为17.7\%的效果。Iyyer等人\upcite{iyyer2014political}使用了一个循环神经网络结构来对文本中的政治倾向性做判别，算法不仅考虑语义内容而且考虑了句法结构。Kalchbrenner等人\upcite{kalchbrenner2013recurrent}介绍了一个同时面向语句和段落的分类算法，算法结合了卷积神经网络和循环神经网络。同时Kalchbrenner等人\upcite{kalchbrenner2014convolutional}提出了动态卷积神经网络（Dynamic Convolutional Neural Network）的思想，网络采用一个动态的池化层，在智能问答方面的取得了较好的效果。
 \subsection{传播模型的学习}
 \label{subsec1:diffusionModel}
-社交网络中的信息传播或是影响力传播都是按照一个离散的时间段来进行的，例如在时刻$t = 0, 1, 2, ...$。每一个节点$v \in \mathcal{V}$都有两个可能的状态，激活与非激活状态。直观上来说，我们可以认为激活的节点是接收到了信息、是认同了某种观点或是新的产品在网络中进行了传播，而非激活的节点则表示相反的情况。令$S_t \subseteq \mathcal{V}$表示在$t$时刻激活的节点集合，则$S_0$表示种子节点集合，表示信息传播过程中初始激活的节点。这些节点是信息传播过程中被选中来进行传播的节点，例如在商业促销活动中被选中来试用免费样品的用户。
+社交网络中的信息传播或是影响力传播都是按照一个离散的时间段来进行的，例如在时刻$t = 0, 1, 2, ...$。每一个节点$v \in \mathcal{V}$都有两个可能的状态，激活与未激活状态。直观上来说，我们可以认为激活的节点是接收到了信息、是认同了某种观点或是新的产品在网络中进行了传播，而未激活的节点则表示相反的情况。令$S_t \subseteq \mathcal{V}$表示在$t$时刻激活的节点集合，则$S_0$表示种子节点集合，表示信息传播过程中初始激活的节点。这些节点是信息传播过程中被选中来进行传播的节点，例如在商业促销活动中被选中来试用免费样品的用户。
 
 在信息传播过程中，随着时间的变化，激活节点集合是单调非递减的，且节点集合的大小决定了其上限。因此，在有限的时间段后，激活节点集合将不再变化，传播过程结束。令最终稳态的激活节点集合为$\Phi \left(S_0\right)$，其中$S_0$为初始种子节点集合。由于传播过程是个随机的，$\Phi \left(S_0\right)$也是一个随机集合。因此，研究传播模型的重点则在于研究最终稳态激活节点集合的期望$\mathbb{E} \left[ | \Phi \left(S_0\right) | \right]$。目前应用最广、最流行的传播模型包含如下两种，独立级联模型和线性阈值模型，这两种模型首先都是在数理社会学中进行研究。
 
-独立级联模型的当前形式是Kempe等人\upcite{kempe2003maximizing}率先提出的，模型基于相互作用粒子系统中的模型\upcite{durrett1988lecture,liggett2012interacting}以及市场研究的相关工作\upcite{goldenberg2001talk,goldenberg2001using}。同时，独立级联模型与传染病模型\upcite{anderson1992infectious}也是相关的。独立级联模型的核心特点是在传播过程中，社交网络图中每一条边是相互独立的。
+独立级联模型的当前形式是Kempe等人\upcite{kempe2003maximizing}率先提出的，模型基于相互作用粒子系统中的模型\upcite{durrett1988lecture,liggett2012interacting}以及市场研究的相关工作\upcite{goldenberg2001talk,goldenberg2001using}。同时，独立级联模型与传染病模型\upcite{anderson1992infectious}也是相关的。独立级联模型的核心特点是在传播过程中，社交网络图中每一条边是相互独立的。在独立级联模型中，网络中每一条边$e_{u,v} \in \mathcal{E}$与传播概率$p_{u,v} \in \left[0,1\right]$相关联，表示着节点$u$影响$v$的程度。对于不连接的边$e_{u,v} \notin \mathcal{E}$，传播概率$p_{u,v} = 0$。在下面的定义中，我们定义$S_{-1} = \emptyset$，意味着在加入种子节点前，网络中没有被激活的节点。
+
+\begin{defn}[独立级联模型]
+\label{def:icModel}
+独立级联模型以$\mathcal{G} = \left(\mathcal{V}, \mathcal{E}\right)$代表网络，传播概率函数$p\left( \cdot \right)$作用于每一条边$e_{u,v} \in \mathcal{E}$。初始种子节点集合$S_0$作为输入，按照如下的规则来生成所有时刻$t \geq 1$对应的激活节点集合$S_t$。对于任意一个时间段$t \geq 1$，集合$S_t$前一时刻的集合为$S_{t-1}$。对于所有在$t-1$时刻未激活的节点$v \notin S_{t-1}$，所有节点$u \in N^{in}\left(v\right) \cap \left(S_{t-1} \setminus S_{t-2} \right)$，即所有在$t-1$时刻激活的节点将尝试去激活其出度节点。节点$u$将进行一次成功概率为$p_{u,v}$的伯努利实验（抛掷一枚独立的硬币）。如果成功，则将节点$v$加入集合$S_t$，并称节点$u$在时刻$t$激活节点$v$。如果有多个节点在时刻$t$激活了$v$，最终的结果是相同的，即将节点$v$加入集合$S_t$。
+\end{defn}
+
+根据独立级联模型的性质，该模型适合对信息传播或者病毒传播进行建模。在这些场景下，只需要一个源节点就能使得节点被激活（接受信息或者感染病毒）。社会学家Centola和Macy\upcite{centola2007complex}将这种传播行为称之为简单蔓延（Simple Contagion）。
+
+独立级联模型能够适应于单源激活的传播过程，但是在一些情况下，节点被激活需要收到多源的影响才能改变节点的状态。例如，接受一个为证明的新技术、采纳一个有争议的想法、使用一个昂贵的新产品。在这些时候，人们在决策之前往往需要从多个其他独立的源头获取参考意见。
+
+社会学家首先提出了线性阈值模型\upcite{granovetter1978threshold,thomas1978micromotives}来对此类传播进行建模。当节点受到的正向累积效应（计数、加和等）超过了一定的阈值时，该节点将被激活。社会学家Centola和Macy\upcite{centola2007complex}将这种受到两个或者多个源节点激活的传播行为称之为复杂蔓延（Complex Contagion）。
+
+线性阈值模型作为一种传播模型首先由Kempe等人\upcite{kempe2003maximizing}形式化的提出，并对该模型的性质进行了描述。在线性阈值模型中，网络中的每一条边$e_{u,v} \in \mathcal{E}$与影响权重$w_{u,v} \in \left[0,1\right]$相关联，表示这节点$u$对节点$v$的影响程度。对于某一个节点$v$，影响权重是一个归一化的参数，满足$\sum_{u \in N^{in}} w_{u,v} \leq 1$。对于不连接的边$e_{u,v} \notin \mathcal{E}$，令影响权重$w_{u,v} = 0$。
 \section{本文的工作与创新}
 \label{sec1:inovation}
 
